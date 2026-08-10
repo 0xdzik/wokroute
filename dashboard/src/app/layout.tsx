@@ -1,37 +1,37 @@
 import { AnimatePresence, m } from "framer-motion";
 import {
+  Activity,
   Bell,
   Boxes,
   Cable,
   ChartSpline,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  Globe,
-  Gauge,
-  Layers,
-  LayoutDashboard,
-  LogOut,
-  MessageSquare,
-  Menu,
-  Moon,
-  Pencil,
   Check,
-  Rocket,
-  Settings,
-  Activity,
+  ChevronsLeft,
+  ChevronsRight,
+  Clock,
   Coins,
   Database,
   Filter,
+  Gauge,
+  Globe,
+  LayoutDashboard,
+  Layers,
+  LogOut,
+  Menu,
+  MessageSquare,
+  Moon,
+  Pencil,
+  Search,
+  Settings,
   SlidersHorizontal,
   Sun,
-  TerminalSquare,
-  Workflow,
   Terminal,
+  TerminalSquare,
   Timer,
+  Workflow,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { NavLink, useLocation, useNavigate, useOutlet } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -43,7 +43,6 @@ import { formatUptime } from "../lib/format";
 import { toast } from "../lib/toast";
 import { Dialog } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
-import { CustomAtmosphere } from "../features/customization/background";
 
 interface HealthStatus {
   version: string;
@@ -64,10 +63,11 @@ interface AppearanceSettingsResponse {
 const GITHUB_REPO = "risunCode/Cartethyia";
 
 // ---------------------------------------------------------------------------
-// FooterClock — isolated so the 1-second tick never re-renders AppShell or
-// any page inside <Outlet />.
+// StatusClock — header status pill (operational state + server clocks +
+// uptime). Isolated so the 1-second tick never re-renders AppShell or any
+// page inside <Outlet />.
 // ---------------------------------------------------------------------------
-function FooterClock({ statusData, isError }: { statusData: HealthStatus | undefined; isError: boolean }) {
+function StatusClock({ statusData, isError }: { statusData: HealthStatus | undefined; isError: boolean }) {
   const [nowMs, setNowMs] = useState(() => Date.now());
   useEffect(() => {
     const id = window.setInterval(() => setNowMs(Date.now()), 1_000);
@@ -91,41 +91,40 @@ function FooterClock({ statusData, isError }: { statusData: HealthStatus | undef
     ? (serverNowMs - startedAtRef.current) / 1000
     : null;
 
-  const fmt = (d: Date) => d.toLocaleTimeString("en-GB", { timeZone: "UTC", hour12: false });
-
   return (
-    <footer className="glass z-30 mt-auto grid w-full grid-cols-2 items-center gap-x-4 gap-y-1.5 rounded-2xl px-4 py-3 text-xs text-[var(--text-2)] sm:gap-x-8 sm:px-5 sm:py-3.5">
-      <div className="flex items-center gap-1.5 font-semibold text-[var(--text-1)]">
+    <div className="flex shrink-0 items-center gap-3 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-1)] px-3.5 py-2 text-[11px] text-[var(--text-2)] shadow-[var(--shadow-soft)]">
+      <span className="flex items-center gap-1.5 font-semibold text-[var(--text-1)]">
         {isError ? (
           <>
             <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-[var(--red)]" />
-            System offline
+            <span className="hidden lg:inline">System offline</span>
           </>
         ) : statusData ? (
           <>
             <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-[var(--green)]" />
-            All systems operational
+            <span className="hidden lg:inline">All systems operational</span>
           </>
         ) : (
           <>
             <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-[var(--status-warning)]" />
-            Connecting…
+            <span className="hidden lg:inline">Connecting…</span>
           </>
         )}
-      </div>
-      <div className="flex items-center justify-end gap-1.5" title="UTC time">
-        <Globe size={13} className="shrink-0" />
-        {fmt(serverNow)} UTC
-      </div>
-      <div className="flex items-center gap-1.5" title="Server system time">
-        <Clock size={13} className="shrink-0" />
-        {fmt(serverLocalNow)} system
-      </div>
-      <div className="flex items-center justify-end gap-1.5" title="Uptime since server start">
-        <Timer size={13} className="shrink-0" />
-        uptime {formatUptime(liveUptimeSeconds)}
-      </div>
-    </footer>
+      </span>
+      <span className="h-3.5 w-px bg-[var(--border-subtle)]" aria-hidden="true" />
+      <span className="flex items-center gap-1.5 tabular-nums" title="UTC time">
+        <Globe size={12} className="shrink-0" />
+        {serverNow.toLocaleTimeString("en-GB", { timeZone: "UTC", hour12: false })} UTC
+      </span>
+      <span className="hidden items-center gap-1.5 tabular-nums md:flex" title="Server system time">
+        <Clock size={12} className="shrink-0" />
+        {serverLocalNow.toLocaleTimeString("en-GB", { timeZone: "UTC", hour12: false })}
+      </span>
+      <span className="hidden items-center gap-1.5 tabular-nums xl:flex" title="Uptime since server start">
+        <Timer size={12} className="shrink-0" />
+        {formatUptime(liveUptimeSeconds)}
+      </span>
+    </div>
   );
 }
 
@@ -134,8 +133,6 @@ interface NavEntry {
   label: string;
   icon: typeof Boxes;
   badge?: string;
-  /** When set, clicking this entry switches the sidebar page instead of navigating. */
-  switchTo?: 0 | 1;
 }
 
 const NAV_GROUPS: { label: string; items: NavEntry[] }[] = [
@@ -160,7 +157,6 @@ const NAV_GROUPS: { label: string; items: NavEntry[] }[] = [
     label: "System",
     items: [
       { to: "/console-log", label: "Console Log", icon: Terminal },
-      { to: "", label: "Advanced Features", icon: SlidersHorizontal, switchTo: 1 },
       { to: "/settings", label: "Settings", icon: Settings },
     ],
   },
@@ -192,31 +188,6 @@ const ADVANCED_NAV_GROUPS: { label: string; items: NavEntry[]; soon?: boolean }[
   },
 ];
 
-const ADVANCED_PATHS = new Set(["/advanced", ...ADVANCED_NAV_GROUPS.flatMap((g) => g.items.map((i) => i.to))]);
-
-const TITLES: Record<string, { title: string; sub: string; mobileSub: string }> = {
-  "/overview": { title: "Overview", sub: "Traffic, endpoints, and fast shortcuts", mobileSub: "Traffic & shortcuts" },
-  "/usage": { title: "Usage", sub: "Usage summary and request overview", mobileSub: "Request activity" },
-  "/providers": { title: "Providers", sub: "All supported AI providers", mobileSub: "All AI providers" },
-  "/model-studio": { title: "Model Studio", sub: "Chat-test any provider, model, or combo live", mobileSub: "Test models live" },
-  "/api-keys": { title: "API Keys", sub: "Client credentials and access policies", mobileSub: "Client credentials" },
-  "/combos": { title: "Combos & Alias", sub: "Fallback, round-robin, alias model", mobileSub: "Fallback & aliases" },
-  "/quota": { title: "Quota Management", sub: "Provider account limits and reset windows", mobileSub: "Quota & resets" },
-  "/proxy-requests": { title: "Proxy & Requests", sub: "Routing and request policy controls", mobileSub: "Proxy controls" },
-  "/console-log": { title: "Console Log", sub: "Live log stream", mobileSub: "Live log stream" },
-  "/advanced": { title: "Customization", sub: "Background, sidebar icon, and appearance controls", mobileSub: "Appearance" },
-  "/advanced/filter-sanitize": { title: "Filter Sanitize", sub: "Reasoning tag stripping and response content filtering", mobileSub: "Filter" },
-  "/advanced/token-saver": { title: "Token Saver", sub: "Reduce token usage with compact encoding and caching", mobileSub: "Tokens" },
-  "/advanced/cli-tools": { title: "CLI Tools", sub: "Configure CLI tools for terminal access", mobileSub: "CLI config" },
-  "/advanced/cli-tools/:toolId": { title: "CLI Tool", sub: "Tool configuration", mobileSub: "Tool config" },
-  "/settings": { title: "Settings", sub: "Security, backup, runtime toggles", mobileSub: "Security & runtime" },
-  // Advanced page 2
-  "/system-monitoring": { title: "System Monitoring", sub: "Request monitoring, IP tracking, and IP ban controls", mobileSub: "Monitoring" },
-  "/multi-warp": { title: "Multi Warp", sub: "Cloudflare Warp endpoint management", mobileSub: "Warp endpoints" },
-  "/advanced/automation": { title: "Automation", sub: "Scheduled tasks and workflow triggers", mobileSub: "Automation" },
-  "/advanced/db-map": { title: "Database Map", sub: "Browse, query, export, and import SQLite databases", mobileSub: "DB browser" },
-};
-
 /**
  * `<Outlet />` re-renders reactively off router context the instant
  * `location` changes, which fights a key-based AnimatePresence: the
@@ -237,7 +208,7 @@ function AnimatedOutlet() {
 function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const dark = resolvedTheme === "dark";
-  // Crossfade the next theme snapshot without repainting the full glass surface.
+  // Crossfade the next theme snapshot without repainting the full surface.
   // Without View Transitions (or with reduced motion) the theme swaps instantly.
   const swapTheme = () => {
     const next = dark ? "light" : "dark";
@@ -266,7 +237,7 @@ function ThemeToggle() {
       type="button"
       onClick={swapTheme}
       aria-label="Toggle theme"
-      className="grid h-10 w-10 place-items-center rounded-[var(--radius-control)] border border-[var(--inner-border)] bg-[var(--hover)] text-[var(--text-1)] transition-[background-color,color,transform] duration-150 hover:bg-[var(--active-pill)] active:scale-90"
+      className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface-1)] text-[var(--text-2)] shadow-[var(--shadow-soft)] transition-[background-color,color,transform] duration-150 hover:bg-[var(--surface-2)] hover:text-[var(--text-1)] active:scale-90"
     >
       <span key={dark ? "sun" : "moon"} className="theme-icon-enter grid place-items-center">
         {dark ? <Sun size={17} /> : <Moon size={17} />}
@@ -327,7 +298,7 @@ function NotificationsDialog({
           aria-modal="false"
           aria-label="Notifications"
           tabIndex={-1}
-          className="absolute right-0 top-[calc(100%+16px)] z-50 max-h-[calc(100dvh-120px)] w-[min(360px,calc(100vw-2rem))] origin-top-right overflow-auto rounded-[20px] border border-[var(--inner-border)] bg-[var(--bg-1)] p-2.5 shadow-[0_24px_60px_rgba(0,0,0,0.35)] sm:right-0 sm:w-[360px]"
+          className="absolute right-0 top-[calc(100%+12px)] z-50 max-h-[calc(100dvh-120px)] w-[min(360px,calc(100vw-2rem))] origin-top-right overflow-auto rounded-2xl border border-[var(--border-subtle)] bg-[var(--popover-bg)] p-2.5 sm:right-0 sm:w-[360px]"
           {...popupMotion}
         >
           <div className="flex items-center gap-2 px-2 pb-2.5 pt-1">
@@ -335,14 +306,14 @@ function NotificationsDialog({
               <Bell size={14} aria-hidden="true" />
             </span>
             <span className="min-w-0 flex-1 text-sm font-bold">Notifications</span>
-            <button type="button" onClick={onClose} aria-label="Close notifications" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-[var(--text-3)] transition-colors hover:bg-[var(--hover)] hover:text-[var(--text-1)]">
+            <button type="button" onClick={onClose} aria-label="Close notifications" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-[var(--text-3)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--text-1)]">
               Close
               <X size={13} aria-hidden="true" />
             </button>
           </div>
-          <div className="space-y-2 text-sm">
-            <div role="status" className="flex items-start gap-2.5 rounded-[18px] border border-[var(--inner-border)] bg-[var(--hover)] p-3.5">
-              <span className={cn("mt-1 grid h-5 w-5 shrink-0 place-items-center rounded-full", isHealthError ? "bg-[var(--red-soft,rgba(255,69,58,0.12))] text-[var(--red)]" : statusData ? "bg-[var(--green-soft,rgba(48,209,88,0.12))] text-[var(--green)]" : "bg-[var(--status-warning-soft,rgba(255,159,10,0.12))] text-[var(--status-warning)]")}>
+          <div className="divide-y divide-[var(--border-subtle)] text-sm">
+            <div role="status" className="flex items-start gap-2.5 py-3 first:pt-0 last:pb-0">
+              <span className={cn("mt-1 grid h-5 w-5 shrink-0 place-items-center rounded-full", isHealthError ? "bg-[var(--red-soft)] text-[var(--red)]" : statusData ? "bg-[var(--green-soft)] text-[var(--green)]" : "bg-[var(--orange-soft)] text-[var(--status-warning)]")}>
                 <span className={cn("h-2 w-2 rounded-full", isHealthError ? "bg-[var(--red)]" : statusData ? "bg-[var(--green)]" : "animate-pulse bg-[var(--status-warning)]")} />
               </span>
               <div className="min-w-0">
@@ -351,7 +322,7 @@ function NotificationsDialog({
               </div>
             </div>
             {updateAvailable ? (
-              <div className="rounded-[18px] border border-[var(--accent)] bg-[var(--accent-soft)] p-3.5">
+              <div className="rounded-[12px] bg-[var(--accent-soft)] p-3.5">
                 <p className="font-semibold text-[var(--accent)]">Update available</p>
                 <p className="mt-0.5 text-xs text-[var(--text-2)]">GitHub has {latestTag ? `v${latestTag}` : "a newer release"} available.</p>
               </div>
@@ -398,7 +369,7 @@ function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void 
               navigate(item.to);
               onClose();
             }}
-            className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-[var(--text-2)] transition-colors hover:bg-[var(--hover)] hover:text-[var(--text-1)]"
+            className="flex items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-left text-sm text-[var(--text-2)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--text-1)]"
           >
             <item.icon size={15} aria-hidden="true" />
             {item.label}
@@ -414,48 +385,27 @@ export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [railCollapsed, setRailCollapsed] = useState(() => localStorage.getItem("cartethyia.railCollapsed") === "1");
+  const toggleRailCollapsed = () => {
+    setRailCollapsed((collapsed) => {
+      const next = !collapsed;
+      localStorage.setItem("cartethyia.railCollapsed", next ? "1" : "0");
+      return next;
+    });
+  };
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [adminName, setAdminName] = useState(() => localStorage.getItem("cartethyia.adminName") ?? "Admin");
   const [adminNameDraft, setAdminNameDraft] = useState(adminName);
   const [editingAdminName, setEditingAdminName] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [isStudioComposerFocused, setIsStudioComposerFocused] = useState(false);
   const [motionProfile, setMotionProfile] = useState<MotionProfile>(() => detectMotionProfile());
+  // Which rail flyout is open: advanced features menu, profile card, or none.
+  const [openPanel, setOpenPanel] = useState<null | "advanced" | "profile">(null);
+  const asideRef = useRef<HTMLElement>(null);
 
-  // ── Sidebar page (Main ↔ Advanced sliding launcher) ────────────────
-  // State persists in localStorage so closing the drawer (mobile burger)
-  // and reopening it doesn't reset to page 0. A direct navigation to an
-  // advanced route also flips to page 1 automatically.
-  const swipeStartX = useRef<number | null>(null);
-  const swipeDelta = useRef<number | null>(null);
-  const swipeActive = useRef(false);
-  const [sidebarPage, setSidebarPage] = useState<0 | 1>(() => {
-    const stored = localStorage.getItem("cartethyia.sidebarPage");
-    return stored === "1" ? 1 : 0;
-  });
-  const switchSidebarPage = useCallback((page: 0 | 1) => {
-    setSidebarPage(page);
-    localStorage.setItem("cartethyia.sidebarPage", String(page));
-  }, []);
-  // Auto-switch to page 1 when navigating to an advanced route.
-  // Skips the very first run (initial mount) so a refresh on an advanced
-  // route doesn't override the user's explicit "Back to Main" choice —
-  // localStorage is the source of truth at mount; this effect only kicks
-  // in on *subsequent* navigations (clicking a link / browser back).
-  const sidebarPageFirstRun = useRef(true);
-  useEffect(() => {
-    if (sidebarPageFirstRun.current) {
-      sidebarPageFirstRun.current = false;
-      return;
-    }
-    const pathKey = `/${location.pathname.split("/").filter(Boolean)[0] ?? "overview"}`;
-    if (ADVANCED_PATHS.has(pathKey)) {
-      setSidebarPage(1);
-      localStorage.setItem("cartethyia.sidebarPage", "1");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
+  const fullPath = location.pathname.replace(/\/$/, "") || "/overview";
+
   useEffect(() => {
     const mediaQueries = [
       window.matchMedia("(max-width: 767px)"),
@@ -476,28 +426,6 @@ export function AppShell() {
     };
   }, []);
 
-  useEffect(() => {
-    const onFocusChange = () => setIsStudioComposerFocused(document.activeElement?.matches("[data-model-studio-composer]") ?? false);
-    document.addEventListener("focusin", onFocusChange);
-    document.addEventListener("focusout", onFocusChange);
-    return () => {
-      document.removeEventListener("focusin", onFocusChange);
-      document.removeEventListener("focusout", onFocusChange);
-    };
-  }, []);
-  // Use the full pathname for TITLES lookup so advanced routes like
-  // /advanced/filter-sanitize resolve to their specific title, not the
-  // generic /advanced "Customization" entry.
-  const fullPath = location.pathname.replace(/\/$/, "") || "/overview";
-  // Try exact match, then pattern match (replace last segment with :param).
-  const segments = fullPath.split("/").filter(Boolean);
-  const patternKey = segments.length >= 2 ? `/${segments.slice(0, -1).join("/")}/:toolId` : fullPath;
-  const pathKey = TITLES[fullPath] !== undefined
-    ? fullPath
-    : TITLES[patternKey] !== undefined
-      ? patternKey
-      : `/${segments[0] ?? "overview"}`;
-  const meta = TITLES[pathKey] ?? { title: "Cartethyia", sub: "Internal console", mobileSub: "Internal console" };
   const routeTransition = getPageTransition(motionProfile);
 
   useEffect(() => {
@@ -511,9 +439,30 @@ export function AppShell() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Navigating closes the mobile drawer and any open flyout.
   useEffect(() => {
     setDrawerOpen(false);
+    setOpenPanel(null);
   }, [location.pathname]);
+
+  // Outside click + Escape dismiss the open flyout. Both flyout panels live
+  // inside the aside, so a single containment check covers trigger + panel.
+  useEffect(() => {
+    if (!openPanel) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (asideRef.current?.contains(e.target as Node)) return;
+      setOpenPanel(null);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenPanel(null);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [openPanel]);
 
   useEffect(() => {
     if (!drawerOpen) return;
@@ -576,266 +525,320 @@ export function AppShell() {
   const latestTag = releaseQuery.data?.tag_name?.replace(/^v/, "");
   const updateAvailable = Boolean(localVersion && latestTag && latestTag !== localVersion);
 
+  const initials = useMemo(() => {
+    const parts = adminName.trim().split(/\s+/).filter(Boolean);
+    return (parts.map((part) => part[0]).slice(0, 2).join("") || "A").toUpperCase();
+  }, [adminName]);
+
+  const isFullBleed = fullPath === "/console-log" || fullPath === "/advanced/db-map";
+
   const sidebar = useMemo(() => (
-    <aside
+        <aside
+      ref={asideRef}
       className={cn(
-        "sidebar-drawer glass scrollbar-fade flex h-full flex-col gap-1 overflow-y-auto rounded-[var(--radius-sidebar)] p-[18px_14px]",
-        "lg:sticky lg:top-4 lg:self-start lg:h-[calc(100vh-32px)]",
-        // Off-canvas offsets match the shell's p-4 so the drawer lines up with
-        // the content edges instead of sitting 4px proud of them.
-        "fixed top-4 bottom-4 left-4 z-70 w-[272px] lg:left-0 lg:bottom-auto"
+        "sidebar-drawer flex h-full flex-col rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-1)] shadow-[var(--shadow-card)]",
+        // Pinned to the viewport's left edge; a full-width grouped sidebar
+        // on desktop (off-canvas drawer on mobile via the transform below —
+        // index.css forces transform: none >= lg so it stays visible there).
+        // Desktop: flush against the top/bottom/left edges — only the right
+        // hairline border separates it from the content.
+        "fixed top-4 bottom-4 left-4 z-70 lg:top-0 lg:bottom-0 lg:left-0 lg:rounded-none lg:border-y-0 lg:border-l-0",
+        railCollapsed ? "w-[250px] lg:w-[68px]" : "w-[250px]"
       )}
       style={{
         transform: drawerOpen ? "translateX(0)" : "translateX(calc(-100% - 24px))",
         transition: "transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)",
       }}
     >
-      <div className="flex items-center gap-2.5 px-2 pb-3.5 pt-1.5">
-        <img
-          src={appearanceQuery.data?.settings.runtime.sidebarIconDataUrl || `${import.meta.env.BASE_URL}favicon_love.webp`}
-          alt="Cartethyia"
-          onError={(event) => {
-            event.currentTarget.onerror = null;
-            event.currentTarget.src = `${import.meta.env.BASE_URL}favicon_love.webp`;
-          }}
-          className="h-9 w-9 shrink-0 rounded-[11px] object-cover"
-        />
-        <div className="min-w-0">
+      {/* Brand */}
+      <div className={cn("flex items-center gap-2.5 px-3 pb-3 pt-4", railCollapsed && "lg:justify-center lg:px-2")}>
+        <a
+          href={`https://github.com/${GITHUB_REPO}`}
+          target="_blank"
+          rel="noreferrer"
+          title="Cartethyia Router on GitHub"
+          className="block shrink-0 transition-transform hover:scale-105 active:scale-95"
+        >
+          <img
+            src={appearanceQuery.data?.settings.runtime.sidebarIconDataUrl || `${import.meta.env.BASE_URL}favicon_love.webp`}
+            alt="Cartethyia"
+            onError={(event) => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = `${import.meta.env.BASE_URL}favicon_love.webp`;
+            }}
+            className="size-9 rounded-xl object-cover"
+          />
+        </a>
+        <div className={cn("min-w-0 flex-1", railCollapsed && "lg:hidden")}>
           <a
             href={`https://github.com/${GITHUB_REPO}`}
             target="_blank"
             rel="noreferrer"
-            className="truncate text-base font-bold leading-tight transition-colors hover:text-[var(--accent)]"
+            className="block truncate text-[13.5px] font-bold tracking-tight text-[var(--text-1)] transition-colors hover:text-[var(--accent)]"
           >
-            Cartethyia Router
+            Cartethyia
           </a>
           <a
             href={releaseQuery.data?.html_url ?? `https://github.com/${GITHUB_REPO}/releases`}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1 text-[11px] text-[var(--text-2)] transition-colors hover:text-[var(--accent)]"
+            className="flex items-center gap-1 text-[10px] font-semibold text-[var(--text-3)] transition-colors hover:text-[var(--accent)]"
             title={updateAvailable ? `Update available on GitHub: v${latestTag}` : "View releases on GitHub"}
           >
             v{localVersion ?? "\u2026"}
-            {updateAvailable && (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-[var(--accent-soft)] px-1.5 py-[1px] text-[9.5px] font-semibold text-[var(--accent)]">
-                <Rocket size={9} className="shrink-0" /> update
-              </span>
-            )}
+            {updateAvailable && <span className="size-1.5 rounded-full bg-[var(--accent)]" aria-label="Update available" />}
           </a>
         </div>
+        {/* Collapse toggle — desktop, expanded state */}
+        <button
+          type="button"
+          onClick={toggleRailCollapsed}
+          aria-label="Collapse sidebar"
+          title="Collapse sidebar"
+          className={cn("grid size-7 shrink-0 place-items-center rounded-md text-[var(--text-3)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--text-1)] max-lg:hidden", railCollapsed && "lg:hidden")}
+        >
+          <ChevronsLeft size={14} />
+        </button>
       </div>
+      {/* Expand toggle — desktop, collapsed state */}
+      {railCollapsed && (
+        <div className="flex justify-center pb-2 max-lg:hidden">
+          <button
+            type="button"
+            onClick={toggleRailCollapsed}
+            aria-label="Expand sidebar"
+            title="Expand sidebar"
+            className="grid size-7 place-items-center rounded-md text-[var(--text-3)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--text-1)]"
+          >
+            <ChevronsRight size={14} />
+          </button>
+        </div>
+      )}
 
-      <div
-        className="relative min-h-0 flex-1 overflow-hidden"
-        onPointerDown={(e) => { swipeStartX.current = e.clientX; swipeActive.current = true; }}
-        onPointerMove={(e) => {
-          if (!swipeActive.current || swipeStartX.current === null) return;
-          const delta = e.clientX - swipeStartX.current;
-          swipeDelta.current = delta;
-        }}
-        onPointerUp={() => {
-          if (!swipeActive.current || swipeDelta.current === null) { swipeActive.current = false; return; }
-          const threshold = 60;
-          if (swipeDelta.current <= -threshold && sidebarPage === 0) switchSidebarPage(1);
-          else if (swipeDelta.current >= threshold && sidebarPage === 1) switchSidebarPage(0);
-          swipeStartX.current = null;
-          swipeDelta.current = null;
-          swipeActive.current = false;
-        }}
-        onPointerLeave={() => { swipeStartX.current = null; swipeDelta.current = null; swipeActive.current = false; }}
-      >
-        <AnimatePresence initial={false}>
-          {sidebarPage === 0 ? (
-            <m.div
-              key="page-main"
-              initial={{ x: "-100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "-100%", opacity: 0 }}
-              transition={{ duration: motionProfile === "reduced" ? 0 : motionProfile === "mobile" ? 0.2 : 0.3, ease: [0.32, 0.72, 0, 1] }}
-              className="absolute inset-0 flex flex-col gap-1 overflow-y-auto scrollbar-fade"
-            >
-              {NAV_GROUPS.map((group) => (
-                <div key={group.label}>
-                  <div className="px-2.5 pb-1 pt-2.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
-                    {group.label}
-                  </div>
-                  {group.items.map((item) =>
-                    item.switchTo !== undefined ? (
-                      <button
-                        key={item.label}
-                        type="button"
-                        onClick={() => switchSidebarPage(item.switchTo!)}
-                        className="relative flex min-w-0 items-center gap-2.5 rounded-[11px] px-2.5 py-[9px] text-[13.5px] font-medium text-[var(--text-2)] transition-[background-color,color,transform] duration-150 hover:bg-[var(--hover)] hover:text-[var(--text-1)] active:scale-[0.98]"
-                      >
-                        <item.icon size={18} className="relative shrink-0" />
-                        <span className="relative">{item.label}</span>
-                        <ChevronRight size={14} className="relative ml-auto text-[var(--text-3)]" />
-                      </button>
-                    ) : (
-                      <NavLink
-                        key={item.to}
-                        to={item.to}
-                        className={({ isActive }) =>
-                          cn(
-                            "relative flex min-w-0 items-center gap-2.5 rounded-[11px] px-2.5 py-[9px] text-[13.5px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.98]",
-                            isActive ? "font-semibold text-[var(--text-1)]" : "text-[var(--text-2)] hover:bg-[var(--hover)] hover:text-[var(--text-1)]"
-                          )
-                        }
-                      >
-                        {({ isActive }) => (
-                          <>
-                            {isActive && (
-                              <m.span
-                                layoutId={motionProfile === "desktop" || motionProfile === "max" ? "sidebar-active" : undefined}
-                                transition={motionProfile === "max" ? { duration: 0.28, ease: "easeOut" } : { duration: 0.2, ease: "easeOut" }}
-                                className="absolute inset-0 rounded-[11px] border border-[var(--inner-border)] bg-[var(--active-pill)] shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
-                              />
-                            )}
-                            <item.icon size={18} className="relative shrink-0" />
-                            <span className="relative">{item.label}</span>
-                            {item.badge && (
-                              <span className="relative ml-auto rounded-full bg-[var(--accent-soft)] px-[7px] py-0.5 text-[10.5px] font-semibold text-[var(--accent)]">
-                                {item.badge}
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </NavLink>
-                    )
-                  )}
-                </div>
-              ))}
-            </m.div>
-          ) : (
-            <m.div
-              key="page-advanced"
-              initial={{ x: "100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "100%", opacity: 0 }}
-              transition={{ duration: motionProfile === "reduced" ? 0 : motionProfile === "mobile" ? 0.2 : 0.3, ease: [0.32, 0.72, 0, 1] }}
-              className="absolute inset-0 flex flex-col gap-1 overflow-y-auto scrollbar-fade"
-            >
-              <button
-                type="button"
-                onClick={() => switchSidebarPage(0)}
-                className="relative flex min-w-0 items-center gap-2.5 rounded-[11px] px-2.5 py-[9px] text-[13.5px] font-medium text-[var(--text-2)] transition-[background-color,color,transform] duration-150 hover:bg-[var(--hover)] hover:text-[var(--text-1)] active:scale-[0.98]"
-              >
-                <ChevronLeft size={18} className="relative shrink-0" />
-                <span className="relative">Back to Main</span>
-              </button>
-              {ADVANCED_NAV_GROUPS.map((group) => (
-                <div key={group.label}>
-                  <div className="flex items-center gap-1.5 px-2.5 pb-1 pt-2.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[var(--text-3)]">
-                    {group.label}
-                    {group.soon && (
-                      <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-[1px] text-[8.5px] font-bold tracking-normal text-[var(--accent)]">SOON</span>
-                    )}
-                  </div>
-                  {group.items.map((item) => (
+      {/* Nav — grouped horizontal items */}
+      <div className="relative min-h-0 flex-1">
+        <nav className={cn("scrollbar-fade flex h-full flex-col overflow-y-auto px-3", railCollapsed && "lg:px-2")} aria-label="Primary">
+          {NAV_GROUPS.map((group) => (
+            <div key={group.label}>
+              <div className={cn("px-2.5 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-3)]", railCollapsed && "lg:hidden")}>{group.label}</div>
+              <ul className="space-y-0.5">
+                {group.items.map((item) => (
+                  <li key={item.to}>
                     <NavLink
-                      key={item.to}
                       to={item.to}
-                      end={item.to === "/advanced"}
+                      title={item.label}
                       className={({ isActive }) =>
                         cn(
-                          "relative flex min-w-0 items-center gap-2.5 rounded-[11px] px-2.5 py-[9px] text-[13.5px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.98]",
-                          isActive ? "font-semibold text-[var(--text-1)]" : "text-[var(--text-2)] hover:bg-[var(--hover)] hover:text-[var(--text-1)]"
+                          "flex items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                          isActive
+                            ? "bg-[var(--accent-soft)] font-semibold text-[var(--accent)]"
+                            : "text-[var(--text-2)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-1)]",
+                          railCollapsed && "lg:justify-center lg:px-0"
                         )
                       }
                     >
                       {({ isActive }) => (
                         <>
-                          {isActive && (
-                            <m.span
-                              layoutId={motionProfile === "desktop" || motionProfile === "max" ? "sidebar-active-adv" : undefined}
-                              transition={motionProfile === "max" ? { duration: 0.28, ease: "easeOut" } : { duration: 0.2, ease: "easeOut" }}
-                              className="absolute inset-0 rounded-[11px] border border-[var(--inner-border)] bg-[var(--active-pill)] shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
-                            />
-                          )}
-                          <item.icon size={18} className="relative shrink-0" />
-                          <span className="relative">{item.label}</span>
-                          {item.badge && (
-                            <span className="relative ml-auto rounded-full bg-[var(--accent-soft)] px-[7px] py-0.5 text-[10.5px] font-semibold text-[var(--accent)]">
-                              {item.badge}
-                            </span>
-                          )}
+                          <item.icon size={17} strokeWidth={isActive ? 2.1 : 1.8} className="shrink-0" />
+                          <span className={cn("min-w-0 flex-1 truncate", railCollapsed && "lg:hidden")}>{item.label}</span>
                         </>
                       )}
                     </NavLink>
-                  ))}
-                </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+
+          {/* Advanced features — flat inline list */}
+          <div>
+            <div className={cn("px-2.5 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-3)]", railCollapsed && "lg:hidden")}>Advanced</div>
+            <ul className="space-y-0.5">
+              {ADVANCED_NAV_GROUPS.flatMap((group) => group.items).map((item) => (
+                <li key={item.to}>
+                  <NavLink
+                    to={item.to}
+                    end={item.to === "/advanced"}
+                    title={item.label}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-[13px] font-medium transition-colors duration-150",
+                        isActive
+                          ? "bg-[var(--accent-soft)] font-semibold text-[var(--accent)]"
+                          : "text-[var(--text-2)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-1)]",
+                        railCollapsed && "lg:justify-center lg:px-0"
+                      )
+                    }
+                  >
+                    <item.icon size={17} className="shrink-0" />
+                    <span className={cn("min-w-0 flex-1 truncate", railCollapsed && "lg:hidden")}>{item.label}</span>
+                    {item.badge && (
+                      <span className={cn("rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--accent)]", railCollapsed && "lg:hidden")}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </NavLink>
+                </li>
               ))}
-            </m.div>
-          )}
+            </ul>
+          </div>
+
+        </nav>
+
+        <AnimatePresence>
+          {openPanel === "profile" && (
+          <m.div
+            key="panel-profile"
+            role="dialog"
+            aria-label="Profile"
+            className="absolute bottom-0 left-[calc(100%+12px)] z-50 w-[248px] rounded-2xl border border-[var(--border-subtle)] bg-[var(--popover-bg)] p-3"
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -8 }}
+            transition={{ duration: motionProfile === "reduced" ? 0 : 0.16, ease: [0.32, 0.72, 0, 1] }}
+          >
+            <div className="flex items-center gap-2.5 border-b border-[var(--border-subtle)] px-1 pb-3">
+              <div className="grid size-9 shrink-0 place-items-center rounded-full bg-[var(--text-1)] text-[11px] font-bold text-[var(--page-bg)]">
+                {initials}
+              </div>
+              <div className="min-w-0">
+                <div className="truncate text-[13px] font-bold leading-tight">{adminName}</div>
+                <div className="text-[10.5px] text-[var(--text-3)]">Cartethyia console</div>
+              </div>
+            </div>
+            <div className="pt-2">
+              {editingAdminName ? (
+                <form
+                  className="flex items-center gap-1.5 px-1 pb-1"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    const next = adminNameDraft.trim() || "Admin";
+                    setAdminName(next);
+                    localStorage.setItem("cartethyia.adminName", next);
+                    setEditingAdminName(false);
+                  }}
+                >
+                  <Input autoFocus value={adminNameDraft} onChange={(event) => setAdminNameDraft(event.target.value)} aria-label="Admin display name" className="h-8 min-w-0 flex-1 px-2 text-xs" />
+                  <button type="submit" aria-label="Save admin name" title="Save" className="grid size-8 shrink-0 place-items-center rounded-[10px] text-[var(--green)] transition-colors hover:bg-[var(--surface-muted)]">
+                    <Check size={14} />
+                  </button>
+                </form>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => { setAdminNameDraft(adminName); setEditingAdminName(true); }}
+                  className="flex w-full items-center gap-2.5 rounded-[12px] px-2.5 py-2 text-[12.5px] font-medium text-[var(--text-2)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--text-1)]"
+                >
+                  <Pencil size={14} className="shrink-0" />
+                  Edit display name
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => { void apiPost("/logout").finally(() => navigate("/login", { replace: true })); }}
+                className="flex w-full items-center gap-2.5 rounded-[12px] px-2.5 py-2 text-[12.5px] font-medium text-[var(--red)] transition-colors hover:bg-[var(--red-soft)]"
+              >
+                <LogOut size={14} className="shrink-0" />
+                Sign out
+              </button>
+            </div>
+          </m.div>
+        )}
         </AnimatePresence>
       </div>
 
-      <div className="mt-auto pt-4">
-        <div className="group flex items-center gap-2.5 rounded-[13px] border border-[var(--inner-border)] bg-[var(--hover)] p-[9px_10px]">
-          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#ff9f0a] to-[#ff375f] text-xs font-bold text-white">AD</div>
-          <div className="min-w-0 flex-1">
-            {editingAdminName ? (
-              <form className="flex items-center gap-1" onSubmit={(event) => { event.preventDefault(); const next = adminNameDraft.trim() || "Admin"; setAdminName(next); localStorage.setItem("cartethyia.adminName", next); setEditingAdminName(false); }}>
-                <Input autoFocus value={adminNameDraft} onChange={(event) => setAdminNameDraft(event.target.value)} aria-label="Admin display name" className="h-7 min-w-0 px-2 text-xs" />
-                <button type="submit" aria-label="Save admin name" title="Save" className="grid size-7 shrink-0 place-items-center rounded-md text-[var(--green)] hover:bg-[var(--active-pill)]"><Check size={14} /></button>
-              </form>
-            ) : (
-              <button type="button" className="flex max-w-full items-center gap-1 text-left" onClick={() => { setAdminNameDraft(adminName); setEditingAdminName(true); }}>
-                <span className="truncate text-[13px] font-semibold leading-tight">{adminName}</span><Pencil size={11} className="shrink-0 text-[var(--text-3)] opacity-0 transition-opacity group-hover:opacity-100" />
-              </button>
-            )}
-            <div className="text-[11px] text-[var(--text-2)]">Cartethyia console</div>
-          </div>
-          <button onClick={() => { void apiPost("/logout").finally(() => navigate("/login", { replace: true })); }} aria-label="Logout" title="Logout" className="grid place-items-center rounded-lg p-1.5 text-[var(--text-3)] transition-colors hover:bg-[var(--hover)] hover:text-[var(--red)]"><LogOut size={15} /></button>
-        </div>
+      {/* Profile */}
+      <div className={cn("border-t border-[var(--border-subtle)] p-2.5", railCollapsed && "lg:p-2")}>
+        <button
+          type="button"
+          onClick={() => setOpenPanel((current) => (current === "profile" ? null : "profile"))}
+          aria-haspopup="dialog"
+          aria-expanded={openPanel === "profile"}
+          title={adminName}
+          className={cn(
+            "group flex w-full items-center gap-2.5 rounded-[10px] px-1.5 py-1.5 text-left transition-colors hover:bg-[var(--surface-muted)]",
+            railCollapsed && "lg:justify-center lg:px-0"
+          )}
+        >
+          <span className="relative grid size-9 shrink-0 place-items-center rounded-full bg-[var(--text-1)] text-[11px] font-bold text-[var(--page-bg)]">
+            {initials}
+            <span className="absolute -right-0 -top-0 size-2.5 rounded-full border-2 border-[var(--surface-1)] bg-[var(--status-success)]" aria-hidden="true" />
+          </span>
+          <span className={cn("min-w-0 flex-1", railCollapsed && "lg:hidden")}>
+            <span className="block truncate text-[12.5px] font-bold leading-tight text-[var(--text-1)]">{adminName}</span>
+            <span className="block truncate text-[10.5px] text-[var(--text-3)]">Cartethyia console</span>
+          </span>
+        </button>
       </div>
     </aside>
-  ), [drawerOpen, sidebarPage, switchSidebarPage, motionProfile, appearanceQuery.data?.settings.runtime.sidebarIconDataUrl, localVersion, updateAvailable, releaseQuery.data?.html_url, latestTag, adminName, adminNameDraft, editingAdminName]);
+
+  ), [drawerOpen, openPanel, motionProfile, railCollapsed, appearanceQuery.data?.settings.runtime.sidebarIconDataUrl, localVersion, updateAvailable, releaseQuery.data?.html_url, latestTag, adminName, adminNameDraft, editingAdminName, initials]);
 
   return (
     <>
-      <CustomAtmosphere />
-      <div className="relative z-10 mx-auto grid min-h-dvh max-w-[1560px] grid-cols-1 gap-4 p-4 lg:grid-cols-[272px_minmax(0,1fr)]">
+      {/* The sidebar is pinned to the viewport's left edge (position: fixed),
+          so this wrapper only reserves space for it on desktop via padding. */}
+      <div className={cn("relative z-10 min-h-dvh p-4", railCollapsed ? "lg:pl-[84px]" : "lg:pl-[266px]")}>
+      <div className="mx-auto w-full max-w-7xl">
       {drawerOpen && (
         <button
           type="button"
           aria-label="Close navigation"
-          className="fixed inset-0 z-60 cursor-default bg-black/30 backdrop-blur-[4px] lg:hidden"
+          className="fixed inset-0 z-60 cursor-default bg-[var(--text-primary)]/40 lg:hidden"
           onClick={() => setDrawerOpen(false)}
         />
       )}
       {sidebar}
 
-      <div className={cn("flex min-h-0 min-w-0 flex-col gap-4", (pathKey === "/console-log" || pathKey === "/advanced/db-map") && "h-dvh overflow-hidden")}>
-        <header className={cn("glass z-40 flex items-center gap-2 rounded-[18px] px-3 py-2.5 sm:gap-3.5 sm:px-4 sm:py-3", pathKey === "/console-log" ? "static" : "sticky top-4")}>
-          <button
-            ref={menuButtonRef}
-            type="button"
-            onClick={() => setDrawerOpen(true)}
-            aria-label="Open menu"
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius-control)] border border-[var(--inner-border)] bg-[var(--hover)] transition-[background-color,color,transform] active:scale-95 lg:hidden"
-          >
-            <Menu size={18} />
-          </button>
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate text-[15px] font-bold tracking-tight sm:text-[17px]">{meta.title}</h1>
-            <p className="truncate text-[10.5px] text-[var(--text-2)] sm:hidden">{meta.mobileSub}</p>
-            <p className="hidden truncate text-xs text-[var(--text-2)] sm:block">{meta.sub}</p>
-          </div>
-          <ThemeToggle />
-          <div className="relative shrink-0">
+      <div className={cn("flex min-h-0 min-w-0 flex-col gap-4", isFullBleed && "h-dvh overflow-hidden")}>
+        <header>
+          <div className="flex items-center gap-2.5 py-1 sm:gap-3.5">
+            <button
+              ref={menuButtonRef}
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Open menu"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface-1)] text-[var(--text-2)] shadow-[var(--shadow-soft)] transition-[background-color,color,transform] hover:bg-[var(--surface-2)] hover:text-[var(--text-1)] active:scale-95 lg:hidden"
+            >
+              <Menu size={18} />
+            </button>
+            <div className="min-w-0 flex-1">
+              <h1 className="truncate text-[20px] font-bold tracking-tight sm:text-[22px]">Hello, {adminName}!</h1>
+              <p className="truncate text-[12px] text-[var(--text-3)]">Explore information and activity about your system</p>
+            </div>
+            <StatusClock statusData={statusQuery.data} isError={statusQuery.isError} />
             <button
               type="button"
-              onClick={() => setNotificationsOpen((current) => !current)}
-              aria-label="Open notifications"
-              aria-expanded={notificationsOpen}
-              aria-haspopup="dialog"
-              className="grid h-10 w-10 place-items-center rounded-[var(--radius-control)] border border-[var(--inner-border)] bg-[var(--hover)] transition-[background-color,color,transform] hover:bg-[var(--active-pill)] active:scale-90"
+              onClick={() => setPaletteOpen(true)}
+              className="hidden h-10 w-full max-w-[340px] items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-1)] px-4 text-[12.5px] text-[var(--text-3)] shadow-[var(--shadow-soft)] transition-colors hover:border-[var(--border-strong)] md:flex"
             >
-              <Bell size={17} />
+              <Search size={14} className="shrink-0" />
+              <span className="flex-1 text-left">Search…</span>
+              <kbd className="rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-2)] px-1.5 py-0.5 text-[9.5px] font-semibold text-[var(--text-3)]">⌘K</kbd>
             </button>
-            <NotificationsDialog open={notificationsOpen} onClose={() => setNotificationsOpen(false)} statusData={statusQuery.data} isHealthError={statusQuery.isError} updateAvailable={updateAvailable} latestTag={latestTag} />
+            <button
+              type="button"
+              onClick={() => setPaletteOpen(true)}
+              aria-label="Search"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface-1)] text-[var(--text-2)] shadow-[var(--shadow-soft)] transition-colors hover:text-[var(--text-1)] md:hidden"
+            >
+              <Search size={16} />
+            </button>
+            <ThemeToggle />
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setNotificationsOpen((current) => !current)}
+                aria-label="Open notifications"
+                aria-expanded={notificationsOpen}
+                aria-haspopup="dialog"
+                className="relative grid h-10 w-10 place-items-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface-1)] text-[var(--text-2)] shadow-[var(--shadow-soft)] transition-[background-color,color,transform] duration-150 hover:bg-[var(--surface-2)] hover:text-[var(--text-1)] active:scale-90"
+              >
+                <Bell size={17} />
+                {updateAvailable && <span className="absolute right-2 top-2 size-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />}
+              </button>
+              <NotificationsDialog open={notificationsOpen} onClose={() => setNotificationsOpen(false)} statusData={statusQuery.data} isHealthError={statusQuery.isError} updateAvailable={updateAvailable} latestTag={latestTag} />
+            </div>
           </div>
         </header>
 
@@ -843,7 +846,7 @@ export function AppShell() {
             space between the sticky header and footer (e.g. Console Log's
             `h-full` root) instead of the old `max-h-[calc(100vh-Npx)]`
             magic-number hack; pages that don't opt in render at their
-            natural content height exactly as before \u2014 a column flex
+            natural content height exactly as before — a column flex
             child's main-axis size stays content-driven unless it sets its
             own `flex-1`/`h-full`. */}
         <main className="relative flex min-h-0 min-w-0 flex-1 flex-col">
@@ -852,11 +855,10 @@ export function AppShell() {
           </m.div>
         </main>
 
-        {/* Normal flow footer: `mt-auto` drops it to the bottom on short pages. */}
-        {pathKey !== "/model-studio" && <div className={cn(isStudioComposerFocused && "hidden sm:block")}><FooterClock statusData={statusQuery.data} isError={statusQuery.isError} /></div>}
       </div>
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      </div>
       </div>
     </>
   );

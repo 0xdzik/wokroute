@@ -20,7 +20,7 @@ export function StatCard({ label, value, description, icon: Icon, tone = "accent
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="truncate text-[11px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">{label}</div>
-          {loading ? <div className="mt-2 h-7 w-24 animate-pulse rounded bg-[var(--surface-muted)]" aria-label={`Loading ${label}`} /> : <div className="mt-1 text-xl font-bold tabular-nums">{value}</div>}
+          {loading ? <div className="mt-2 h-7 w-24 animate-pulse rounded bg-[var(--surface-muted)]" aria-label={`Loading ${label}`} /> : <div className="mt-1.5 text-[22px] font-bold tracking-tight tabular-nums">{value}</div>}
           {description && <div className="mt-1 truncate text-[11px] text-[var(--text-tertiary)]">{description}</div>}
         </div>
         {Icon && <IconBadge icon={Icon} tone={tone} size="md" />}

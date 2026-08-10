@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { buildKeyLimitsInput, parseOverviewData } from "./page";
+import { buildKeyLimitsInput } from "./key-limits";
+import { parseOverviewData } from "./overview-data";
 
 // Regression: a bare (no "/") entry was always classified as a
 // providerAllowlist entry, treating every alias/combo name (also bare) as if

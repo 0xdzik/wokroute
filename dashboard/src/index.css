@@ -5,27 +5,13 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes toast-in {
-  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes highlightFade {
-  0% { background-color: color-mix(in srgb, var(--accent) 18%, transparent); }
-  100% { background-color: transparent; }
-}
-
-.toast-item {
-  animation: toast-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-/* Login form entrance — CSS-only, zero framer-motion overhead */
+/* Login form entrance */
 .login-enter {
-  animation: login-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: login-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 @keyframes login-in {
-  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
@@ -35,7 +21,7 @@ html[data-motion-profile="reduced"] .login-enter {
   transform: none;
 }
 
-/* Theme toggle icon swap — CSS-only crossfade + rotate */
+/* Theme toggle icon swap */
 .theme-icon-enter {
   animation: theme-icon-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
@@ -51,8 +37,7 @@ html[data-motion-profile="reduced"] .theme-icon-enter {
   transform: none;
 }
 
-/* Traffic chart active line — CSS-only dash animation, disabled on mobile/reduced.
-   `content-visibility: auto` on the chart container skips rendering when offscreen. */
+/* Traffic chart active line */
 .traffic-line-active {
   animation: traffic-dash 0.8s linear infinite;
 }
@@ -61,7 +46,7 @@ html[data-motion-profile="reduced"] .theme-icon-enter {
   contain-intrinsic-size: auto 200px;
 }
 
-/* iOS-style chat bubble entrance — slide + fade in from bottom */
+/* Chat bubble entrance */
 .chat-bubble-enter {
   animation: chat-bubble-in 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
@@ -81,7 +66,7 @@ html[data-motion-profile="reduced"] .chat-bubble-enter {
   transform: none;
 }
 
-/* "Thinking" shimmer — glowing text that sweeps right, like iOS/ChatGPT loading */
+/* "Thinking" shimmer */
 .thinking-shimmer {
   background: linear-gradient(
     90deg,
@@ -118,7 +103,7 @@ html[data-motion-profile="reduced"] .thinking-shimmer {
   to { stroke-dashoffset: -12; }
 }
 
-/* Popout/dropdown animation — CSS-driven, profile-aware */
+/* Popout/dropdown animation + surface (flat, no blur). */
 @keyframes popout-in {
   from { opacity: 0; transform: translateY(-6px) scale(0.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -127,6 +112,7 @@ html[data-motion-profile="reduced"] .thinking-shimmer {
 .popout-enter {
   animation: popout-in 0.16s cubic-bezier(0.32, 0.72, 0, 1) both;
   transform-origin: top center;
+  background-color: var(--popover-bg);
 }
 
 html[data-motion-profile="mobile"] .popout-enter {
@@ -138,13 +124,6 @@ html[data-motion-profile="reduced"] .popout-enter {
   opacity: 1;
 }
 
-/* Ensure popout panels are always opaque and on top */
-.popout-enter {
-  background-color: var(--popover-bg);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-
 html[data-motion-profile="max"] .traffic-line-active {
   animation-duration: 0.5s;
 }
@@ -152,14 +131,6 @@ html[data-motion-profile="max"] .traffic-line-active {
 html[data-motion-profile="reduced"] .traffic-line-active,
 html[data-motion-profile="mobile"] .traffic-line-active {
   animation: none;
-}
-
-/* Disable backdrop-blur on mobile/reduced — GPU-heavy on 2GB RAM devices */
-html[data-motion-profile="mobile"] .backdrop-blur-[6px],
-html[data-motion-profile="reduced"] .backdrop-blur-[6px] {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  background-color: rgba(0, 0, 0, 0.6);
 }
 
 .stagger-item {
@@ -184,43 +155,41 @@ html[data-motion-profile="reduced"] .stagger-item {
 
 @theme {
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  --radius-card: 18px;
-  --radius-sidebar: 22px;
-  --radius-control: 11px;
+
+  /* Radius scale — tight, quiet corners for the monochrome-minimal look. */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-card: 10px;
+  --radius-control: 6px;
 }
 
+/* ── Light theme — monochrome, airy, flat. Hairlines over shadows. ─────── */
 :root {
-  --page-bg: #f7f3ed;
-  --surface-1: rgba(255, 252, 247, 0.76);
-  --surface-2: rgba(255, 253, 249, 0.9);
-  --surface-muted: rgba(119, 83, 55, 0.07);
-  --surface-hover: rgba(255, 248, 240, 0.92);
-  --surface-active: rgba(255, 248, 240, 0.98);
-  --text-primary: #2d2926;
-  --text-secondary: #746b65;
-  --text-tertiary: #a49a92;
-  --border-subtle: rgba(78, 58, 42, 0.09);
-  --border-strong: rgba(119, 94, 72, 0.12);
-  --accent: #d97757;
-  --accent-soft: rgba(217, 119, 87, 0.14);
-  --status-success: #4c9368;
-  --status-danger: #c95145;
-  --status-warning: #ca7b32;
-  --status-info: #448f8d;
-  --focus-ring: #d97757;
-  --track: rgba(113, 82, 57, 0.1);
-  --code-surface: rgba(255, 252, 247, 0.82);
-  --radius-sm: 8px;
-  --radius-md: 11px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --control-height-sm: 32px;
-  --control-height-md: 36px;
-  --control-height-lg: 40px;
-  --touch-target: 40px;
-  --motion-fast: 120ms;
-  --motion-base: 160ms;
-  --motion-slow: 240ms;
+  --page-bg: #FAFAFA;
+  --surface-1: #FFFFFF;
+  --surface-2: #F7F7F7;
+  --surface-muted: #F4F4F4;
+  --surface-hover: #ECECEC;
+  --text-primary: #171717;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+  --border-subtle: #E7E7E7;
+  --border-strong: #D4D4D4;
+  /* Monochrome accent: near-black in light, near-white in dark. */
+  --accent: #171717;
+  --accent-hover: #000000;
+  --accent-soft: rgba(23, 23, 23, 0.06);
+  --accent-foreground: #FFFFFF;
+  /* Semantic status hues — used for dots/text only, never full surfaces. */
+  --status-success: #16A34A;
+  --status-danger: #DC2626;
+  --status-warning: #D97706;
+  --status-info: #525252;
+  --focus-ring: #171717;
+  --track: #ECECEC;
 
   --text-1: var(--text-primary);
   --text-2: var(--text-secondary);
@@ -228,60 +197,75 @@ html[data-motion-profile="reduced"] .stagger-item {
   --green: var(--status-success);
   --red: var(--status-danger);
   --orange: var(--status-warning);
-  --purple: #8769a4;
+  --purple: #737373;
   --teal: var(--status-info);
-  --green-soft: rgba(76, 147, 104, 0.12);
-  --red-soft: rgba(201, 81, 69, 0.12);
-  --orange-soft: rgba(202, 123, 50, 0.12);
-  --teal-soft: rgba(68, 143, 141, 0.12);
-  --purple-soft: rgba(135, 105, 164, 0.12);
+  /* Soft fills are neutral tints — badges keep hue only in their text. */
+  --green-soft: rgba(0, 0, 0, 0.045);
+  --red-soft: rgba(0, 0, 0, 0.045);
+  --orange-soft: rgba(0, 0, 0, 0.045);
+  --teal-soft: rgba(0, 0, 0, 0.045);
+  --purple-soft: rgba(0, 0, 0, 0.045);
   --glass-bg: var(--surface-1);
   --glass-bg-2: var(--surface-2);
-  --popover-bg: #fffefb;
-  --glass-border: var(--border-strong);
-  --glass-border-2: rgba(255, 255, 255, 0.78);
+  --popover-bg: #FFFFFF;
+  --glass-border: var(--border-subtle);
+  --glass-border-2: var(--border-subtle);
   --inner-border: var(--border-subtle);
   --hover: var(--surface-muted);
   --active-pill: var(--surface-hover);
-  --kbd-bg: rgba(113, 82, 57, 0.08);
-  --shadow-card: 0 1px 2px rgba(83, 56, 36, 0.05), 0 12px 32px rgba(83, 56, 36, 0.1);
+  --kbd-bg: #F4F4F4;
+  /* Flat system: hairline borders carry the hierarchy, not shadows. */
+  --shadow-card: none;
+  --shadow-soft: none;
   color-scheme: light;
 }
 
+/* ── Dark theme — the same system inverted, true neutrals only. ────────── */
 .dark {
-  --page-bg: #08080b;
-  --surface-1: rgba(28, 28, 32, 0.55);
-  --surface-2: rgba(34, 34, 40, 0.72);
-  --surface-muted: rgba(255, 255, 255, 0.07);
-  --surface-hover: rgba(255, 255, 255, 0.12);
-  --surface-active: rgba(255, 255, 255, 0.16);
-  --text-primary: #f5f5f7;
-  --text-secondary: #a1a1a6;
-  --text-tertiary: #6e6e73;
-  --border-subtle: rgba(255, 255, 255, 0.07);
-  --border-strong: rgba(255, 255, 255, 0.1);
-  --accent-soft: rgba(10, 132, 255, 0.18);
-  --focus-ring: #0a84ff;
-  --track: rgba(255, 255, 255, 0.12);
-  --code-surface: rgba(28, 28, 32, 0.8);
+  --page-bg: #0A0A0A;
+  --surface-1: #161616;
+  --surface-2: #1C1C1C;
+  --surface-muted: #232323;
+  --surface-hover: #2B2B2B;
+  --text-primary: #EDEDED;
+  --text-secondary: #A3A3A3;
+  --text-tertiary: #666666;
+  --border-subtle: #262626;
+  --border-strong: #383838;
+  --accent: #EDEDED;
+  --accent-hover: #FFFFFF;
+  --accent-soft: rgba(237, 237, 237, 0.08);
+  --accent-foreground: #0A0A0A;
+  --status-success: #22C55E;
+  --status-danger: #EF4444;
+  --status-warning: #F59E0B;
+  --status-info: #A3A3A3;
+  --focus-ring: #EDEDED;
+  --track: #232323;
   --text-1: var(--text-primary);
   --text-2: var(--text-secondary);
   --text-3: var(--text-tertiary);
+  --green: var(--status-success);
+  --red: var(--status-danger);
+  --orange: var(--status-warning);
+  --purple: #A3A3A3;
+  --teal: var(--status-info);
+  --green-soft: rgba(255, 255, 255, 0.06);
+  --red-soft: rgba(255, 255, 255, 0.06);
+  --orange-soft: rgba(255, 255, 255, 0.06);
+  --teal-soft: rgba(255, 255, 255, 0.06);
+  --purple-soft: rgba(255, 255, 255, 0.06);
   --glass-bg: var(--surface-1);
   --glass-bg-2: var(--surface-2);
-  --popover-bg: #1c1c20;
-  --glass-border: var(--border-strong);
-  --glass-border-2: rgba(255, 255, 255, 0.16);
+  --popover-bg: #161616;
+  --glass-border: var(--border-subtle);
+  --glass-border-2: var(--border-subtle);
   --inner-border: var(--border-subtle);
   --hover: var(--surface-muted);
   --active-pill: var(--surface-hover);
-  --kbd-bg: rgba(255, 255, 255, 0.1);
-  --green-soft: rgba(76, 147, 104, 0.18);
-  --red-soft: rgba(201, 81, 69, 0.18);
-  --orange-soft: rgba(202, 123, 50, 0.18);
-  --teal-soft: rgba(68, 143, 141, 0.18);
-  --purple-soft: rgba(135, 105, 164, 0.18);
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.45);
+  --kbd-bg: #232323;
+  --shadow-card: none;
+  --shadow-soft: none;
   color-scheme: dark;
 }
 
@@ -316,8 +300,10 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   color: var(--text-1);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.014em;
+  background-color: var(--page-bg);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Every authenticated page owns the same width and shrink behavior inside the shell. */
@@ -326,9 +312,7 @@ body {
   min-width: 0;
 }
 
-/* Native dropdown menus are rendered outside the page surface by the browser.
-   Give both the closed control and its option popup the active theme colors so
-   dark mode never falls back to a white system menu. */
+/* Native dropdown menus get the active theme colors. */
 select {
   color: var(--text-1);
   color-scheme: light;
@@ -342,112 +326,17 @@ select optgroup {
   color: var(--text-1);
 }
 
-/* Mesh background layer — the "material" that blur works on. */
-.app-bg {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(55rem 38rem at 8% -12%, rgba(250, 212, 178, 0.42), transparent 60%),
-    radial-gradient(48rem 34rem at 108% 6%, rgba(246, 222, 182, 0.4), transparent 60%),
-    radial-gradient(42rem 42rem at 50% 118%, rgba(240, 192, 169, 0.27), transparent 60%),
-    var(--page-bg);
-}
-.dark .app-bg {
-  background:
-    radial-gradient(55rem 38rem at 8% -12%, rgba(14, 165, 233, 0.2), transparent 60%),
-    radial-gradient(48rem 34rem at 108% 6%, rgba(139, 92, 246, 0.18), transparent 60%),
-    radial-gradient(42rem 42rem at 50% 118%, rgba(190, 24, 93, 0.14), transparent 60%),
-    var(--page-bg);
-}
 
-.custom-background-layer {
-  contain: strict;
-  position: fixed;
-  inset: -2%;
-  z-index: 0;
-  pointer-events: none;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  filter: blur(min(var(--custom-bg-blur, 0px), 10px));
-  transform: scale(1.02);
-}
-
-@media (max-width: 767px) {
-  .custom-background-layer {
-    filter: blur(min(var(--custom-bg-blur, 0px), 4px));
-  }
-}
-
+/* ── Cards — flat surfaces, hairline borders, no blur, no shadow. ─────── */
 .glass {
   background: var(--glass-bg);
-  -webkit-backdrop-filter: blur(10px) saturate(1.15);
-  backdrop-filter: blur(10px) saturate(1.15);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-card), inset 0 1px 0 var(--glass-border-2);
 }
 .glass-2 {
   background: var(--glass-bg-2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  backdrop-filter: blur(14px) saturate(1.2);
   border: 1px solid var(--glass-border-2);
-  box-shadow: var(--shadow-card);
 }
 
-/* ── Performance mode (solid surfaces, no backdrop-filter) ──────────────
-   Toggle: data-glass="off" on <html> — set by CustomAtmosphere when
-   settings.solidMode is true. Eliminates GPU blur compositing on every card.
-   One line to flip the entire dashboard from frosted-glass to solid. */
-html[data-glass="off"] .glass,
-html[data-glass="off"] .glass-2 {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-html[data-glass="off"] {
-  --surface-1: #fffefb;
-  --surface-2: #fffefb;
-  --glass-bg: #fffefb;
-  --glass-bg-2: #fffefb;
-  --glass-border: var(--border-subtle);
-  --glass-border-2: var(--border-subtle);
-}
-html[data-glass="off"].dark {
-  --surface-1: #161618;
-  --surface-2: #1a1a1e;
-  --glass-bg: #161618;
-  --glass-bg-2: #1a1a1e;
-  --glass-border: var(--border-subtle);
-  --glass-border-2: var(--border-subtle);
-}
-/* Solid mode also skips the custom-background-layer blur for perf. */
-html[data-glass="off"] .custom-background-layer {
-  filter: none;
-}
-
-/* A custom image is already a costly full-screen backdrop. Keep the frosted
-   look, but avoid stacking the maximum blur on every card. */
-.custom-background-layer ~ .relative.z-10 .glass {
-  -webkit-backdrop-filter: blur(6px) saturate(1.1);
-  backdrop-filter: blur(6px) saturate(1.1);
-}
-.custom-background-layer ~ .relative.z-10 .glass-2 {
-  -webkit-backdrop-filter: blur(8px) saturate(1.1);
-  backdrop-filter: blur(8px) saturate(1.1);
-}
-
-/* Keeps a container scrollable without a visible scrollbar track — used by
-   the sidebar, which is tight enough that a scrollbar reads as clutter. */
-.scrollbar-none {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
-
-/* Thin scrollbar that fades in on hover/focus and out when idle — used by
-   the sidebar nav area so it stays scrollable without permanent clutter. */
 .scrollbar-fade {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
@@ -458,8 +347,8 @@ html[data-glass="off"] .custom-background-layer {
   scrollbar-color: var(--border-strong) transparent;
 }
 .scrollbar-fade::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 .scrollbar-fade::-webkit-scrollbar-track {
   background: transparent;
@@ -475,27 +364,11 @@ html[data-glass="off"] .custom-background-layer {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--hover), var(--track));
+  background: linear-gradient(90deg, var(--surface-muted), var(--track));
   border-radius: 8px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Mobile prioritizes immediate interaction and scrolling over translucent blur and list choreography. */
 @media (max-width: 767px) {
-  .glass,
-  .glass-2 {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-
   .skeleton {
     animation: none;
   }
@@ -507,8 +380,7 @@ html[data-glass="off"] .custom-background-layer {
   }
 }
 
-/* ── Theme transition ───────────────────────────────────────────────────────
-   Crossfade the snapshots instead of clipping a full glass/chart surface. */
+/* ── Theme transition ─────────────────────────────────────────────────── */
 html[data-theme-wipe]::view-transition-old(root),
 html[data-theme-wipe]::view-transition-new(root) {
   mix-blend-mode: normal;
@@ -533,10 +405,15 @@ html[data-theme-wipe]::view-transition-new(root) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
   html[data-theme-wipe]::view-transition-old(root),
   html[data-theme-wipe]::view-transition-new(root) {
     animation: none;
   }
 }
-
-

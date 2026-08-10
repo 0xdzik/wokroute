@@ -159,6 +159,13 @@ export function useModelCatalogState(providers: ProviderSummary[], enabled: bool
       enabled: enabled && canLoadCatalog(provider),
     })),
   });
+  // `results` is a fresh array every render (useQueries), so depend on a
+  // serialized data signature instead of the array reference to avoid a
+  // render loop. Use a single derived key (NOT a spread of per-query
+  // timestamps) so the dependency array stays a constant size across
+  // renders — spreading would change the array length as providers load
+  // and violate React's rules-of-hooks ("final argument changed size").
+  const dataSignature = results.map((result) => result.dataUpdatedAt).join(",");
   const items = useMemo(() => {
     if (!enabled) return [];
     return providers.flatMap((provider, index) => {
@@ -176,10 +183,8 @@ export function useModelCatalogState(providers: ProviderSummary[], enabled: bool
         return [{ provider, qualified, images: model.images === true }];
       });
     });
-    // `results` is a fresh array every render (useQueries), so depend on its
-    // serialized data rather than the array reference to avoid a render loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [providers, enabled, ...results.map((result) => result.dataUpdatedAt)]);
+  }, [providers, enabled, dataSignature]);
   const eligibleResults = results.filter((_result, index) => {
     const provider = providers[index];
     return provider !== undefined && canLoadCatalog(provider);
@@ -355,7 +360,7 @@ export function ModelPickerModal({
                   <ProviderIcon icon={provider.icon} name={provider.name} size={22} />
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold text-[var(--text-1)]">{provider.name}</div>
-                    <div className="text-[10.5px] text-[var(--text-3)]">{provider.prefix} · {provider.modelCount} models</div>
+                    <div className="text-[11px] text-[var(--text-3)]">{provider.prefix} · {provider.modelCount} models</div>
                   </div>
                   {isSelected(provider.id) && <Badge tone="accent">added</Badge>}
                 </button>
@@ -376,7 +381,7 @@ export function ModelPickerModal({
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="truncate font-mono text-[11.5px] font-semibold text-[var(--text-1)]">{combo.name}</div>
-                      <div className="text-[10.5px] text-[var(--text-3)]">Combo</div>
+                      <div className="text-[11px] text-[var(--text-3)]">Combo</div>
                     </div>
                     {isSelected(combo.name) && <Badge tone="accent">added</Badge>}
                   </button>
@@ -563,7 +568,7 @@ export function InlineModelBrowser({
           <button
             type="button"
             onClick={addFromSearch}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-[var(--accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--accent)] hover:text-white"
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-[var(--accent-soft)] px-2 py-0.5 text-[11px] font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
           >
             + Add "{search.trim()}"
           </button>
@@ -604,7 +609,7 @@ export function InlineModelBrowser({
                       key={value}
                       type="button"
                       onClick={() => pick(value)}
-                      className={cn("inline-flex items-center rounded-full border border-[var(--inner-border)] bg-[var(--surface-1)] px-2.5 py-1 text-[10.5px] font-mono transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]", isSelected(value) && "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]")}
+                      className={cn("inline-flex items-center rounded-full border border-[var(--inner-border)] bg-[var(--surface-1)] px-2.5 py-1 text-[11px] font-mono transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]", isSelected(value) && "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]")}
                     >
                       <span className="min-w-0 flex-1 truncate">{value}</span>
 
@@ -624,11 +629,11 @@ export function InlineModelBrowser({
                       onClick={() => pick(entry.alias)}
                       title={`\u2192 ${entry.model}`}
                       className={cn(
-                        "inline-flex items-center rounded-full border border-[var(--inner-border)] bg-[var(--surface-1)] px-2.5 py-1 text-[10.5px] font-mono transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]",
+                        "inline-flex items-center rounded-full border border-[var(--inner-border)] bg-[var(--surface-1)] px-2.5 py-1 text-[11px] font-mono transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]",
                         isSelected(entry.alias) && "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]"
                       )}
                     >
-                      <span className="min-w-0 flex-1 truncate"><span className="block">{entry.alias}</span><span className="block truncate text-[9px] text-[var(--text-3)]">→ {entry.model}</span></span>
+                      <span className="min-w-0 flex-1 truncate"><span className="block">{entry.alias}</span><span className="block truncate text-[11px] text-[var(--text-3)]">→ {entry.model}</span></span>
 
                     </button>
                   ))}
@@ -644,7 +649,7 @@ export function InlineModelBrowser({
                       key={`combo:${combo.name}`}
                       type="button"
                       onClick={() => pick(combo.name)}
-                      className={cn("inline-flex items-center rounded-full border border-[var(--inner-border)] bg-[var(--surface-1)] px-2.5 py-1 text-[10.5px] font-mono transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]", isSelected(combo.name) && "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]")}
+                      className={cn("inline-flex items-center rounded-full border border-[var(--inner-border)] bg-[var(--surface-1)] px-2.5 py-1 text-[11px] font-mono transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]", isSelected(combo.name) && "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]")}
                     >
                       <span className="min-w-0 flex-1 truncate">{combo.name}</span>
 
@@ -663,7 +668,7 @@ export function InlineModelBrowser({
                       key={entry.qualified}
                       type="button"
                       onClick={() => pick(entry.qualified)}
-                      className={cn("inline-flex items-center rounded-full border border-[var(--inner-border)] bg-[var(--surface-1)] px-2.5 py-1 text-[10.5px] font-mono transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]", isSelected(entry.qualified) && "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]")}
+                      className={cn("inline-flex items-center rounded-full border border-[var(--inner-border)] bg-[var(--surface-1)] px-2.5 py-1 text-[11px] font-mono transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]", isSelected(entry.qualified) && "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]")}
                     >
                       <span className="min-w-0 flex-1 truncate">{entry.qualified.slice(entry.qualified.indexOf("/") + 1)}</span>
 
@@ -681,7 +686,7 @@ export function InlineModelBrowser({
                       key={entry.qualified}
                       type="button"
                       onClick={() => pick(entry.qualified)}
-                      className={cn("inline-flex items-center rounded-full border border-[var(--inner-border)] bg-[var(--surface-1)] px-2.5 py-1 text-[10.5px] font-mono transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]", isSelected(entry.qualified) && "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]")}
+                      className={cn("inline-flex items-center rounded-full border border-[var(--inner-border)] bg-[var(--surface-1)] px-2.5 py-1 text-[11px] font-mono transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]", isSelected(entry.qualified) && "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]")}
                     >
                       {/* Everything after the FIRST slash, not `.split("/")[1]` \u2014 some
                           providers' own model ids embed a slash (OpenRouter's
@@ -735,13 +740,13 @@ export function ModelPickerField({
   return (
     <div>
       <Label>{label}</Label>
-      {hint && <p className="-mt-1 mb-1.5 text-[10.5px] text-[var(--text-3)]">{hint}</p>}
+      {hint && <p className="-mt-1 mb-1.5 text-[11px] text-[var(--text-3)]">{hint}</p>}
       {values.length > 0 && (
         <div className="mb-2 flex flex-wrap gap-1.5">
           {values.map((value) => (
             <span
               key={value}
-              className="inline-flex max-w-full items-center gap-1 overflow-hidden rounded-full border border-[var(--inner-border)] bg-[var(--hover)] px-2 py-0.5 font-mono text-[10.5px] font-medium text-[var(--text-1)]"
+              className="inline-flex max-w-full items-center gap-1 overflow-hidden rounded-full border border-[var(--inner-border)] bg-[var(--hover)] px-2 py-0.5 font-mono text-[11px] font-medium text-[var(--text-1)]"
             >
               <span className="truncate">{value}</span>
               <button

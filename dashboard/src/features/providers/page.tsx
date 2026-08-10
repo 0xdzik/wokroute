@@ -221,15 +221,15 @@ function CustomProvidersSection() {
         </div>
       )}
       {isPending ? (
-        <div className="rounded-xl border border-[var(--inner-border)] bg-[var(--glass-bg-2)]/60 p-4 backdrop-blur-xl">
+        <div className="rounded-xl border border-[var(--inner-border)] bg-[var(--surface-1)] p-4">
           <div className="h-10 animate-pulse rounded-lg bg-[var(--surface-muted)]" aria-label="Loading custom providers" />
         </div>
       ) : isError ? (
-        <div className="rounded-xl border border-[var(--red)]/25 bg-[var(--glass-bg-2)]/70 p-4 text-sm text-[var(--text-2)] backdrop-blur-xl">
+        <div className="rounded-xl border border-[var(--red)]/25 bg-[var(--surface-1)] p-4 text-sm text-[var(--text-2)]">
           Could not load custom providers. Retry the page to check your saved endpoints again.
         </div>
       ) : items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[var(--inner-border)] bg-[var(--glass-bg-2)]/60 px-4 py-7 text-center backdrop-blur-xl">
+        <div className="rounded-xl border border-dashed border-[var(--inner-border)] bg-[var(--surface-1)] px-4 py-7 text-center">
           <p className="text-sm font-semibold text-[var(--text-1)]">No custom providers yet</p>
           <p className="mt-1 text-xs leading-5 text-[var(--text-2)]">Add an OpenAI- or Anthropic-compatible endpoint with the buttons above.</p>
         </div>
@@ -271,10 +271,10 @@ function CustomProvidersSection() {
                 </div>
                 <Link to={`/providers/custom/${cp.id}`} className="mt-1.5 block space-y-0.5">
                   <div className="flex items-center gap-1.5">
-                    <code className="max-w-full truncate rounded bg-[var(--kbd-bg)] px-1 py-0.5 font-mono text-[10px] text-[var(--text-3)]">{cp.slug}/</code>
-                    <span className="text-[10px] text-[var(--text-3)]">Models available in detail</span>
+                    <code className="max-w-full truncate rounded bg-[var(--kbd-bg)] px-1 py-0.5 font-mono text-[11px] text-[var(--text-3)]">{cp.slug}/</code>
+                    <span className="text-[11px] text-[var(--text-3)]">Models available in detail</span>
                   </div>
-                  <p className="truncate text-[10px] text-[var(--text-3)]">{cp.baseUrl}</p>
+                  <p className="truncate text-[11px] text-[var(--text-3)]">{cp.baseUrl}</p>
                 </Link>
               </Card>
             );
@@ -329,7 +329,7 @@ const ProviderCard = memo(function ProviderCard({ provider }: { provider: Provid
             </div>
           </div>
           <div className="ml-auto flex shrink-0 flex-col items-end gap-1">
-            <span className="rounded-md bg-[var(--kbd-bg)] px-1.5 py-0.5 font-mono text-[10px] font-semibold text-[var(--text-3)]">
+            <span className="rounded-md bg-[var(--kbd-bg)] px-1.5 py-0.5 font-mono text-[11px] font-semibold text-[var(--text-3)]">
               {provider.prefix}/
             </span>
             <Badge tone="info">{provider.modelCount} models</Badge>
@@ -405,7 +405,7 @@ export function ProvidersPage() {
             </section>
           ))}
           {totalProviders > 0 && (
-            <div ref={loadMoreRef} className="flex min-h-10 items-center justify-center rounded-xl border border-[var(--inner-border)] bg-[var(--glass-bg-2)]/55 px-4 py-2 text-center text-[11px] text-[var(--text-3)] backdrop-blur-xl">
+            <div ref={loadMoreRef} className="flex min-h-10 items-center justify-center rounded-xl border border-[var(--inner-border)] bg-[var(--surface-1)] px-4 py-2 text-center text-[11px] text-[var(--text-3)]">
               {hasMore ? `Showing ${visibleProviders} of ${totalProviders} providers · loading more as you scroll` : `Showing all ${totalProviders} providers`}
             </div>
           )}

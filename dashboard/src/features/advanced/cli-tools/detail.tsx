@@ -142,11 +142,11 @@ function ToolDetailContent({
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-base font-bold text-[var(--text-1)]">{def.name}</h2>
               {installed ? (
-                <span className="flex items-center gap-1 text-[10.5px] text-[var(--accent)]">
+                <span className="flex items-center gap-1 text-[11px] text-[var(--accent)]">
                   <CheckCircle2 size={12} /> Installed
                 </span>
               ) : (
-                <span className="flex items-center gap-1 text-[10.5px] text-[var(--text-3)]">
+                <span className="flex items-center gap-1 text-[11px] text-[var(--text-3)]">
                   <XCircle size={12} /> Not installed
                 </span>
               )}
@@ -156,10 +156,10 @@ function ToolDetailContent({
             </div>
             <p className="mt-0.5 text-xs text-[var(--text-2)]">{def.description}</p>
             {def.settingsFile && (
-              <p className="mt-1 text-[10.5px] font-mono text-[var(--text-3)]">{def.settingsFile}</p>
+              <p className="mt-1 text-[11px] font-mono text-[var(--text-3)]">{def.settingsFile}</p>
             )}
             {status?.currentEndpoint && (
-              <p className="mt-0.5 text-[10.5px] text-[var(--text-2)]">
+              <p className="mt-0.5 text-[11px] text-[var(--text-2)]">
                 Endpoint: <span className="font-mono">{status.currentEndpoint}</span>
               </p>
             )}
@@ -168,7 +168,7 @@ function ToolDetailContent({
                 href={def.docsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-1 inline-flex items-center gap-1 text-[10.5px] text-[var(--accent)] hover:underline"
+                className="mt-1 inline-flex items-center gap-1 text-[11px] text-[var(--accent)] hover:underline"
               >
                 <ExternalLink size={11} /> Documentation
               </a>
@@ -185,9 +185,9 @@ function ToolDetailContent({
               key={i}
               className={cn(
                 "rounded-[var(--radius-control)] border px-3 py-2 text-[11px]",
-                note.type === "warning" && "border-[var(--orange-soft)] bg-[var(--orange-soft)] text-[var(--orange)]",
-                note.type === "error" && "border-[var(--red-soft)] bg-[var(--red-soft)] text-[var(--red)]",
-                note.type === "info" && "border-[var(--teal-soft)] bg-[var(--teal-soft)] text-[var(--teal)]",
+                note.type === "warning" && " text-[var(--orange)]",
+                note.type === "error" && " text-[var(--red)]",
+                note.type === "info" && " text-[var(--teal)]",
               )}
             >
               {note.text}
@@ -305,7 +305,7 @@ function GuideContent({
               {step.desc && <p className="mt-0.5 text-[11px] text-[var(--text-3)]">{step.desc}</p>}
               {step.value && (
                 <div className="mt-1.5 flex items-center gap-2">
-                  <code className="flex-1 overflow-x-auto rounded-[var(--radius-control)] bg-[var(--surface-muted)] px-2 py-1 text-[10.5px] font-mono text-[var(--text-2)]">
+                  <code className="flex-1 overflow-x-auto rounded-[var(--radius-control)] bg-[var(--surface-muted)] px-2 py-1 text-[11px] font-mono text-[var(--text-2)]">
                     {step.value.replace(/\{\{baseUrl\}\}/g, endpoint)}
                   </code>
                   {step.copyable && (
@@ -321,7 +321,7 @@ function GuideContent({
 
         {processedCode && (
           <div className="relative mt-2">
-            <pre className="overflow-x-auto rounded-[var(--radius-control)] border border-[var(--inner-border)] bg-[var(--surface-muted)] p-3 text-[10.5px] font-mono leading-relaxed text-[var(--text-2)]">
+            <pre className="overflow-x-auto py-2 text-[11px] font-mono leading-relaxed text-[var(--text-2)]">
               {processedCode}
             </pre>
             <button

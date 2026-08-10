@@ -1,7 +1,7 @@
 /** Customization — one compact, local custom background control. */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { RotateCcw, Image as ImageIcon, SlidersHorizontal, Trash2, Upload, Gauge } from "lucide-react";
+import { RotateCcw, Image as ImageIcon, SlidersHorizontal, Trash2, Upload } from "lucide-react";
 import { useRef, useState, type ChangeEvent } from "react";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
@@ -99,7 +99,6 @@ export function CustomizationPage() {
       backgroundEnabled: true,
       backgroundOpacity: 21,
       backgroundBlur: 2,
-      solidMode: false,
     });
     setError(null);
     toast.success("Customization reset.");
@@ -205,31 +204,6 @@ export function CustomizationPage() {
 
       {appearance && (
         <>
-        <Card density="compact" className="w-full">
-          <CardHeader
-            title="Performance Mode"
-            icon={Gauge}
-            sub="Disable blur effects and use solid warm surfaces for a smoother experience."
-          >
-            <Badge tone={settings.solidMode ? "ok" : "default"}>
-              {settings.solidMode ? "Solid" : "Frosted"}
-            </Badge>
-          </CardHeader>
-          <div className="flex flex-col gap-3 rounded-[var(--radius-control)] border border-[var(--inner-border)] bg-[var(--hover)] px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <div className="text-xs font-semibold">Solid surfaces (no blur)</div>
-              <div className="mt-0.5 text-[11px] text-[var(--text-3)]">
-                Replaces frosted-glass backdrop-filter with solid black/white warm surfaces. Fixes lag on lower-end GPUs and saves ~20–40 MB RAM.
-              </div>
-            </div>
-            <Switch
-              checked={settings.solidMode}
-              onChange={(checked) => setSettings({ solidMode: checked })}
-              label="Solid mode"
-            />
-          </div>
-        </Card>
-
         <Card density="compact" className="w-full">
           <CardHeader title="Application Appearance" icon={ImageIcon} sub="Customize the dashboard sidebar icon." />
           <div className="space-y-3">

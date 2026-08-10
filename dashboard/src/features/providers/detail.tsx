@@ -391,11 +391,11 @@ function useModelTest(
         toast.success(`${modelId} · END ${formatDuration(result.latencyMs)}`, {
           description: (
             <div className="max-w-sm space-y-0.5">
-              {modelLine && <p className="text-[10px] text-[var(--text-3)]">{renderInlineMarkdown(modelLine)}</p>}
+              {modelLine && <p className="text-[11px] text-[var(--text-3)]">{renderInlineMarkdown(modelLine)}</p>}
               {result.sample && (
                 <p className="whitespace-pre-wrap text-[11px] leading-5 text-[var(--text-2)]">{renderInlineMarkdown(result.sample)}</p>
               )}
-              {!result.sample && <p className="text-[10px] text-[var(--text-3)]">No sample text in the response.</p>}
+              {!result.sample && <p className="text-[11px] text-[var(--text-3)]">No sample text in the response.</p>}
             </div>
           ),
         });
@@ -764,6 +764,12 @@ function KiroOAuthDialog({ onClose, onConnected, accountName }: { onClose: () =>
   const [message, setMessage] = useState("");
   const [polling, setPolling] = useState(false);
 
+  // The parent passes an inline arrow, whose identity changes on every
+  // re-render (the page polls account health) — keep it in a ref so the
+  // poll effect below doesn't restart its timer on every parent render.
+  const onConnectedRef = useRef(onConnected);
+  onConnectedRef.current = onConnected;
+
   // Auto-poll device flow session status
   useEffect(() => {
     if (!session) return;
@@ -776,7 +782,7 @@ function KiroOAuthDialog({ onClose, onConnected, accountName }: { onClose: () =>
         if (stopped) return;
         if (status.status === "completed") {
           toast.success("Kiro account connected");
-          onConnected();
+          onConnectedRef.current();
           return;
         }
         if (status.status === "failed" || status.status === "expired" || status.status === "cancelled") {
@@ -798,7 +804,7 @@ function KiroOAuthDialog({ onClose, onConnected, accountName }: { onClose: () =>
     // Start first poll after the interval
     let timer: number | undefined = window.setTimeout(() => void poll(), session.intervalSeconds * 1000);
     return () => { stopped = true; if (timer !== undefined) window.clearTimeout(timer); };
-  }, [session, onConnected]);
+  }, [session]);
 
   const start = async () => {
     setBusy(true); setMessage("");
@@ -912,7 +918,7 @@ function OAuthConnectDialog({
       }
     >
       <div className="space-y-4">
-        <div className="flex items-center gap-2.5 rounded-xl border border-[var(--inner-border)] bg-[var(--hover)] px-3.5 py-3">
+        <div className="flex items-center gap-2.5 px-1 py-0.5">
           {status?.status === "completed" ? (
             <CheckCircle2 size={18} className="shrink-0 text-[var(--green)]" aria-hidden="true" />
           ) : (
@@ -922,7 +928,7 @@ function OAuthConnectDialog({
         </div>
 
         {!isDeviceFlow && (
-          <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-3)] before:h-px before:flex-1 before:bg-[var(--inner-border)] after:h-px after:flex-1 after:bg-[var(--inner-border)]">
+          <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--text-3)] before:h-px before:flex-1 before:bg-[var(--inner-border)] after:h-px after:flex-1 after:bg-[var(--inner-border)]">
             Or paste callback URL manually
           </div>
         )}
@@ -950,7 +956,7 @@ function OAuthConnectDialog({
             </Button>
           </div>
           <p className="text-[11px] leading-4 text-[var(--text-3)]">{session.instructions}</p>
-          {isDeviceFlow && <div className="rounded-xl border border-[var(--inner-border)] bg-[var(--hover)] p-3"><div className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-3)]">Device code</div><div className="mt-1 font-mono text-xl tracking-[0.2em] text-[var(--text-1)]">{session.userCode}</div><a href={session.verificationUri ?? session.authorizationUrl} target="_blank" rel="noreferrer" className="mt-1 block break-all text-[11px] text-[var(--accent)] hover:underline">{session.verificationUri ?? session.authorizationUrl}</a></div>}
+          {isDeviceFlow && <div className="rounded-xl border border-[var(--inner-border)] bg-[var(--hover)] p-3"><div className="text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]">Device code</div><div className="mt-1 font-mono text-xl tracking-[0.2em] text-[var(--text-1)]">{session.userCode}</div><a href={session.verificationUri ?? session.authorizationUrl} target="_blank" rel="noreferrer" className="mt-1 block break-all text-[11px] text-[var(--accent)] hover:underline">{session.verificationUri ?? session.authorizationUrl}</a></div>}
         </section>
 
         {!isDeviceFlow && (
@@ -1045,7 +1051,7 @@ function AddModelModal({
               {testState === "testing" ? <Loader2 size={13} className="animate-spin" /> : <FlaskConical size={13} />} Test
             </Button>
           </div>
-          {qualified.length > 0 && <div className="mt-1 text-[10px] text-[var(--text-3)]">Sent to provider as: <span className="font-mono">{qualified}</span></div>}
+          {qualified.length > 0 && <div className="mt-1 text-[11px] text-[var(--text-3)]">Sent to provider as: <span className="font-mono">{qualified}</span></div>}
         </div>
         {testState === "passed" && <div className="rounded-xl border border-[var(--green)]/40 bg-[var(--green)]/5 px-3 py-2 text-xs text-[var(--green)]">Model test passed — ready to add.</div>}
         {testState === "failed" && <div className="rounded-xl border border-[var(--red)]/40 bg-[var(--red)]/5 px-3 py-2 text-xs text-[var(--red)]">{testError || "Model test failed."}</div>}
@@ -1081,10 +1087,10 @@ function RouteHealthNotice({ title, route, tone }: { title: string; route: Route
       "rounded-xl border px-3 py-2.5",
       tone === "failed" ? "border-[var(--red)]/35 bg-[var(--red)]/5" : "border-[var(--green)]/35 bg-[var(--green)]/5",
     )}>
-      <div className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-3)]">{title}</div>
+      <div className="text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]">{title}</div>
       <div className="mt-1 truncate text-xs font-semibold text-[var(--text-1)]">{label}</div>
       <div
-        className={cn("mt-0.5 truncate text-[10px]", tone === "failed" ? "text-[var(--red)]" : "text-[var(--green)]")}
+        className={cn("mt-0.5 truncate text-[11px]", tone === "failed" ? "text-[var(--red)]" : "text-[var(--green)]")}
         title={accessibleStatus}
         aria-label={`${title} health: ${accessibleStatus}`}
       >
@@ -1098,7 +1104,7 @@ function RouteSwitchNotice({ event }: { event: RouteSwitchEvent }) {
   const previous = event.previousRouteId ? event.previousRouteId.slice(0, 96) : "unknown route";
   const replacement = event.replacementRouteId ? event.replacementRouteId.slice(0, 96) : "no replacement";
   return (
-    <div className="rounded-xl border border-[var(--accent)]/30 bg-[var(--accent-soft)] px-3 py-2.5 text-[10px] text-[var(--text-2)]" role="status">
+    <div className="rounded-xl border border-[var(--accent)]/30 bg-[var(--accent-soft)] px-3 py-2.5 text-[11px] text-[var(--text-2)]" role="status">
       <div className="font-semibold text-[var(--accent)]">Route replaced</div>
       <div className="mt-1 break-words">{previous} → {replacement}</div>
       {event.reason && <div className="mt-0.5 break-words text-[var(--text-3)]">Reason: {event.reason.slice(0, 160)}</div>}
@@ -1436,8 +1442,8 @@ export function ProviderDetailPage() {
           <div className="flex min-h-[34px] items-start gap-1.5">
             <Bot size={14} aria-hidden="true" className="mt-0.5 shrink-0 text-[var(--text-3)]" />
             <div className="min-w-0 flex-1">
-              <div className="break-all font-mono text-[10px] font-semibold leading-4 text-[var(--text-1)] sm:text-[11px]">{qualified}</div>
-              <div className="mt-0.5 break-all text-[9px] leading-4 text-[var(--text-3)] sm:text-[10px]">{model.id}</div>
+              <div className="break-all font-mono text-[11px] font-semibold leading-4 text-[var(--text-1)] sm:text-[11px]">{qualified}</div>
+              <div className="mt-0.5 break-all text-[11px] leading-4 text-[var(--text-3)] sm:text-[11px]">{model.id}</div>
             </div>
             <Button variant="ghost" size="sm" className="shrink-0" aria-label={`Copy ${qualified}`} onClick={() => void copyToClipboard(qualified)}>
               <Copy size={12} aria-hidden="true" />
@@ -1446,36 +1452,36 @@ export function ProviderDetailPage() {
           {/* Capabilities — fixed height row, badges or placeholder */}
           <div className="flex min-h-[18px] flex-wrap items-center gap-1">
             {model.source !== "built-in" && <FileUp size={11} aria-hidden="true" className="text-[var(--text-3)]" />}
-            {!model.reasoning && <span className="rounded-md bg-[var(--hover)] px-1.5 py-0.5 text-[9px] text-[var(--text-2)]">Standard</span>}
+            {!model.reasoning && <span className="rounded-md bg-[var(--hover)] px-1.5 py-0.5 text-[11px] text-[var(--text-2)]">Standard</span>}
             {model.reasoning && (
-              <span className="inline-flex items-center gap-0.5 rounded-md bg-[var(--hover)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--accent)]">
+              <span className="inline-flex items-center gap-0.5 rounded-md bg-[var(--hover)] px-1.5 py-0.5 text-[11px] font-medium text-[var(--accent)]">
                 <Brain size={10} aria-hidden="true" /> Reasoning
               </span>
             )}
             {model.vision && (
-              <span className="inline-flex items-center gap-0.5 rounded-md bg-[var(--hover)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--teal)]">
+              <span className="inline-flex items-center gap-0.5 rounded-md bg-[var(--hover)] px-1.5 py-0.5 text-[11px] font-medium text-[var(--teal)]">
                 <Eye size={10} aria-hidden="true" /> Vision
               </span>
             )}
             {model.websearch && (
-              <span className="inline-flex items-center gap-0.5 rounded-md bg-[var(--hover)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--green)]">
+              <span className="inline-flex items-center gap-0.5 rounded-md bg-[var(--hover)] px-1.5 py-0.5 text-[11px] font-medium text-[var(--green)]">
                 <Globe size={10} aria-hidden="true" /> Web
               </span>
             )}
           </div>
           {/* Context + pricing — fixed two-line block */}
           <div className="flex-1 flex-col gap-1">
-            <div className="min-h-[16px] text-[9px] leading-4 text-[var(--text-2)]">
+            <div className="min-h-[16px] text-[11px] leading-4 text-[var(--text-2)]">
               {model.contextWindow ? `${formatTokens(model.contextWindow)} context` : "Context unknown"}
               {model.contextWindow && model.maxOutputTokens ? " · " : null}
               {model.maxOutputTokens ? `${formatTokens(model.maxOutputTokens)} max out` : " · max out unknown"}
             </div>
-            <div className="min-h-[16px] text-[9px] leading-4 text-[var(--text-2)]">{priceLabel ?? "Pricing unknown"}</div>
+            <div className="min-h-[16px] text-[11px] leading-4 text-[var(--text-2)]">{priceLabel ?? "Pricing unknown"}</div>
           </div>
           {/* Actions — pinned to bottom */}
           <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
             {model.enabled && (
-              <Button variant="secondary" size="sm" className={cn("h-7 min-w-0 flex-1 gap-1 rounded-lg px-2 text-[10px] sm:h-7", getTestResult(model.id)?.ok && "bg-[var(--green-soft)] text-[var(--green)] hover:bg-[var(--green-soft)]", getTestResult(model.id) && !getTestResult(model.id)!.ok && "bg-[var(--red-soft)] text-[var(--red)] hover:bg-[var(--red-soft)]")} disabled={testing} onClick={() => runTest(model.id)}>
+              <Button variant="secondary" size="sm" className={cn("h-7 min-w-0 flex-1 gap-1 rounded-lg px-2 text-[11px] sm:h-7", getTestResult(model.id)?.ok && "bg-[var(--green-soft)] text-[var(--green)] hover:bg-[var(--green-soft)]", getTestResult(model.id) && !getTestResult(model.id)!.ok && "bg-[var(--red-soft)] text-[var(--red)] hover:bg-[var(--red-soft)]")} disabled={testing} onClick={() => runTest(model.id)}>
                 {testing ? <Loader2 size={10} className="animate-spin" /> : getTestResult(model.id) ? (getTestResult(model.id)!.ok ? <CheckCircle2 size={10} aria-hidden="true" /> : <AlertTriangle size={10} aria-hidden="true" />) : <FlaskConical size={10} aria-hidden="true" />}
                 <span className="truncate">{testing ? "Thinking…" : getTestResult(model.id) ? (getTestResult(model.id)!.ok ? `pass · ${formatDuration(getTestResult(model.id)!.latencyMs)}` : "fail") : "Test"}</span>
               </Button>
@@ -1486,7 +1492,7 @@ export function ProviderDetailPage() {
               onClick={() => modelMutation.mutate({ path: `/${encodeURIComponent(model.id)}`, method: "PATCH", body: { enabled: !model.enabled } })}
               title={model.enabled ? "Disable" : "Enable"}
               aria-label={model.enabled ? "Disable" : "Enable"}
-              className={`inline-flex h-7 items-center justify-center gap-1 rounded-lg border px-2 text-[10px] font-medium transition-colors ${model.enabled ? "border-transparent bg-[var(--red-soft)] text-[var(--red)] hover:bg-[var(--red-soft)] hover:brightness-95 dark:hover:brightness-125" : "border-transparent bg-[var(--green-soft)] text-[var(--green)] hover:bg-[var(--green-soft)] hover:brightness-95 dark:hover:brightness-125"}`}
+              className={`inline-flex h-7 items-center justify-center gap-1 rounded-lg border px-2 text-[11px] font-medium transition-colors ${model.enabled ? "border-transparent bg-[var(--red-soft)] text-[var(--red)] hover:bg-[var(--red-soft)] hover:brightness-95 dark:hover:brightness-125" : "border-transparent bg-[var(--green-soft)] text-[var(--green)] hover:bg-[var(--green-soft)] hover:brightness-95 dark:hover:brightness-125"}`}
             >
               {model.enabled ? <PowerOff size={10} aria-hidden="true" /> : <LockOpen size={10} aria-hidden="true" />} {model.enabled ? "Disable" : "Enable"}
             </button>
@@ -1502,7 +1508,7 @@ export function ProviderDetailPage() {
               }}
               title={model.source === "built-in" ? "Delete (disable)" : "Delete (remove)"}
               aria-label={`Delete ${model.id}`}
-              className="inline-flex h-7 items-center justify-center gap-1 rounded-lg border border-transparent px-2 text-[10px] font-medium text-[var(--red)] transition-colors hover:bg-[var(--red-soft)]"
+              className="inline-flex h-7 items-center justify-center gap-1 rounded-lg border border-transparent px-2 text-[11px] font-medium text-[var(--red)] transition-colors hover:bg-[var(--red-soft)]"
             >
               <Trash2 size={10} aria-hidden="true" /> Delete
             </button>
@@ -1558,12 +1564,12 @@ export function ProviderDetailPage() {
         </div>
       </div>
 
-      <Card className={cn("py-3.5", noAuth ? "border-[rgba(48,209,88,0.3)]" : "border-[rgba(100,210,255,0.3)]")}>
+      <Card className={cn("py-3.5", noAuth ? "border-[var(--green)]/30" : "border-[var(--teal)]/30")}>
         <div className="flex items-start gap-3">
           <span
             className={cn(
-              "mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-[9px]",
-              noAuth ? "bg-[rgba(48,209,88,0.14)] text-[var(--green)]" : "bg-[rgba(100,210,255,0.15)] text-[var(--teal)]"
+              "mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg",
+              noAuth ? "bg-[var(--green)]/15 text-[var(--green)]" : "bg-[var(--teal)]/15 text-[var(--teal)]"
             )}
           >
             {noAuth ? <LockOpen size={14} /> : <Info size={14} />}
@@ -1612,22 +1618,22 @@ export function ProviderDetailPage() {
         {!noAuth && (
           <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-stretch">
             {/* Account counts */}
-            <div className="flex min-w-[140px] flex-1 flex-col justify-center gap-2 rounded-[12px] border border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2.5">
-              <div className="flex items-center gap-1.5 text-[9.5px] font-semibold uppercase tracking-wide text-[var(--text-3)]">
+            <div className="flex min-w-[140px] flex-1 flex-col justify-center gap-1.5 px-1">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]">
                 <Users size={11} /> Accounts
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-base font-bold tabular-nums text-[var(--text-1)]">{data.accounts.length}</span>
-                <span className="text-[9.5px] text-[var(--text-3)]">total</span>
+                <span className="text-[11px] text-[var(--text-3)]">total</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--green)]" />
-                  <span className="text-[9.5px] tabular-nums text-[var(--text-2)]">{data.accounts.filter((a) => a.active).length} active</span>
+                  <span className="text-[11px] tabular-nums text-[var(--text-2)]">{data.accounts.filter((a) => a.active).length} active</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--text-3)]" />
-                  <span className="text-[9.5px] tabular-nums text-[var(--text-2)]">{data.accounts.filter((a) => !a.active).length} disabled</span>
+                  <span className="text-[11px] tabular-nums text-[var(--text-2)]">{data.accounts.filter((a) => !a.active).length} disabled</span>
                 </div>
               </div>
               {/* Stacked bar */}
@@ -1636,7 +1642,7 @@ export function ProviderDetailPage() {
               </div>
             </div>
             {/* Health breakdown */}
-            <div className="flex min-w-[140px] flex-1 flex-col justify-center gap-2 rounded-[12px] border border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2.5">
+            <div className="flex min-w-[140px] flex-1 flex-col justify-center gap-1.5 px-1">
               {(() => {
                 const active = data.accounts.filter((a) => a.active);
                 const exhausted = active.filter((a) => a.health?.status === "cooling_down").length;
@@ -1645,30 +1651,30 @@ export function ProviderDetailPage() {
                 const totalIssues = exhausted + errors;
                 return (
                   <>
-                    <div className="flex items-center gap-1.5 text-[9.5px] font-semibold uppercase tracking-wide text-[var(--text-3)]">
+                    <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]">
                       <AlertTriangle size={11} /> Health
                     </div>
                     <div className="flex items-baseline gap-1">
                       <span className="text-base font-bold tabular-nums text-[var(--text-1)]">{totalIssues > 0 ? totalIssues : "OK"}</span>
-                      {totalIssues === 0 && <span className="text-[9.5px] text-[var(--green)]">all healthy</span>}
+                      {totalIssues === 0 && <span className="text-[11px] text-[var(--green)]">all healthy</span>}
                     </div>
                     <div className="flex items-center gap-2">
                       {exhausted > 0 && (
                         <div className="flex items-center gap-1">
                           <span className="h-1.5 w-1.5 rounded-full bg-[var(--orange)]" />
-                          <span className="text-[9.5px] tabular-nums text-[var(--text-2)]">{exhausted} exh.</span>
+                          <span className="text-[11px] tabular-nums text-[var(--text-2)]">{exhausted} exh.</span>
                         </div>
                       )}
                       {errors > 0 && (
                         <div className="flex items-center gap-1">
                           <span className="h-1.5 w-1.5 rounded-full bg-[var(--red)]" />
-                          <span className="text-[9.5px] tabular-nums text-[var(--text-2)]">{errors} err.</span>
+                          <span className="text-[11px] tabular-nums text-[var(--text-2)]">{errors} err.</span>
                         </div>
                       )}
                       {totalIssues === 0 && (
                         <div className="flex items-center gap-1">
                           <span className="h-1.5 w-1.5 rounded-full bg-[var(--green)]" />
-                          <span className="text-[9.5px] tabular-nums text-[var(--text-2)]">{healthy} ok</span>
+                          <span className="text-[11px] tabular-nums text-[var(--text-2)]">{healthy} ok</span>
                         </div>
                       )}
                     </div>
@@ -1684,10 +1690,10 @@ export function ProviderDetailPage() {
             </div>
             {/* Warmup Test button — full-width on mobile, auto on desktop */}
             <div className="flex w-full items-center sm:w-auto sm:min-w-[120px]">
-              <Button variant="secondary" size="sm" className="h-full w-full flex-col gap-0.5 rounded-[12px] border border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2.5 text-[var(--text-2)] hover:bg-[var(--active-pill)] hover:text-[var(--text-1)]" disabled={accountConnectionTest.isPending || data.accounts.length === 0 || data.models.length === 0} onClick={() => accountConnectionTest.testActive(data.accounts)}>
+              <Button variant="secondary" size="sm" className="h-full w-full gap-1.5" disabled={accountConnectionTest.isPending || data.accounts.length === 0 || data.models.length === 0} onClick={() => accountConnectionTest.testActive(data.accounts)}>
                 {accountConnectionTest.isPending ? <Loader2 size={14} className="animate-spin" /> : <FlaskConical size={14} />}
-                <span className="text-[9.5px] font-semibold">{accountConnectionTest.isPending ? "Testing…" : "Warmup Test"}</span>
-                <span className="text-[8.5px] text-[var(--text-3)]">{data.accounts.filter((a) => a.active).length} active</span>
+                <span className="text-[11px] font-semibold">{accountConnectionTest.isPending ? "Testing…" : "Warmup Test"}</span>
+                <span className="text-[11px] text-[var(--text-3)]">{data.accounts.filter((a) => a.active).length} active</span>
               </Button>
             </div>
           </div>
@@ -1738,7 +1744,7 @@ export function ProviderDetailPage() {
           ) : (
               <div ref={accountWindow.containerRef} onScroll={handleAccountsScroll} className="max-h-[21rem] overflow-auto">
                 <table className="w-full text-left text-[11px]">
-                  <thead className="sticky top-0 z-10 bg-[var(--hover)] text-[10px] font-semibold uppercase tracking-wide text-[var(--text-3)]">
+                  <thead className="sticky top-0 z-10 bg-[var(--hover)] text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]">
                     <tr>
                       <th className="w-8 px-1.5 py-2.5 sm:w-9 sm:px-2">
                         <input
@@ -1796,7 +1802,7 @@ export function ProviderDetailPage() {
                         </td>
                         <td className="min-w-0 px-2 py-2.5 align-top">
                           <div className="max-w-48 truncate text-xs font-semibold sm:max-w-none">{displayHint(account.credentialHint, account.name)}</div>
-                          <div className={cn("mt-0.5 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9.5px] font-medium", hasHealthError || accountTestStatus[account.id]?.state === "failed" ? "bg-[var(--red-soft)] text-[var(--red)]" : accountTestStatus[account.id]?.state === "passed" ? "bg-[var(--green-soft)] text-[var(--green)]" : "bg-[var(--hover)] text-[var(--text-3)]")} title={accessibleAccountStatus} aria-label={`Account status: ${accessibleAccountStatus}`}>
+                          <div className={cn("mt-0.5 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium", hasHealthError || accountTestStatus[account.id]?.state === "failed" ? "bg-[var(--red-soft)] text-[var(--red)]" : accountTestStatus[account.id]?.state === "passed" ? "bg-[var(--green-soft)] text-[var(--green)]" : "bg-[var(--hover)] text-[var(--text-3)]")} title={accessibleAccountStatus} aria-label={`Account status: ${accessibleAccountStatus}`}>
                             {accountTestStatus[account.id]?.state === "passed" ? "passed" : accountTestStatus[account.id]?.state === "failed" ? "error" : accountStatus}
                           </div>
                         </td>
@@ -1826,14 +1832,13 @@ export function ProviderDetailPage() {
         </div>
       </Card>
 
-      <Card>
-        <div className="mb-4">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <div className="text-sm font-bold">Available Models</div>
-              <div className="mt-0.5 text-[11.5px] text-[var(--text-2)]">{data.models.filter((model) => model.enabled).length} active · {data.models.filter((model) => !model.enabled).length} disabled</div>
-            </div>
-            <div className="flex min-w-0 flex-wrap items-center justify-end gap-1.5">
+      <section>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h2 className="truncate text-[15px] font-bold tracking-tight">Available Models</h2>
+            <p className="mt-0.5 truncate text-[11.5px] text-[var(--text-3)]">{data.models.filter((model) => model.enabled).length} active · {data.models.filter((model) => !model.enabled).length} disabled</p>
+          </div>
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
               {data.modelManagement.canAddModels && <Button variant="secondary" size="sm" onClick={() => setAddModelModalOpen(true)}>
                 <Plus size={13} /> Add Model
               </Button>}
@@ -1850,10 +1855,8 @@ export function ProviderDetailPage() {
               </Button>
             </div>
           </div>
-
-        </div>
         {activeModels.length === 0 && disabledModels.length === 0 ? (
-          <Card className="py-8 text-center text-xs text-[var(--text-3)]">No models published by this provider yet.</Card>
+          <div className="py-8 text-center text-xs text-[var(--text-3)]">No models published by this provider yet.</div>
         ) : (
           <>
             {activeModels.length > 0 && <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{activeModels.map(renderModel)}</div>}
@@ -1865,7 +1868,7 @@ export function ProviderDetailPage() {
             )}
           </>
         )}
-      </Card>
+      </section>
 
 
       {accountModal.open && (

@@ -6,7 +6,6 @@ import { ApiError, apiPost } from "../../lib/api";
 import { Button } from "../../components/ui/button";
 import { Input, Label } from "../../components/ui/input";
 
-const LOGIN_BACKDROP_URL = `${import.meta.env.BASE_URL}CartethyiaPi/kepitsusu.jpg`;
 const LOGIN_LOGO_URL = `${import.meta.env.BASE_URL}favicon_love.webp`;
 
 export function LoginPage() {
@@ -47,24 +46,16 @@ export function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--page-bg)] p-4 text-[var(--text-primary)]">
-      <div
-        aria-hidden="true"
-        data-login-backdrop
-        className="absolute inset-0 bg-cover bg-center opacity-25 saturate-[0.85] dark:opacity-60 dark:saturate-100"
-        style={{ backgroundImage: `url(${LOGIN_BACKDROP_URL})` }}
-      />
-      <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(110deg,rgba(247,243,237,0.96),rgba(247,243,237,0.8)_52%,rgba(247,243,237,0.5))] dark:bg-[linear-gradient(110deg,rgba(4,13,24,0.78),rgba(4,13,24,0.3)_52%,rgba(4,13,24,0.62))]" />
-      <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(217,119,87,0.16),transparent_32%),radial-gradient(circle_at_88%_88%,rgba(68,143,141,0.12),transparent_30%)] dark:bg-[radial-gradient(circle_at_18%_10%,rgba(217,119,87,0.2),transparent_32%),radial-gradient(circle_at_88%_88%,rgba(68,143,141,0.16),transparent_30%)]" />
       <form
         onSubmit={submit}
-        className="login-enter glass-2 relative w-full max-w-[26rem] rounded-[var(--radius-xl)] border-[var(--glass-border)] p-6 text-[var(--text-primary)] shadow-[0_24px_80px_rgba(83,56,36,0.16)] sm:p-8 dark:border-white/15 dark:shadow-[0_24px_90px_rgba(0,0,0,0.42)]"
+        className="login-enter relative w-full max-w-[26rem] rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-6 sm:p-8"
       >
         <div className="mb-7 flex flex-col items-center gap-3 text-center">
-          <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-[22px] border border-black/10 bg-white/65 shadow-[0_12px_30px_rgba(83,56,36,0.14)] dark:border-white/20 dark:bg-white/10 dark:shadow-[0_10px_30px_rgba(0,0,0,0.24)]">
+          <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
             <img src={LOGIN_LOGO_URL} alt="" width="64" height="64" className="h-full w-full object-cover" />
           </div>
           <div>
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--accent)]">Private workspace</p>
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--accent)]">Private workspace</p>
             <h1 className="text-2xl font-bold tracking-tight text-[var(--text-1)]">Cartethyia</h1>
             <p className="mt-1 text-sm text-[var(--text-2)]">Sign in to manage your gateway</p>
           </div>
@@ -79,7 +70,7 @@ export function LoginPage() {
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             autoFocus
-            className="h-11 bg-white/55 pr-10 pl-9 shadow-sm dark:bg-white/5"
+            className="h-11 pl-9 pr-10"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password…"
@@ -101,12 +92,12 @@ export function LoginPage() {
           </p>
         )}
 
-        <Button type="submit" disabled={busy || !password} className="mt-5 w-full">
+        <Button type="submit" disabled={busy || !password} className="mt-5 h-11 w-full">
           {busy ? "Signing in…" : "Sign in"}
         </Button>
 
         <div className="mt-5 text-center text-[11px] text-[var(--text-3)]">
-          <p>Password is set via <code className="rounded bg-[var(--surface-1)] px-1 py-0.5 font-mono text-[10px] text-[var(--text-2)]">CONSOLE_PASSWORD</code> in <code className="rounded bg-[var(--surface-1)] px-1 py-0.5 font-mono text-[10px] text-[var(--text-2)]">.env</code></p>
+          <p>Password is set via <code className="rounded bg-[var(--surface-2)] px-1 py-0.5 font-mono text-[11px] text-[var(--text-2)]">CONSOLE_PASSWORD</code> in <code className="rounded bg-[var(--surface-2)] px-1 py-0.5 font-mono text-[11px] text-[var(--text-2)]">.env</code></p>
         </div>
       </form>
     </div>

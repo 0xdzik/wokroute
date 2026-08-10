@@ -42,10 +42,9 @@ export function Providers({ children }: { children: ReactNode }) {
                 color: "var(--text-1)",
               },
               style: {
-                background: "var(--glass-bg-2)",
-                border: "1px solid var(--glass-border-2)",
+                background: "var(--popover-bg)",
+                border: "1px solid var(--inner-border)",
                 color: "var(--text-1)",
-                backdropFilter: "blur(10px) saturate(1.4)",
                 userSelect: "text",
               },
             }}

@@ -242,13 +242,17 @@ export async function probeProviderModel(input: ModelProbeInput, ports: ProbePor
       // "No sample text in the response" instead of a hard failure.
     }
 
-    if (accountId !== null) {
+    // Skip health recording for synthetic custom-provider accounts (id starts
+    // with "custom:") — they don't exist in provider_accounts, so the FK on
+    // provider_account_health would reject the INSERT. Manual-credential probes
+    // (accountId === null) also skip — they have no stored account to track.
+    if (accountId !== null && !accountId.startsWith("custom:")) {
       await ports.accountHealth.recordSuccess(accountId, input.provider);
     }
     return { ok: true, mode, latencyMs: latency(), firstVisibleTextMs, sample, returnedModel };
   } catch (error) {
     const providerError = toProbeError(error, adapter);
-    if (accountId !== null) {
+    if (accountId !== null && !accountId.startsWith("custom:")) {
       await ports.accountHealth.recordFailure(accountId, input.provider, providerError);
     }
     return failure(mode, latency(), providerError);

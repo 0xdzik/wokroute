@@ -39,7 +39,7 @@ export function CliToolsPage() {
       {/* Header */}
       <Card>
         <div className="flex items-start gap-2.5">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[10px] bg-[rgba(10,132,255,0.13)] text-[#0a84ff]"><Terminal size={15} /></span>
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[var(--teal-soft)] text-[var(--teal)]"><Terminal size={15} /></span>
           <div className="min-w-0">
             <h2 className="text-sm font-bold tracking-tight">CLI Tools</h2>
             <p className="text-[11.5px] text-[var(--text-2)]">
@@ -77,7 +77,7 @@ export function CliToolsPage() {
                       <XCircle size={11} className="shrink-0 text-[var(--text-3)]" />
                     )}
                   </div>
-                  <p className="truncate text-[10px] text-[var(--text-3)]">
+                  <p className="truncate text-[11px] text-[var(--text-3)]">
                     {st?.configured ? "Configured" : st?.installed ? "Installed" : "Not installed"}
                   </p>
                 </div>
@@ -98,12 +98,12 @@ export function CliToolsPage() {
             <Link
               key={def.id}
               to={`/advanced/cli-tools/${def.id}`}
-              className="flex items-center gap-2.5 rounded-[var(--radius-card)] border border-[var(--inner-border)] bg-[var(--hover)] p-2.5 transition-colors hover:border-[var(--accent)]/50"
+              className="flex items-center gap-2.5 transition-colors hover:bg-[var(--surface-muted)]"
             >
               <ToolIcon toolId={def.id} name={def.name} size={32} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[12px] font-semibold text-[var(--text-1)]">{def.name}</p>
-                <p className="truncate text-[10px] text-[var(--text-3)]">Guide</p>
+                <p className="truncate text-[11px] text-[var(--text-3)]">Guide</p>
               </div>
               <ArrowRight size={14} className="shrink-0 text-[var(--text-3)]" />
             </Link>

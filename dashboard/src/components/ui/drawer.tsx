@@ -63,7 +63,7 @@ export function Drawer({
     <AnimatePresence>
       {open && (
         <m.div className="fixed inset-0 z-90" {...drawerMotion.overlay}>
-          <button type="button" aria-label="Close drawer" className="absolute inset-0 h-full w-full cursor-default bg-black/40 backdrop-blur-[6px]" onClick={onClose} />
+          <button type="button" aria-label="Close drawer" className="absolute inset-0 h-full w-full cursor-default bg-[var(--text-primary)]/40" onClick={onClose} />
           <m.aside
             ref={drawerRef}
             role="dialog"

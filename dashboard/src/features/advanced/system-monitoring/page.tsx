@@ -149,7 +149,7 @@ function RequestMonitorTab() {
             </div>
           ) : (
             <div className="w-full">
-              <div className="sticky top-0 z-10 grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_minmax(0,0.6fr)_minmax(0,0.6fr)] gap-2 border-b border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--text-3)]">
+              <div className="sticky top-0 z-10 grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_minmax(0,0.6fr)_minmax(0,0.6fr)] gap-2 border-b border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]">
                 <span>Time</span>
                 <span>IP / Client</span>
                 <span>Provider / Model</span>
@@ -165,40 +165,40 @@ function RequestMonitorTab() {
                 >
                   <div className="min-w-0">
                     <div className="truncate text-[var(--text-2)]">{formatTime(item.startedAt)}</div>
-                    <div className="truncate text-[9.5px] text-[var(--text-3)]">{SURFACE_SHORT[item.surface] ?? item.surface}{item.mode === "stream" ? " · stream" : ""}</div>
+                    <div className="truncate text-[11px] text-[var(--text-3)]">{SURFACE_SHORT[item.surface] ?? item.surface}{item.mode === "stream" ? " · stream" : ""}</div>
                   </div>
                   <div className="min-w-0">
-                    <div className="truncate font-mono text-[10px] text-[var(--text-2)]">{item.clientIp ?? "—"}</div>
-                    <div className="truncate text-[9.5px] text-[var(--text-3)]">{item.clientName}</div>
+                    <div className="truncate font-mono text-[11px] text-[var(--text-2)]">{item.clientIp ?? "—"}</div>
+                    <div className="truncate text-[11px] text-[var(--text-3)]">{item.clientName}</div>
                   </div>
                   <div className="min-w-0">
                     <div className="truncate text-[var(--text-2)]">{item.providerId ?? "—"}</div>
-                    <div className="truncate font-mono text-[9.5px] text-[var(--text-3)]">{item.model ?? "—"}</div>
+                    <div className="truncate font-mono text-[11px] text-[var(--text-3)]">{item.model ?? "—"}</div>
                   </div>
                   <div className="flex flex-col items-start gap-0.5">
                     <Badge tone={statusTone(item.statusCode)}>{item.statusCode || "—"}</Badge>
-                    {item.errorKind && <span className="max-w-full truncate text-[9px] text-[var(--red)]" title={item.errorKind}>{item.errorKind}</span>}
+                    {item.errorKind && <span className="max-w-full truncate text-[11px] text-[var(--red)]" title={item.errorKind}>{item.errorKind}</span>}
                   </div>
                   <div className="min-w-0">
                     <div className="tabular-nums text-[var(--text-2)]">{item.totalTokens != null ? formatNumber(item.totalTokens) : "—"}</div>
-                    <div className="text-[9px] text-[var(--text-3)]">
+                    <div className="text-[11px] text-[var(--text-3)]">
                       {item.inputTokens != null && <span>in {formatTokens(item.inputTokens)}</span>}
                       {item.cachedTokens != null && item.cachedTokens > 0 && <span> · cached {formatTokens(item.cachedTokens)}</span>}
                     </div>
                   </div>
                   <div className="min-w-0">
                     <div className="tabular-nums text-[var(--text-2)]">{formatDuration(item.durationMs)}</div>
-                    {item.tfftMs != null && <div className="text-[9px] text-[var(--text-3)]">ttft {formatDuration(item.tfftMs)}</div>}
+                    {item.tfftMs != null && <div className="text-[11px] text-[var(--text-3)]">ttft {formatDuration(item.tfftMs)}</div>}
                   </div>
                   <div className="min-w-0">
-                    <span className="truncate font-mono text-[10px] text-[var(--text-3)]">{item.apiKeyPrefix ?? "—"}</span>
+                    <span className="truncate font-mono text-[11px] text-[var(--text-3)]">{item.apiKeyPrefix ?? "—"}</span>
                   </div>
                 </div>
               ))}
             </div>
           )}
         </div>
-        <footer className="flex min-w-0 shrink-0 flex-wrap items-center justify-between gap-2 border-t border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2 text-[10px] text-[var(--text-3)]">
+        <footer className="flex min-w-0 shrink-0 flex-wrap items-center justify-between gap-2 border-t border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2 text-[11px] text-[var(--text-3)]">
           <span className="min-w-0 truncate" aria-live="polite">
             Showing {visible.length} of {items.length} requests
           </span>
@@ -294,7 +294,7 @@ function IpMonitorTab() {
             </div>
           ) : (
             <div className="w-full">
-              <div className="sticky top-0 z-10 grid grid-cols-[minmax(0,1.5fr)_minmax(0,0.8fr)_minmax(0,0.6fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_minmax(0,1.2fr)] gap-2 border-b border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--text-3)]">
+              <div className="sticky top-0 z-10 grid grid-cols-[minmax(0,1.5fr)_minmax(0,0.8fr)_minmax(0,0.6fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_minmax(0,1.2fr)] gap-2 border-b border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]">
                 <span>IP Address</span>
                 <span>Requests</span>
                 <span>Errors</span>
@@ -315,7 +315,7 @@ function IpMonitorTab() {
                       ) : (
                         <Globe size={12} className="shrink-0 text-[var(--text-3)]" aria-hidden="true" />
                       )}
-                      <span className="truncate font-mono text-[10px] text-[var(--text-2)]">{row.ip}</span>
+                      <span className="truncate font-mono text-[11px] text-[var(--text-2)]">{row.ip}</span>
                       {isBanned && <Badge tone="err">Banned</Badge>}
                     </div>
                     <div className="tabular-nums text-[var(--text-2)]">{formatNumber(row.requests)}</div>
@@ -328,7 +328,7 @@ function IpMonitorTab() {
                     </div>
                     <div className="min-w-0 tabular-nums text-[var(--text-2)]">
                       <span>{formatTokens(row.inputTokens + row.outputTokens)}</span>
-                      <div className="text-[9px] text-[var(--text-3)]">
+                      <div className="text-[11px] text-[var(--text-3)]">
                         in {formatTokens(row.inputTokens)} · out {formatTokens(row.outputTokens)}
                       </div>
                     </div>
@@ -338,7 +338,7 @@ function IpMonitorTab() {
                         <Button
                           variant="secondary"
                           size="sm"
-                          className="h-6 px-2 text-[10px]"
+                          className="h-6 px-2 text-[11px]"
                           onClick={() => void unbanMutation.mutate(row.ip)}
                           disabled={unbanMutation.isPending}
                         >
@@ -349,7 +349,7 @@ function IpMonitorTab() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-6 border-[var(--red)]/30 px-2 text-[10px] text-[var(--red)] hover:bg-[var(--red-soft)] hover:text-[var(--red)]"
+                          className="h-6 border-[var(--red)]/30 px-2 text-[11px] text-[var(--red)] hover:bg-[var(--red-soft)] hover:text-[var(--red)]"
                           onClick={() => {
                             setBanReason("");
                             setBanDialog({ ip: row.ip });
@@ -366,7 +366,7 @@ function IpMonitorTab() {
             </div>
           )}
         </div>
-        <footer className="flex min-w-0 shrink-0 flex-wrap items-center justify-between gap-2 border-t border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2 text-[10px] text-[var(--text-3)]">
+        <footer className="flex min-w-0 shrink-0 flex-wrap items-center justify-between gap-2 border-t border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2 text-[11px] text-[var(--text-3)]">
           <span className="min-w-0 truncate" aria-live="polite">
             {visible.length} IPs · {banCount} banned
           </span>
@@ -420,7 +420,7 @@ function IpMonitorTab() {
 
 const LEVEL_COLORS: Record<ConsoleLogLevel, string> = {
   debug: "text-[var(--text-3)]",
-  info: "text-[#0fa3d1] dark:text-[var(--teal)]",
+  info: "text-[var(--teal)]",
   warn: "text-[var(--orange)]",
   error: "text-[var(--red)]",
 };
@@ -531,7 +531,7 @@ function ConsoleLogsTab() {
             visible.map((line) => <ConsoleLogRow key={line.id} line={line} isNew={newLineIds.has(line.id)} />)
           )}
         </div>
-        <footer className="flex min-w-0 shrink-0 flex-wrap items-center justify-between gap-2 border-t border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2 text-[10px] text-[var(--text-3)]">
+        <footer className="flex min-w-0 shrink-0 flex-wrap items-center justify-between gap-2 border-t border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2 text-[11px] text-[var(--text-3)]">
           <span className="min-w-0 truncate" aria-live="polite">
             {visible.length} of {lines.length} lines{filter !== "all" ? ` · ${filter}` : ""}{search.trim() ? ` · search: "${search.trim()}"` : ""}
           </span>

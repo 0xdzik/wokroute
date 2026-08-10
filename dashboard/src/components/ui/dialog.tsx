@@ -108,30 +108,29 @@ export function Dialog({
           className="fixed inset-0 z-90 flex items-center justify-center p-4"
           {...dialogMotion.overlay}
         >
-          <button type="button" aria-label="Close dialog" className="absolute inset-0 h-full w-full cursor-default bg-black/40 backdrop-blur-[6px]" onClick={requestClose} />
+          <button type="button" aria-label="Close dialog" className="absolute inset-0 h-full w-full cursor-default bg-[var(--text-primary)]/40" onClick={requestClose} />
           <m.div
             ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="dashboard-dialog-title"
             tabIndex={-1}
-            className={`glass-2 relative flex w-full flex-col ${expanded ? "max-w-4xl max-h-[95vh]" : wide ? "max-w-2xl max-h-[85vh]" : "max-w-md max-h-[85vh]"} rounded-2xl p-5`}
+            className={`glass relative flex w-full flex-col ${expanded ? "max-w-4xl max-h-[95vh]" : wide ? "max-w-2xl max-h-[85vh]" : "max-w-md max-h-[85vh]"} rounded-2xl border-[var(--border-subtle)] bg-[var(--surface-1)] p-6`}
             {...dialogMotion.panel}
           >
-            <div className="mb-3 flex shrink-0 items-center gap-3 border-b border-[var(--inner-border)] pb-3">
-              <div className="flex items-center gap-2" role="group" aria-label="Window controls">
-                <button type="button" onClick={requestClose} aria-label="Close dialog" title="Close" className="grid size-3.5 place-items-center rounded-full bg-[#ff5f57] text-[#7a1c17] transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff5f57]">
-                  <X size={9} strokeWidth={2.5} aria-hidden="true" />
+            <div className="mb-4 flex shrink-0 items-center gap-2 border-b border-[var(--border-subtle)] pb-4">
+              <h2 id="dashboard-dialog-title" className="min-w-0 flex-1 truncate text-[15px] font-bold tracking-tight">{title}</h2>
+              <div className="flex items-center gap-0.5" role="group" aria-label="Window controls">
+                <button type="button" onClick={() => setMinimized((value) => !value)} aria-label={minimized ? "Restore dialog" : "Minimize dialog"} title={minimized ? "Restore" : "Minimize"} className="grid size-7 place-items-center rounded-[8px] text-[var(--text-3)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--text-1)]">
+                  <Minus size={14} aria-hidden="true" />
                 </button>
-                <button type="button" onClick={() => setMinimized((value) => !value)} aria-label={minimized ? "Restore dialog" : "Minimize dialog"} title={minimized ? "Restore" : "Minimize"} className="grid size-3.5 place-items-center rounded-full bg-[#febc2e] text-[#6d4b00] transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#febc2e]">
-                  <Minus size={9} strokeWidth={2.5} aria-hidden="true" />
+                <button type="button" onClick={() => { setExpanded((value) => !value); setMinimized(false); }} aria-label={expanded ? "Restore dialog size" : "Expand dialog"} title={expanded ? "Restore" : "Expand"} className="grid size-7 place-items-center rounded-[8px] text-[var(--text-3)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--text-1)]">
+                  <Maximize2 size={13} aria-hidden="true" />
                 </button>
-                <button type="button" onClick={() => { setExpanded((value) => !value); setMinimized(false); }} aria-label={expanded ? "Restore dialog size" : "Expand dialog"} title={expanded ? "Restore" : "Expand"} className="grid size-3.5 place-items-center rounded-full bg-[#28c840] text-[#0b5a22] transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#28c840]">
-                  <Maximize2 size={8} strokeWidth={2.5} aria-hidden="true" />
+                <button type="button" onClick={requestClose} aria-label="Close dialog" title="Close" className="grid size-7 place-items-center rounded-[8px] text-[var(--text-3)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--text-1)]">
+                  <X size={15} aria-hidden="true" />
                 </button>
               </div>
-              <h2 id="dashboard-dialog-title" className="min-w-0 flex-1 truncate text-center text-base font-bold">{title}</h2>
-              <span className="w-[3.75rem]" aria-hidden="true" />
             </div>
             {!minimized && <>
               <div className="min-w-0 flex-1 overflow-y-auto">{children}</div>

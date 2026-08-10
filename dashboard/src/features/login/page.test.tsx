@@ -33,7 +33,6 @@ describe("LoginPage", () => {
   test("uses the provided artwork and Cartethyia logo without a public-page link", () => {
     renderLogin();
 
-    expect(document.querySelector("[data-login-backdrop]")?.getAttribute("style")).toContain("CartethyiaPi/kepitsusu.jpg");
     expect(document.querySelector("img[src*='favicon_love.webp']")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /back to public page/i })).not.toBeInTheDocument();
     expect(screen.queryByText(/single admin/i)).not.toBeInTheDocument();

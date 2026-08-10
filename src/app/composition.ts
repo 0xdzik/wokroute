@@ -495,18 +495,18 @@ export async function createCartethyiaRuntime(): Promise<CartethyiaRuntime> {
     },
     onRouteFailure: async (candidate, error, selected) => {
       const accountId = selected?.accountId ?? null;
-      if (error.routeScope === "account" && accountId) await accountHealth.recordFailure(accountId, candidate.providerId, error);
-      // Per-model lock: an error on model A does NOT block model B on the
-      // same account. recordModelLock internally skips T2 transient errors
-      // (delayMs === 0) and non-retryable errors, so this is safe to call
-      // unconditionally for account-scoped failures.
-      if (error.routeScope === "account" && accountId && candidate.modelId) await accountHealth.recordModelLock(accountId, candidate.modelId, error);
+      // Skip health recording for synthetic custom-provider accounts (id starts
+      // with "custom:") — they don't exist in provider_accounts, so the FK on
+      // provider_account_health would reject the INSERT.
+      const tracked = accountId !== null && !accountId.startsWith("custom:");
+      if (error.routeScope === "account" && tracked) await accountHealth.recordFailure(accountId, candidate.providerId, error);
+      if (error.routeScope === "account" && tracked && candidate.modelId) await accountHealth.recordModelLock(accountId, candidate.modelId, error);
       const proxyId = selected?.proxyId ?? null;
       if (error.routeScope === "proxy" && proxyId) await proxyHealth.recordFailure(proxyId, error);
     },
     onRouteSuccess: async (candidate, selected) => {
       const accountId = selected?.accountId ?? null;
-      if (accountId) {
+      if (accountId && !accountId.startsWith("custom:")) {
         await accountHealth.recordSuccess(accountId, candidate.providerId);
         if (candidate.modelId) await accountHealth.clearModelLock(accountId, candidate.modelId);
       }

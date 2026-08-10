@@ -16,8 +16,6 @@ export interface CustomizationSettings {
   backgroundOpacity: number;
   backgroundBlur: number;
   backgroundPreferenceVersion: number;
-  /** Performance mode — disables backdrop-blur, uses solid warm surfaces. */
-  solidMode: boolean;
 }
 
 const DEFAULT_BACKGROUND_URL = `${import.meta.env.BASE_URL}macos-big-sur-apple-layers-fluidic-colorful-dark-wwdc-2020-3840x2160-1432.jpg`;
@@ -36,7 +34,6 @@ const DEFAULTS: CustomizationSettings = {
   backgroundOpacity: 21,
   backgroundBlur: 2,
   backgroundPreferenceVersion: BACKGROUND_PREFERENCE_VERSION,
-  solidMode: false,
 };
 
 let cachedSettings: CustomizationSettings | null = null;
@@ -65,7 +62,6 @@ function parseStoredSettings(value: unknown): CustomizationSettings | null {
     backgroundOpacity: typeof value.backgroundOpacity === "number" ? value.backgroundOpacity : DEFAULTS.backgroundOpacity,
     backgroundBlur: typeof value.backgroundBlur === "number" ? value.backgroundBlur : DEFAULTS.backgroundBlur,
     backgroundPreferenceVersion: BACKGROUND_PREFERENCE_VERSION,
-    solidMode: typeof value.solidMode === "boolean" ? value.solidMode : DEFAULTS.solidMode,
   };
 }
 
@@ -229,16 +225,6 @@ export function CustomAtmosphere() {
   const [settings] = useCustomizationSettings();
   const customBackgroundUrl = useCustomizationAssetUrl(settings.backgroundAsset);
   const backgroundUrl = settings.backgroundAsset ? customBackgroundUrl : DEFAULT_BACKGROUND_URL;
-
-  // Apply solid-mode data attribute to <html> — CSS overrides .glass to use
-  // solid warm surfaces with no backdrop-filter (eliminates GPU blur lag).
-  useEffect(() => {
-    if (settings.solidMode) {
-      document.documentElement.setAttribute("data-glass", "off");
-    } else {
-      document.documentElement.removeAttribute("data-glass");
-    }
-  }, [settings.solidMode]);
 
   if (!backgroundUrl || !settings.backgroundEnabled) return null;
 

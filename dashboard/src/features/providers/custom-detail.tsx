@@ -498,7 +498,7 @@ export function CustomProviderDetailPage() {
               const testStatus = modelTestStatus[model.id];
               return (
                 <div key={model.id} {...staggerClass(index)}>
-                  <Card className="flex h-full flex-col gap-1.5 p-2.5">
+                  <div className="flex h-full flex-col gap-1.5 p-2.5">
                     <div className="flex items-start gap-1.5">
                       <Bot size={13} className="mt-0.5 shrink-0 text-[var(--text-3)]" />
                       <div className="min-w-0">
@@ -531,7 +531,7 @@ export function CustomProviderDetailPage() {
                         <Trash2 size={12} />
                       </Button>
                     </div>
-                  </Card>
+                  </div>
                 </div>
               );
             })}

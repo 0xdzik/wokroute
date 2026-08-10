@@ -212,8 +212,8 @@ function CodeBlock({ language, children }: { language?: string; children: ReactN
   return (
     <div className="my-1.5 overflow-hidden rounded-xl border border-[var(--inner-border)] bg-[var(--surface-1)]">
       <div className="flex items-center justify-between border-b border-[var(--inner-border)] px-2.5 py-1">
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-3)]">{language || "text"}</span>
-        <button type="button" onClick={() => void copy()} className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-semibold text-[var(--text-3)] transition-colors hover:bg-[var(--hover)] hover:text-[var(--text-1)]">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]">{language || "text"}</span>
+        <button type="button" onClick={() => void copy()} className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[var(--text-3)] transition-colors hover:bg-[var(--hover)] hover:text-[var(--text-1)]">
           {copied ? <Check size={11} /> : <Copy size={11} />} {copied ? "Copied" : "Copy"}
         </button>
       </div>
@@ -293,13 +293,13 @@ function ContextIndicator({ messages, systemPrompt, compacting, onCompact }: { m
         <>
           <div className="flex items-center gap-2">
             <span className="grid h-7 w-7 place-items-center rounded-lg bg-[var(--accent-soft)] text-[var(--accent)]"><Zap size={14} /></span>
-            <div><p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-3)]">Context</p><p className="text-xs font-bold">{snapshot.source === "provider" ? "Provider usage" : "Estimated"}</p></div>
+            <div><p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-3)]">Context</p><p className="text-xs font-bold">{snapshot.source === "provider" ? "Provider usage" : "Estimated"}</p></div>
           </div>
-          <div className="grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-4">
-            <span className="rounded-lg border border-[var(--inner-border)] bg-[var(--hover)] px-2 py-1.5">In<strong className="block font-mono">{formatTokenCount(snapshot.inputTokens)}</strong></span>
-            <span className="rounded-lg border border-[var(--inner-border)] bg-[var(--hover)] px-2 py-1.5">Out<strong className="block font-mono">{formatTokenCount(snapshot.outputTokens)}</strong></span>
-            <span className="rounded-lg border border-[var(--inner-border)] bg-[var(--hover)] px-2 py-1.5">Think<strong className="block font-mono">{formatTokenCount(snapshot.reasoningTokens)}</strong></span>
-            <span className="rounded-lg border border-[var(--inner-border)] bg-[var(--hover)] px-2 py-1.5">Cache<strong className="block font-mono">{formatTokenCount(snapshot.cachedTokens)}</strong></span>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] sm:grid-cols-4">
+            <span>In<strong className="block font-mono text-[var(--text-1)]">{formatTokenCount(snapshot.inputTokens)}</strong></span>
+            <span>Out<strong className="block font-mono text-[var(--text-1)]">{formatTokenCount(snapshot.outputTokens)}</strong></span>
+            <span>Think<strong className="block font-mono text-[var(--text-1)]">{formatTokenCount(snapshot.reasoningTokens)}</strong></span>
+            <span>Cache<strong className="block font-mono text-[var(--text-1)]">{formatTokenCount(snapshot.cachedTokens)}</strong></span>
           </div>
           <button type="button" onClick={() => { setOpen(false); onCompact(); }} disabled={compacting || messages.length < 2} className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2 text-[11px] font-semibold text-[var(--accent)] transition-colors hover:border-[var(--accent)] disabled:opacity-50">
             <MoreHorizontal size={12} /> {compacting ? "Compacting…" : "Compact context"}
@@ -363,10 +363,10 @@ function ModelDropdown({ value, onChange, onCapabilityChange }: { value: string;
             <div className="relative"><Search size={13} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-3)]" /><input ref={inputRef} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search…" className="w-full rounded-lg border-none bg-[var(--surface-1)] py-1.5 pl-8 pr-2.5 text-[12.5px] outline-none placeholder:text-[var(--text-3)]" /></div>
           </div>
           <div className="max-h-80 overflow-y-auto p-1.5">
-            {aliases.length > 0 && (<div className="mb-1"><div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--text-3)]">Aliases</div>{aliases.map((a) => <button key={a.alias} type="button" onClick={() => pick(a.alias)} className={cn("flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[12.5px] hover:bg-[var(--hover)]", value === a.alias && "bg-[var(--accent-soft)] text-[var(--accent)]")}><span className="min-w-0 flex-1 truncate font-mono">{a.alias}</span>{value === a.alias && <Check size={13} className="shrink-0" />}</button>)}</div>)}
-            {combos.length > 0 && (<div className="mb-1"><div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--text-3)]">Combos</div>{combos.map((c) => <button key={c.name} type="button" onClick={() => pick(c.name)} className={cn("flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[12.5px] hover:bg-[var(--hover)]", value === c.name && "bg-[var(--accent-soft)] text-[var(--accent)]")}><Boxes size={14} className="shrink-0" /><span className="min-w-0 flex-1 truncate font-mono">{c.name}</span>{value === c.name && <Check size={13} className="shrink-0" />}</button>)}</div>)}
+            {aliases.length > 0 && (<div className="mb-1"><div className="px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-[var(--text-3)]">Aliases</div>{aliases.map((a) => <button key={a.alias} type="button" onClick={() => pick(a.alias)} className={cn("flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[12.5px] hover:bg-[var(--hover)]", value === a.alias && "bg-[var(--accent-soft)] text-[var(--accent)]")}><span className="min-w-0 flex-1 truncate font-mono">{a.alias}</span>{value === a.alias && <Check size={13} className="shrink-0" />}</button>)}</div>)}
+            {combos.length > 0 && (<div className="mb-1"><div className="px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-[var(--text-3)]">Combos</div>{combos.map((c) => <button key={c.name} type="button" onClick={() => pick(c.name)} className={cn("flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[12.5px] hover:bg-[var(--hover)]", value === c.name && "bg-[var(--accent-soft)] text-[var(--accent)]")}><Boxes size={14} className="shrink-0" /><span className="min-w-0 flex-1 truncate font-mono">{c.name}</span>{value === c.name && <Check size={13} className="shrink-0" />}</button>)}</div>)}
             {catalogLoading ? <div className="py-8 text-center text-[11px] text-[var(--text-3)]">Loading…</div> : grouped.length === 0 && combos.length === 0 && aliases.length === 0 ? <div className="py-8 text-center text-[11px] text-[var(--text-3)]">No models match.</div> : grouped.map(({ provider, models }) => (
-              <div key={provider.id} className="mb-1"><div className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--text-3)]"><span className={cn("h-1.5 w-1.5 rounded-full", provider.connections > 0 ? "bg-[var(--green)]" : "bg-[var(--text-3)]")} />{provider.name}</div>{models.map((e) => <button key={e.qualified} type="button" onClick={() => pick(e.qualified)} className={cn("flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[12.5px] hover:bg-[var(--hover)]", value === e.qualified && "bg-[var(--accent-soft)] text-[var(--accent)]")}><span className="min-w-0 flex-1 truncate font-mono">{e.qualified.split("/").slice(1).join("/")}</span>{value === e.qualified && <Check size={13} className="shrink-0" />}</button>)}</div>
+              <div key={provider.id} className="mb-1"><div className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-[var(--text-3)]"><span className={cn("h-1.5 w-1.5 rounded-full", provider.connections > 0 ? "bg-[var(--green)]" : "bg-[var(--text-3)]")} />{provider.name}</div>{models.map((e) => <button key={e.qualified} type="button" onClick={() => pick(e.qualified)} className={cn("flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[12.5px] hover:bg-[var(--hover)]", value === e.qualified && "bg-[var(--accent-soft)] text-[var(--accent)]")}><span className="min-w-0 flex-1 truncate font-mono">{e.qualified.split("/").slice(1).join("/")}</span>{value === e.qualified && <Check size={13} className="shrink-0" />}</button>)}</div>
             ))}
           </div>
         </>
@@ -420,7 +420,7 @@ function PromptPopover({ maxTokens, onMaxTokens, reasoningEffort, onReasoningEff
               <label className={cn("text-[11px] font-semibold", bokepEnabled ? "text-[var(--text-3)]" : "text-[var(--text-2)]")}>System Prompt Override</label>
               <Switch checked={systemPromptEnabled} onChange={onSystemPromptEnabled} disabled={bokepEnabled} label="Override" />
             </div>
-            <p className="mt-0.5 text-[10px] text-[var(--text-3)]">When enabled, this system prompt is prepended to every request.</p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-3)]">When enabled, this system prompt is prepended to every request.</p>
             {systemPromptEnabled && (
               <textarea
                 value={systemPromptOverride}
@@ -437,15 +437,15 @@ function PromptPopover({ maxTokens, onMaxTokens, reasoningEffort, onReasoningEff
               <label className={cn("text-[11px] font-semibold", systemPromptEnabled ? "text-[var(--text-3)]" : "text-[var(--text-2)]")}>System Prompt Bokep</label>
               <Switch checked={bokepEnabled} onChange={onBokepEnabled} disabled={systemPromptEnabled} label="Bokep" />
             </div>
-            <p className="mt-0.5 text-[10px] text-[var(--text-3)]">Load the bundled character prompt ({jinhsiPromptText.length.toLocaleString()} chars). Disabled while Override is active.</p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-3)]">Load the bundled character prompt ({jinhsiPromptText.length.toLocaleString()} chars). Disabled while Override is active.</p>
             {bokepEnabled && (
-              <button type="button" onClick={() => setShowBokepPreview((v) => !v)} className="mt-2 flex items-center gap-1 text-[10px] font-semibold text-[var(--accent)] transition-colors hover:text-[var(--accent)]">
+              <button type="button" onClick={() => setShowBokepPreview((v) => !v)} className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-[var(--accent)] transition-colors hover:text-[var(--accent)]">
                 <ChevronDown size={10} className={cn("transition-transform", showBokepPreview && "rotate-180")} />
                 {showBokepPreview ? "Hide preview" : "Show preview"}
               </button>
             )}
             {bokepEnabled && showBokepPreview && (
-              <pre className="mt-1.5 max-h-40 overflow-y-auto whitespace-pre-wrap rounded-lg border border-[var(--inner-border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-[10px] leading-relaxed text-[var(--text-3)]">{jinhsiPromptText}</pre>
+              <pre className="mt-1.5 max-h-40 overflow-y-auto whitespace-pre-wrap rounded-lg border border-[var(--inner-border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-[11px] leading-relaxed text-[var(--text-3)]">{jinhsiPromptText}</pre>
             )}
           </div>
         </>
@@ -488,12 +488,12 @@ const MessageRow = memo(function MessageRow({ message: m, index: i, isStreaming:
         {/* Reasoning dropdown */}
         {m.role === "assistant" && (m.reasoning || isStreamingThis) && (
           <div className="min-w-0">
-            <button type="button" onClick={() => onThinkingToggle(i)} className="flex items-center gap-1 rounded-full border border-[var(--inner-border)] bg-[var(--hover)] px-2 py-0.5 text-[10px] font-semibold text-[var(--text-3)] transition-colors hover:text-[var(--text-2)]">
+            <button type="button" onClick={() => onThinkingToggle(i)} className="flex items-center gap-1 rounded-full border border-[var(--inner-border)] bg-[var(--hover)] px-2 py-0.5 text-[11px] font-semibold text-[var(--text-3)] transition-colors hover:text-[var(--text-2)]">
               <Brain size={9} className={cn(isStreamingThis && !m.content && "animate-pulse")} />
               {isStreamingThis && !m.content ? <span className="thinking-shimmer">Thinking</span> : "Thinking"}
               <ChevronDown size={8} className={cn("transition-transform", thinkingOpen && "rotate-180")} />
             </button>
-            {thinkingOpen && m.reasoning && <div className="mt-1 whitespace-pre-wrap rounded-xl border border-dashed border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2 text-[11px] italic leading-relaxed text-[var(--text-3)]">{m.reasoning}</div>}
+            {thinkingOpen && m.reasoning && <div className="mt-1 whitespace-pre-wrap border-l-2 border-[var(--inner-border)] pl-3 text-[11px] italic leading-relaxed text-[var(--text-3)]">{m.reasoning}</div>}
           </div>
         )}
         {/* Bubble */}
@@ -526,7 +526,7 @@ const MessageRow = memo(function MessageRow({ message: m, index: i, isStreaming:
           </div>
         )}
         {!editing && hasOutput && (
-          <div className={cn("flex flex-wrap items-center gap-1.5 text-[10px] text-[var(--text-3)]", isUser ? "justify-end" : "justify-start")}>
+          <div className={cn("flex flex-wrap items-center gap-1.5 text-[11px] text-[var(--text-3)]", isUser ? "justify-end" : "justify-start")}>
             {/* TTFB + completion for assistant */}
             {m.role === "assistant" && (m.ttfbMs !== undefined || m.completionMs !== undefined) && (
               <span className="inline-flex items-center gap-1 rounded-md bg-[var(--hover)] px-1.5 py-0.5 font-mono tabular-nums">
@@ -584,7 +584,7 @@ function SessionPicker({ sessions, activeId, onSelect, onCreate, creating }: { s
             ) : sessions.map((s) => (
               <button key={s.id} type="button" onClick={() => { onSelect(s.id); setOpen(false); }} className={cn("flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[12px] hover:bg-[var(--hover)]", s.id === activeId && "bg-[var(--accent-soft)] text-[var(--accent)]")}>
                 <span className="min-w-0 flex-1 truncate">{s.title}</span>
-                <span className="shrink-0 text-[10px] text-[var(--text-3)]">{timeAgo(s.updatedAt)}</span>
+                <span className="shrink-0 text-[11px] text-[var(--text-3)]">{timeAgo(s.updatedAt)}</span>
                 {s.id === activeId && <Check size={13} className="shrink-0" />}
               </button>
             ))}
@@ -645,22 +645,44 @@ export function ModelStudioPage() {
   const skipSaveRef = useRef(true);
   const [sending, setSending] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  // Which session the in-flight stream belongs to. Patches targeting any other
+  // session are dropped, so switching sessions mid-stream can't leak the old
+  // response into (or autosave it into) the newly loaded conversation.
+  const streamOwnerRef = useRef<string | null>(null);
   const pendingPatchRef = useRef<Partial<StudioMessage> | null>(null);
   const patchFrameRef = useRef<number | null>(null);
 
   const flushPatch = useCallback(() => {
     const patch = pendingPatchRef.current;
     pendingPatchRef.current = null;
-    if (patch) setMessages((prev) => { const next = [...prev]; const last = next[next.length - 1]; if (last) next[next.length - 1] = { ...last, ...patch }; return next; });
+    // Drop patches that belong to a session the user already navigated away from.
+    if (patch && streamOwnerRef.current === syncedIdRef.current) setMessages((prev) => { const next = [...prev]; const last = next[next.length - 1]; if (last) next[next.length - 1] = { ...last, ...patch }; return next; });
     patchFrameRef.current = null;
   }, []);
   const patchLast = useCallback((patch: Partial<StudioMessage>) => {
+    if (streamOwnerRef.current !== syncedIdRef.current) return;
     pendingPatchRef.current = { ...pendingPatchRef.current, ...patch };
     if (patchFrameRef.current === null) patchFrameRef.current = requestAnimationFrame(flushPatch);
   }, [flushPatch]);
-  useEffect(() => () => { abortRef.current?.abort(); if (patchFrameRef.current !== null) cancelAnimationFrame(patchFrameRef.current); }, []);
+  const stopStream = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    streamOwnerRef.current = null;
+    setSending(false);
+  }, []);
+  useEffect(() => () => { stopStream(); if (patchFrameRef.current !== null) cancelAnimationFrame(patchFrameRef.current); }, [stopStream]);
+  // If the user switches sessions while a stream is in flight, abort it so
+  // its chunks and retry loop can't write into the newly loaded session.
+  useEffect(() => {
+    if (activeId !== null && streamOwnerRef.current !== null && streamOwnerRef.current !== activeId) stopStream();
+  }, [activeId, stopStream]);
 
   if (sessionQuery.data && syncedIdRef.current !== sessionQuery.data.id) {
+    // Switching sessions mid-stream: stop the old stream before swapping the
+    // message list, so its chunks and autosave can't land in the new session.
+    stopStream();
+    pendingPatchRef.current = null;
+    if (patchFrameRef.current !== null) { cancelAnimationFrame(patchFrameRef.current); patchFrameRef.current = null; }
     syncedIdRef.current = sessionQuery.data.id; skipSaveRef.current = true;
     setTitle(sessionQuery.data.title); setModel(sessionQuery.data.model); setSystemPrompt(sessionQuery.data.systemPrompt); setMessages(sessionQuery.data.messages);
   }
@@ -747,6 +769,19 @@ export function ModelStudioPage() {
    * Auto-retries up to 3 times on error or empty response.
    */
   const streamResponse = useCallback(async (history: StudioMessage[], assistantIndex: number) => {
+    // If another stream is still winding down in a different session, stop it
+    // before claiming ownership for this one.
+    if (streamOwnerRef.current !== null && streamOwnerRef.current !== syncedIdRef.current) stopStream();
+    if (streamOwnerRef.current !== null) return;
+    const ownerId = syncedIdRef.current;
+    streamOwnerRef.current = ownerId;
+    // Reset shared stream state only if no newer stream has taken over since.
+    const releaseIfOwner = () => {
+      if (streamOwnerRef.current !== ownerId) return;
+      streamOwnerRef.current = null;
+      setSending(false);
+      abortRef.current = null;
+    };
     const MAX_RETRIES = 3;
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       const sendStartTime = performance.now();
@@ -786,6 +821,9 @@ export function ModelStudioPage() {
         if (textAcc || reasoningAcc) return;
         // Empty response (no text, no reasoning) — retry if attempts remain.
         if (attempt < MAX_RETRIES) {
+          // If the session changed under us, stop retrying — this stream no
+          // longer owns the conversation.
+          if (streamOwnerRef.current !== ownerId) { releaseIfOwner(); return; }
           patchLast({ content: `_(retry ${attempt}/${MAX_RETRIES}…)_` });
           await new Promise((r) => setTimeout(r, 500 * attempt));
           continue;
@@ -793,9 +831,10 @@ export function ModelStudioPage() {
       } catch (err) {
         const isAbort = err instanceof DOMException && err.name === "AbortError";
         errorMsg = err instanceof Error ? err.message : "Request failed";
-        if (isAbort) { flushPatch(); setSending(false); abortRef.current = null; return; }
+        if (isAbort) { flushPatch(); releaseIfOwner(); return; }
         errored = true;
         if (attempt < MAX_RETRIES) {
+          if (streamOwnerRef.current !== ownerId) { releaseIfOwner(); return; }
           patchLast({ content: `_(retry ${attempt}/${MAX_RETRIES}…)_` });
           await new Promise((r) => setTimeout(r, 500 * attempt));
           continue;
@@ -806,13 +845,13 @@ export function ModelStudioPage() {
         toast.error(errorMsg);
       } finally {
         if (errored || attempt === MAX_RETRIES || (textAcc || reasoningAcc)) {
-          flushPatch(); setSending(false); abortRef.current = null;
+          flushPatch(); releaseIfOwner();
         }
       }
       // If we reached here on the last attempt with no success, break.
       if (attempt === MAX_RETRIES) break;
     }
-  }, [maxTokens, model, patchLast, reasoningEffort, systemPrompt, systemPromptEnabled, systemPromptOverride, bokepEnabled, flushPatch]);
+  }, [maxTokens, model, patchLast, reasoningEffort, systemPrompt, systemPromptEnabled, systemPromptOverride, bokepEnabled, flushPatch, stopStream]);
 
   /** Auto-send after edit — reads from messagesRef since state was just set. */
   const sendWithMessages = useCallback(async (upToIndex: number) => {
@@ -885,12 +924,15 @@ export function ModelStudioPage() {
     const sendStartTime = performance.now();
 
     if (imageMode) {
+      if (streamOwnerRef.current !== null) return;
       setDraft(""); setAttachments([]);
       setMessages([...messages, { role: "user", content: text, ts: new Date().toISOString(), ...(images.length > 0 ? { images } : {}) }, { role: "assistant", content: "", ts: new Date().toISOString() }]);
       setSending(true);
+      const ownerId = syncedIdRef.current;
+      streamOwnerRef.current = ownerId;
       try { const result = await apiPost<{ data?: Array<{ b64_json?: string }> }>("/model-studio/image", { model: model.trim(), prompt: text || "Create an image from the attached reference.", ...(images.length > 0 ? { images } : {}) }); const generated = (result.data ?? []).flatMap((e) => typeof e.b64_json === "string" ? [`data:image/webp;base64,${e.b64_json}`] : []); patchLast({ content: generated.length > 0 ? `Generated ${generated.length} image${generated.length === 1 ? "" : "s"}.` : "No image returned.", completionMs: Math.round(performance.now() - sendStartTime), ...(generated.length > 0 ? { images: generated } : {}) }); }
       catch (error) { patchLast({ content: `⚠ ${error instanceof Error ? error.message : "Image request failed"}`, completionMs: Math.round(performance.now() - sendStartTime) }); }
-      finally { flushPatch(); setSending(false); }
+      finally { flushPatch(); if (streamOwnerRef.current === ownerId) { streamOwnerRef.current = null; setSending(false); } }
       return;
     }
 
@@ -914,8 +956,8 @@ export function ModelStudioPage() {
           <Button variant="secondary" size="icon" className="h-8 w-8 shrink-0 text-[var(--red)]" onClick={() => activeId && setDeleteTarget(activeId)} disabled={!activeId} aria-label="Delete" title="Delete"><Trash2 size={14} /></Button>
         </div>
       </div>
-      {sessionsQuery.isError && <div role="alert" className="border-b border-[var(--status-warning)]/30 bg-[var(--status-warning)]/10 px-3 py-1.5 text-[10px] text-[var(--status-warning)]">Session storage unavailable. Messages stay local until recovered.</div>}
-      {sessionQuery.isError && <div role="alert" className="border-b border-[var(--status-danger)]/30 bg-[var(--status-danger)]/10 px-3 py-1.5 text-[10px] text-[var(--status-danger)]">Session load failed. Select another or create new.</div>}
+      {sessionsQuery.isError && <div role="alert" className="border-b border-[var(--status-warning)]/30 bg-[var(--status-warning)]/10 px-3 py-1.5 text-[11px] text-[var(--status-warning)]">Session storage unavailable. Messages stay local until recovered.</div>}
+      {sessionQuery.isError && <div role="alert" className="border-b border-[var(--status-danger)]/30 bg-[var(--status-danger)]/10 px-3 py-1.5 text-[11px] text-[var(--status-danger)]">Session load failed. Select another or create new.</div>}
 
       {/* Messages — iOS-style scroll area */}
       <div ref={scrollRef} onScroll={onMessagesScroll} className="min-h-0 flex-1 space-y-2 overflow-y-auto px-2.5 py-2 sm:space-y-3 sm:px-4 sm:py-3">
@@ -926,11 +968,11 @@ export function ModelStudioPage() {
         ) : (
           <>
         {autoCompactBanner && (
-          <div role="status" aria-live="polite" className="flex items-center gap-2 rounded-lg border border-[var(--accent)]/35 bg-[var(--accent-soft)] px-3 py-1.5 text-[10px] font-medium text-[var(--accent)]">
+          <div role="status" aria-live="polite" className="flex items-center gap-2 px-1 py-0.5 text-[11px] font-medium text-[var(--accent)]">
             <Loader2 size={12} className="animate-spin" /> {autoCompactBanner}
           </div>
         )}
-        {compacting && !autoCompactBanner && <div role="status" aria-live="polite" className="flex items-center gap-2 rounded-lg border border-dashed border-[var(--accent)]/35 bg-[var(--accent-soft)] px-3 py-1.5 text-[10px] text-[var(--accent)]"><Loader2 size={12} className="animate-spin" /> Compacting…</div>}
+        {compacting && !autoCompactBanner && <div role="status" aria-live="polite" className="flex items-center gap-2 px-1 py-0.5 text-[11px] text-[var(--accent)]"><Loader2 size={12} className="animate-spin" /> Compacting…</div>}
             {messages.map((message, index) => (
               <MessageRow key={message.ts + index} message={message} index={index} isStreaming={sending && index === messages.length - 1} thinkingOpen={expandedThinking.has(index) || (sending && index === messages.length - 1)} editing={editingMessageIndex === index} editDraft={editingMessageDraft} onEditDraft={setEditingMessageDraft} onEdit={onEditMessage} onSaveEdit={onSaveEdit} onCancelEdit={onCancelEdit} onCopy={onCopyMessage} onDelete={onDeleteMessage} onThinkingToggle={toggleThinking} onRetry={onRetryMessage} />
             ))}
@@ -938,29 +980,27 @@ export function ModelStudioPage() {
         )}
       </div>
 
-      {/* Composer — compact, ChatGPT-style */}
-      <div className="shrink-0 border-t border-[var(--inner-border)] p-1.5 sm:p-2">
-        <div className="rounded-2xl border border-[var(--inner-border)] bg-[var(--hover)] p-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-colors focus-within:border-[var(--accent)] focus-within:bg-[var(--glass-bg-2)] sm:p-2">
-          {attachments.length > 0 && (
-            <div className="mb-1.5 flex flex-wrap gap-1.5 px-1 pt-1">
-              {attachments.map((a) => (
-                <div key={a.id} className="group relative h-12 w-12 shrink-0 sm:h-14 sm:w-14">
-                  <img src={a.dataUrl} alt={a.name} className="h-full w-full rounded-lg border border-[var(--inner-border)] object-cover" />
-                  <button type="button" onClick={() => removeAttachment(a.id)} aria-label={`Remove ${a.name}`} className="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-[var(--red)] text-white shadow transition-transform group-hover:scale-110"><X size={8} /></button>
-                </div>
-              ))}
-            </div>
-          )}
-          <Textarea value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); } }} onPaste={(e) => { const files = Array.from(e.clipboardData.items).filter((item) => item.type.startsWith("image/")).map((item) => item.getAsFile()).filter((f): f is File => f !== null); if (files.length > 0) { e.preventDefault(); void addFiles(files); } }} placeholder="Message…" data-model-studio-composer rows={1} className="min-h-[36px] max-h-24 resize-none overflow-y-auto border-0 bg-transparent px-2 py-1 text-[13px] shadow-none focus:bg-transparent focus-visible:outline-0" />
-          <div className="flex flex-wrap items-center gap-1 border-t border-[var(--inner-border)] pt-1.5">
-            <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { if (e.target.files) void addFiles(e.target.files); e.target.value = ""; }} />
-            <ModelDropdown value={model} onChange={setModel} onCapabilityChange={handleModelCapabilityChange} />
-            <ContextIndicator messages={messages} systemPrompt={systemPrompt} compacting={compacting} onCompact={() => void compactChat()} />
-            <div className="ml-auto flex items-center gap-1">
-              {imageCapable && <Button variant="secondary" size="icon" onClick={() => setImageMode((v) => !v)} aria-label={imageMode ? "Chat mode" : "Image mode"} title={imageMode ? "Chat mode" : "Image generation"} className={cn(imageMode && "border-[var(--accent)] text-[var(--accent)]")}><ImagePlus size={14} /></Button>}
-              <Button variant="secondary" size="icon" onClick={() => fileInputRef.current?.click()} aria-label="Attach image" title="Attach image"><Paperclip size={14} /></Button>
-              {sending ? <Button variant="secondary" size="icon" onClick={() => abortRef.current?.abort()} aria-label="Stop"><Square size={14} /></Button> : <Button size="icon" onClick={() => void send()} disabled={(!draft.trim() && attachments.length === 0) || !model.trim()} aria-label="Send"><Send size={14} /></Button>}
-            </div>
+      {/* Composer — flat: bordered textarea control + flat toolbar row */}
+      <div className="shrink-0 border-t border-[var(--inner-border)] px-2.5 py-2 sm:px-3">
+        {attachments.length > 0 && (
+          <div className="mb-2 flex flex-wrap gap-1.5">
+            {attachments.map((a) => (
+              <div key={a.id} className="group relative h-12 w-12 shrink-0 sm:h-14 sm:w-14">
+                <img src={a.dataUrl} alt={a.name} className="h-full w-full rounded-lg border border-[var(--inner-border)] object-cover" />
+                <button type="button" onClick={() => removeAttachment(a.id)} aria-label={`Remove ${a.name}`} className="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-[var(--red)] text-white transition-transform group-hover:scale-110"><X size={8} /></button>
+              </div>
+            ))}
+          </div>
+        )}
+        <Textarea value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); } }} onPaste={(e) => { const files = Array.from(e.clipboardData.items).filter((item) => item.type.startsWith("image/")).map((item) => item.getAsFile()).filter((f): f is File => f !== null); if (files.length > 0) { e.preventDefault(); void addFiles(files); } }} placeholder="Message…" data-model-studio-composer rows={1} className="min-h-[38px] max-h-24 resize-none overflow-y-auto text-[13px]" />
+        <div className="mt-1.5 flex flex-wrap items-center gap-1">
+          <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { if (e.target.files) void addFiles(e.target.files); e.target.value = ""; }} />
+          <ModelDropdown value={model} onChange={setModel} onCapabilityChange={handleModelCapabilityChange} />
+          <ContextIndicator messages={messages} systemPrompt={systemPrompt} compacting={compacting} onCompact={() => void compactChat()} />
+          <div className="ml-auto flex items-center gap-1">
+            {imageCapable && <Button variant="secondary" size="icon" onClick={() => setImageMode((v) => !v)} aria-label={imageMode ? "Chat mode" : "Image mode"} title={imageMode ? "Chat mode" : "Image generation"} className={cn(imageMode && "border-[var(--accent)] text-[var(--accent)]")}><ImagePlus size={14} /></Button>}
+            <Button variant="secondary" size="icon" onClick={() => fileInputRef.current?.click()} aria-label="Attach image" title="Attach image"><Paperclip size={14} /></Button>
+            {sending ? <Button variant="secondary" size="icon" onClick={() => abortRef.current?.abort()} aria-label="Stop"><Square size={14} /></Button> : <Button size="icon" onClick={() => void send()} disabled={(!draft.trim() && attachments.length === 0) || !model.trim()} aria-label="Send"><Send size={14} /></Button>}
           </div>
         </div>
       </div>

@@ -27,7 +27,7 @@ export function Switch({
       <span
         aria-hidden="true"
         className={cn(
-          "absolute left-0.5 top-0.5 block h-4 w-4 rounded-full bg-white shadow transition-transform duration-150",
+          "absolute left-0.5 top-0.5 block h-4 w-4 rounded-full bg-[var(--page-bg)] shadow transition-transform duration-150",
           checked ? "translate-x-[18px]" : "translate-x-0"
         )}
       />

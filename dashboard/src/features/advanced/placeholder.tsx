@@ -27,7 +27,7 @@ export function AdvancedPlaceholder({ title, description, icon: Icon }: Placehol
       <Card className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3">
         <Construction size={40} className="text-[var(--text-3)]/40" aria-hidden={true} />
         <p className="text-sm font-semibold text-[var(--text-3)]">Content will be here.</p>
-        <p className="text-[10.5px] text-[var(--text-3)]/60">{title} — coming soon</p>
+        <p className="text-[11px] text-[var(--text-3)]/60">{title} — coming soon</p>
       </Card>
     </div>
   );

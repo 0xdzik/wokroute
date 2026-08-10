@@ -81,7 +81,7 @@ function formatReset(value: string | null): string {
 }
 
 function formatWindowLabel(label: string): string {
-  const match = /^(\\d+)\\s*hour$/i.exec(label.trim());
+  const match = /^(\d+)\s*hour$/i.exec(label.trim());
   if (!match) return label;
   const hours = Number(match[1]);
   if (!Number.isFinite(hours) || hours < 24 || hours % 24 !== 0) return label;
@@ -144,8 +144,18 @@ async function fetchQuotaPageData(): Promise<QuotaQueryData> {
   const { items: allProviders } = await apiGet<{ items: ProviderSummary[] }>("/providers");
   const providers = allProviders.filter((provider) => QUOTA_SUPPORTED_PROVIDERS.has(provider.id));
   const accounts = await fetchQuotaAccounts(providers);
-  await Promise.allSettled(accounts.map((account) => apiPost(`/accounts/${encodeURIComponent(account.id)}/quota/refresh`)));
-  return { providers, accounts: await fetchQuotaAccounts(providers) };
+  // Refresh each account's quota upstream. The endpoint returns the fresh quota
+  // object, so merge it in place instead of re-fetching the account list a
+  // second time (which the previous implementation did on every cycle).
+  await Promise.allSettled(accounts.map(async (account) => {
+    try {
+      const fresh = await apiPost(`/accounts/${encodeURIComponent(account.id)}/quota/refresh`);
+      account.quota = normalizeQuotaResponse(fresh) ?? account.quota;
+    } catch {
+      // Leave stale quota in place for accounts whose refresh failed.
+    }
+  }));
+  return { providers, accounts };
 }
 
 function QuotaCard({ account, onToggle, onDelete }: { account: QuotaEntry; onToggle: (account: QuotaEntry, active: boolean) => void; onDelete: (account: QuotaEntry) => void }) {
@@ -169,14 +179,14 @@ function QuotaCard({ account, onToggle, onDelete }: { account: QuotaEntry; onTog
   const rawError = refresh.error ? errorMessage(refresh.error) : quotaQuery.error ? errorMessage(quotaQuery.error) : quota?.error ?? account.health?.sanitizedMessage;
   const cardError = friendlyError(rawError);
   return (
-    <div className="overflow-hidden rounded-2xl border border-[var(--inner-border)] bg-[var(--glass-bg)] shadow-[0_8px_30px_rgba(0,0,0,.12)] backdrop-blur-xl" aria-busy={busy}>
+    <div className="overflow-hidden rounded-2xl border border-[var(--inner-border)] bg-[var(--surface-1)]" aria-busy={busy}>
       {/* Header: icon + provider name + plan + account hint + actions */}
       <div className="flex items-center gap-3 px-4 py-3">
         <ProviderIcon icon={account.providerIcon} name={account.providerName} size={36} />
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-2">
             <div className="truncate text-sm font-bold">{account.providerName}</div>
-            {quota?.plan && <span className="shrink-0 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--accent)]">{quota.plan}</span>}
+            {quota?.plan && <span className="shrink-0 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[11px] font-semibold text-[var(--accent)]">{quota.plan}</span>}
           </div>
           <div className="truncate text-[11px] text-[var(--text-2)]">{displayHint(account.credentialHint, account.name)}</div>
         </div>
@@ -220,7 +230,7 @@ function QuotaCard({ account, onToggle, onDelete }: { account: QuotaEntry; onTog
                   <div className={cn("h-full rounded-full transition-all duration-500", colors.bar)} style={{ width: `${usedPct}%` }} />
                 </div>
                 {/* Used / limit + reset */}
-                <div className="mt-1 flex items-center justify-between text-[10px] text-[var(--text-3)]">
+                <div className="mt-1 flex items-center justify-between text-[11px] text-[var(--text-3)]">
                   <span className="tabular-nums">{used !== null && limit !== null ? `${used.toLocaleString()} / ${limit.toLocaleString()}` : "—"}</span>
                   {window.resetsAt && <span className="tabular-nums">{formatReset(window.resetsAt)}</span>}
                 </div>
@@ -247,8 +257,10 @@ export function QuotaPage() {
     queryKey: qk.quota.management,
     queryFn: fetchQuotaPageData,
     staleTime: 0,
-    refetchInterval: QUOTA_REFRESH_INTERVAL_MS,
-    refetchIntervalInBackground: true,
+    // Pause polling while the tab is hidden — each cycle POSTs a quota refresh
+    // to every account's upstream provider, so it must not keep hammering
+    // them from a background tab.
+    refetchInterval: () => (document.hidden ? false : QUOTA_REFRESH_INTERVAL_MS),
     refetchOnMount: "always",
     refetchOnWindowFocus: true,
   });
@@ -304,19 +316,19 @@ export function QuotaPage() {
 
   return (
     <div className="dashboard-page flex min-h-0 flex-1 flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[var(--inner-border)] bg-[var(--surface-1)] p-2">
+      <div className="flex flex-wrap items-center gap-1.5">
         <SlidersHorizontal size={14} className="mx-1 text-[var(--text-3)]" aria-hidden="true" />
         <select aria-label="Filter quota by provider" value={providerFilter} onChange={(event) => setProviderFilter(event.target.value)} className="h-8 rounded-lg border border-[var(--inner-border)] bg-[var(--hover)] px-2 text-xs text-[var(--text-1)]"><option value="all">All Providers</option>{providers.map((provider) => <option key={provider.id} value={provider.id}>{provider.name}</option>)}</select>
         <select aria-label="Filter quota by account" value={accountFilter} onChange={(event) => setAccountFilter(event.target.value)} className="h-8 rounded-lg border border-[var(--inner-border)] bg-[var(--hover)] px-2 text-xs text-[var(--text-1)]"><option value="all">All accounts</option><option value="active">Active</option><option value="disabled">Disabled</option><option value="tracked">With quota</option></select>
         <Button variant={expiringFirst ? "secondary" : "ghost"} size="sm" onClick={() => setExpiringFirst((current) => !current)}><Clock3 size={13} /> Expiring first</Button>
         <Button variant="ghost" size="sm" className="text-[var(--red)]" disabled={emptyCount === 0 || isFetching} onClick={() => void turnOffEmpty()}><EyeOff size={13} /> Turn off Empty</Button>
         <Button variant="ghost" size="sm" className="text-[var(--green)]" disabled={isFetching} onClick={() => void turnOnAvailable()}><Check size={13} /> Turn on Available</Button>
-        <span className="ml-auto flex items-center gap-1 text-[10px] text-[var(--text-3)]"><span className="inline-block size-1.5 animate-pulse rounded-full bg-[var(--green)]" /> Auto-refresh (5m)</span>
+        <span className="ml-auto flex items-center gap-1 text-[11px] text-[var(--text-3)]"><span className="inline-block size-1.5 animate-pulse rounded-full bg-[var(--green)]" /> Auto-refresh (5m)</span>
         <Button variant="ghost" size="icon" className="size-8" title="Refresh quota" aria-label="Refresh quota" disabled={isFetching} onClick={() => void refetch()}><RefreshCw size={14} className={isFetching ? "animate-spin" : undefined} /></Button>
       </div>
 
       {isLoading ? <StatePanel className="min-h-0 flex flex-1 flex-col items-center justify-center" kind="loading" title="Loading quota data" description="Reading provider account limits…" /> : filteredAccounts.length === 0 ? <StatePanel className="min-h-0 flex flex-1 flex-col items-center justify-center" kind="empty" title="No account quota data" description="No tracked provider quota is available yet." /> : <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">{filteredAccounts.map((account) => <QuotaCard key={account.id} account={account} onToggle={(entry, active) => void updateAccount(entry, active)} onDelete={(entry) => setDeleteTarget(entry)} />)}</div>}
-      <div className="flex items-center justify-between text-[10px] text-[var(--text-3)]"><span>Auto-refresh every 5 minutes · updated {lastUpdated}</span><span>{filteredAccounts.length} shown</span></div>
+      <div className="flex items-center justify-between text-[11px] text-[var(--text-3)]"><span>Auto-refresh every 5 minutes · updated {lastUpdated}</span><span>{filteredAccounts.length} shown</span></div>
 
       <ConfirmDialog
         open={deleteTarget !== null}

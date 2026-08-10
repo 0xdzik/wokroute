@@ -74,19 +74,19 @@ export function SqlConsole({ db }: SqlConsoleProps) {
             <button
               type="button"
               onClick={() => setMode("query")}
-              className={cn("rounded px-2 py-0.5 text-[10px] font-medium transition-colors", mode === "query" ? "bg-[var(--accent)] text-white" : "text-[var(--text-3)] hover:text-[var(--text-2)]")}
+              className={cn("rounded px-2 py-0.5 text-[11px] font-medium transition-colors", mode === "query" ? "bg-[var(--accent)] text-[var(--accent-foreground)]" : "text-[var(--text-3)] hover:text-[var(--text-2)]")}
             >SELECT</button>
             <button
               type="button"
               onClick={() => setMode("execute")}
-              className={cn("rounded px-2 py-0.5 text-[10px] font-medium transition-colors", mode === "execute" ? "bg-[var(--accent)] text-white" : "text-[var(--text-3)] hover:text-[var(--text-2)]")}
+              className={cn("rounded px-2 py-0.5 text-[11px] font-medium transition-colors", mode === "execute" ? "bg-[var(--accent)] text-[var(--accent-foreground)]" : "text-[var(--text-3)] hover:text-[var(--text-2)]")}
             >EXEC</button>
           </div>
           <button
             type="button"
             onClick={() => void run()}
             disabled={loading}
-            className="flex items-center gap-1 rounded-md bg-[var(--accent)] px-2.5 py-1 text-[10px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="flex items-center gap-1 rounded-md bg-[var(--accent)] px-2.5 py-1 text-[11px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             <Play size={11} />
             {loading ? "…" : "Run"}
@@ -98,7 +98,7 @@ export function SqlConsole({ db }: SqlConsoleProps) {
       <div className="flex min-h-0 flex-1 flex-col gap-1.5 sm:flex-row">
         {/* Editor column */}
         <div className="flex min-h-0 flex-1 flex-col gap-1 sm:max-w-[40%]">
-          <span className="px-0.5 text-[9px] font-semibold uppercase tracking-wide text-[var(--text-3)]/60">Terminal</span>
+          <span className="px-0.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]/60">Terminal</span>
           <textarea
             value={sql}
             onChange={(e) => setSql(e.target.value)}
@@ -109,7 +109,7 @@ export function SqlConsole({ db }: SqlConsoleProps) {
             spellCheck={false}
             className="min-h-0 flex-1 resize-none rounded-[var(--radius-control)] border border-[var(--inner-border)] bg-[var(--surface-1)] p-2 font-mono text-[11px] text-[var(--text-2)] placeholder:text-[var(--text-3)]/50 focus:border-[var(--accent)] focus:outline-none"
           />
-          <div className="flex items-center gap-1.5 px-1 text-[9px] text-[var(--text-3)]/60">
+          <div className="flex items-center gap-1.5 px-1 text-[11px] text-[var(--text-3)]/60">
             <span>⌘+Enter</span>
             {mode === "execute" && (
               <span className="flex items-center gap-0.5 text-[var(--status-warning)]">
@@ -121,15 +121,15 @@ export function SqlConsole({ db }: SqlConsoleProps) {
 
         {/* Result column */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1">
-          <span className="px-0.5 text-[9px] font-semibold uppercase tracking-wide text-[var(--text-3)]/60">Result</span>
+          <span className="px-0.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]/60">Result</span>
           <div className="min-h-0 flex-1 overflow-auto rounded-[var(--radius-control)] border border-[var(--inner-border)] bg-[var(--hover)]/50">
           {result?.error ? (
             <div className="flex items-start gap-2 p-2.5 text-[var(--red)]">
               <AlertCircle size={13} className="mt-0.5 shrink-0" />
-              <pre className="whitespace-pre-wrap text-[10.5px]">{result.error}</pre>
+              <pre className="whitespace-pre-wrap text-[11px]">{result.error}</pre>
             </div>
           ) : result?.rows ? (
-            <table className="w-full border-collapse text-[10px]">
+            <table className="w-full border-collapse text-[11px]">
               <thead className="sticky top-0 bg-[var(--surface-2)]">
                 <tr>
                   <th className="w-7 border-b border-[var(--inner-border)] px-1 py-0.5 text-right font-medium text-[var(--text-3)]/60">#</th>
@@ -161,13 +161,13 @@ export function SqlConsole({ db }: SqlConsoleProps) {
               </tbody>
             </table>
           ) : result?.changes !== undefined ? (
-            <div className="p-2.5 text-[10.5px] text-[var(--text-2)]">
+            <div className="p-2.5 text-[11px] text-[var(--text-2)]">
               <span className="font-semibold">{result.changes}</span> row(s) affected
               {result.lastInsertRowId !== null && result.lastInsertRowId !== undefined && <> · last insert row id: <span className="font-mono">{result.lastInsertRowId}</span></>}
               {result.durationMs !== undefined && <> · <span className="font-mono">{result.durationMs}ms</span></>}
             </div>
           ) : (
-            <div className="flex h-full items-center justify-center text-[10.5px] text-[var(--text-3)]/40">
+            <div className="flex h-full items-center justify-center text-[11px] text-[var(--text-3)]/40">
               Run a query to see results
             </div>
           )}

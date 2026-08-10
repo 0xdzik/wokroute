@@ -85,7 +85,7 @@ function AuthGate({ onSuccess, onClose }: { onSuccess: () => void; onClose: () =
           <Input id="db-map-password" type="password" autoFocus value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter password…" className="mt-1" />
         </div>
         {error && <p role="alert" className="text-xs font-medium text-[var(--red)]">{error}</p>}
-        <div className="flex items-center justify-end gap-2 [button:last-child]:bg-[var(--accent)] [button:last-child]:text-white">
+        <div className="flex items-center justify-end gap-2 [button:last-child]:bg-[var(--accent)] [button:last-child]:text-[var(--accent-foreground)]">
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>Cancel</Button>
           <Button type="submit" size="sm" disabled={busy || !password}>{busy ? "Verifying…" : "Unlock"}</Button>
         </div>
@@ -104,7 +104,7 @@ function DbSelector({ db, onChange }: { readonly db: DbTarget; readonly onChange
           onClick={() => onChange(target)}
           className={cn(
             "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors",
-            db === target ? "bg-[var(--accent)] text-white" : "text-[var(--text-3)] hover:text-[var(--text-2)]",
+            db === target ? "bg-[var(--accent)] text-[var(--accent-foreground)]" : "text-[var(--text-3)] hover:text-[var(--text-2)]",
           )}
         >
           <Database size={11} />
@@ -166,7 +166,7 @@ export function DatabaseMapPage() {
       <div className="dashboard-page flex min-h-0 flex-1 flex-col items-center justify-center gap-3 overflow-hidden">
         <Lock size={40} className="text-[var(--text-3)]/40" aria-hidden="true" />
         <p className="text-sm font-semibold text-[var(--text-3)]">Database Map is locked.</p>
-        <p className="text-[10.5px] text-[var(--text-3)]/60">Re-authenticate to access schema, data, and SQL tools.</p>
+        <p className="text-[11px] text-[var(--text-3)]/60">Re-authenticate to access schema, data, and SQL tools.</p>
         <Button type="button" size="sm" onClick={() => setShowGate(true)}>Unlock Database Map</Button>
         {showGate && <AuthGate onSuccess={() => { setAuthed(true); setShowGate(false); }} onClose={() => setShowGate(false)} />}
       </div>
@@ -187,7 +187,7 @@ export function DatabaseMapPage() {
             onClick={() => exportMut.mutate(db)}
             disabled={exportMut.isPending}
             title={`Export ${dbName}`}
-            className="flex items-center gap-1 rounded-md border border-[var(--inner-border)] px-2 py-1 text-[10px] font-medium text-[var(--text-3)] hover:bg-[var(--surface-1)] disabled:opacity-50"
+            className="flex items-center gap-1 rounded-md border border-[var(--inner-border)] px-2 py-1 text-[11px] font-medium text-[var(--text-3)] hover:bg-[var(--surface-1)] disabled:opacity-50"
           >
             <Download size={11} />
             Export
@@ -197,14 +197,14 @@ export function DatabaseMapPage() {
             onClick={() => fileRef.current?.click()}
             disabled={importMut.isPending}
             title={`Import ${dbName}`}
-            className="flex items-center gap-1 rounded-md border border-[var(--inner-border)] px-2 py-1 text-[10px] font-medium text-[var(--text-3)] hover:bg-[var(--surface-1)] disabled:opacity-50"
+            className="flex items-center gap-1 rounded-md border border-[var(--inner-border)] px-2 py-1 text-[11px] font-medium text-[var(--text-3)] hover:bg-[var(--surface-1)] disabled:opacity-50"
           >
             <Upload size={11} />
             Import
           </button>
           <input ref={fileRef} type="file" accept=".sqlite,.db,application/x-sqlite3,application/octet-stream" onChange={onFileChange} className="hidden" />
         </div>
-        <div className="ml-auto flex items-center gap-1.5 text-[10px] text-[var(--text-3)]">
+        <div className="ml-auto flex items-center gap-1.5 text-[11px] text-[var(--text-3)]">
           <Lock size={11} className="text-[var(--status-warning)]" />
           <span>{String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}</span>
           <span className="text-[var(--text-3)]/50">remaining</span>
@@ -251,7 +251,7 @@ export function DatabaseMapPage() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center justify-end gap-2 [button:last-child]:bg-[var(--accent)] [button:last-child]:text-white">
+            <div className="flex items-center justify-end gap-2 [button:last-child]:bg-[var(--accent)] [button:last-child]:text-[var(--accent-foreground)]">
               <Button type="button" variant="ghost" size="sm" onClick={() => setPendingFile(null)}>Cancel</Button>
               <Button type="button" size="sm" onClick={() => void confirmImport()}>Replace</Button>
             </div>

@@ -32,7 +32,7 @@ export interface IconBadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 export function IconBadge({ icon: Icon, tone = "accent", size = "md", label, className, ...props }: IconBadgeProps) {
   return (
-    <span className={cn("inline-flex shrink-0 items-center justify-center rounded-full", badgeSizes[size], toneClasses[tone], className)} aria-label={label} {...props}>
+    <span className={cn("inline-flex shrink-0 items-center justify-center rounded-[10px]", badgeSizes[size], toneClasses[tone], className)} aria-label={label} {...props}>
       <Icon aria-hidden={label === undefined} />
     </span>
   );

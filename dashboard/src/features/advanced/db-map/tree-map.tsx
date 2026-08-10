@@ -50,7 +50,7 @@ function formatCell(value: unknown): string {
 function ColumnRow({ col }: { readonly col: ColumnInfo }) {
   const Icon = typeIcon(col.type);
   return (
-    <div className="flex items-center gap-1.5 px-2 py-0.5 text-[10.5px] text-[var(--text-3)] hover:bg-[var(--surface-1)]/50 rounded-sm">
+    <div className="flex items-center gap-1.5 px-2 py-0.5 text-[11px] text-[var(--text-3)] hover:bg-[var(--surface-1)]/50 rounded-sm">
       <Icon size={11} className="shrink-0 text-[var(--text-3)]/60" />
       <span className={cn("font-mono", col.pk && "text-[var(--accent)] font-semibold")}>{col.name}</span>
       <span className="text-[var(--text-3)]/50">{col.type}</span>
@@ -67,7 +67,7 @@ function InlineBody({ db, table }: { readonly db: DbTarget; readonly table: Tabl
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] text-[var(--text-3)]/60">
+      <div className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-[var(--text-3)]/60">
         <div className="h-2.5 w-2.5 animate-spin rounded-full border border-[var(--surface-2)] border-t-[var(--accent)]" />
         Loading rows…
       </div>
@@ -75,16 +75,16 @@ function InlineBody({ db, table }: { readonly db: DbTarget; readonly table: Tabl
   }
 
   if (isError) {
-    return <p className="px-3 py-1 text-[10px] text-[var(--red)]">{error instanceof Error ? error.message : "Failed to load"}</p>;
+    return <p className="px-3 py-1 text-[11px] text-[var(--red)]">{error instanceof Error ? error.message : "Failed to load"}</p>;
   }
 
   if (!data || data.rows.length === 0) {
-    return <p className="px-3 py-1 text-[10px] text-[var(--text-3)]/50">Table is empty</p>;
+    return <p className="px-3 py-1 text-[11px] text-[var(--text-3)]/50">Table is empty</p>;
   }
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-[10px]">
+      <table className="w-full border-collapse text-[11px]">
         <thead>
           <tr>
             {data.columns.map((col) => (
@@ -121,7 +121,7 @@ function InlineBody({ db, table }: { readonly db: DbTarget; readonly table: Tabl
         </tbody>
       </table>
       {data.total > PREVIEW_ROWS && (
-        <p className="px-2 py-0.5 text-[9px] text-[var(--text-3)]/50">
+        <p className="px-2 py-0.5 text-[11px] text-[var(--text-3)]/50">
           Showing {PREVIEW_ROWS} of {data.total.toLocaleString()} rows — use SQL Console for full queries
         </p>
       )}
@@ -154,7 +154,7 @@ function TableNode({
         {expanded ? <ChevronDown size={12} className="shrink-0" /> : <ChevronRight size={12} className="shrink-0" />}
         <TableIcon size={13} className="shrink-0 text-[var(--text-3)]" />
         <span className="truncate font-mono">{table.name}</span>
-        <span className="ml-auto shrink-0 rounded-full bg-[var(--surface-2)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--text-3)]">
+        <span className="ml-auto shrink-0 rounded-full bg-[var(--surface-2)] px-1.5 py-0.5 text-[11px] font-medium text-[var(--text-3)]">
           {table.rowCount.toLocaleString()}
         </span>
       </div>
@@ -168,7 +168,7 @@ function TableNode({
           </div>
           {/* Indexes */}
           {table.indexes.length > 0 && (
-            <div className="mt-1 space-y-0.5 px-2 pb-1 text-[9.5px] text-[var(--text-3)]/60">
+            <div className="mt-1 space-y-0.5 px-2 pb-1 text-[11px] text-[var(--text-3)]/60">
               <div className="font-medium">Indexes</div>
               {table.indexes.map((idx) => (
                 <div key={idx.name} className="flex items-center gap-1 font-mono">
@@ -181,7 +181,7 @@ function TableNode({
           )}
           {/* Inline body data */}
           <div className="mt-1 border-t border-[var(--inner-border)] pt-1">
-            <div className="px-2 pb-0.5 text-[9px] font-medium text-[var(--text-3)]/60">Data preview</div>
+            <div className="px-2 pb-0.5 text-[11px] font-medium text-[var(--text-3)]/60">Data preview</div>
             <InlineBody db={db} table={table} />
           </div>
         </div>
@@ -222,7 +222,7 @@ export function TreeMap({ db, tables, dbName }: TreeMapProps) {
       <div className="flex items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--inner-border)] bg-[var(--hover)] px-2.5 py-2">
         <DbIcon size={14} className="shrink-0 text-[var(--text-3)]" />
         <span className="truncate text-xs font-semibold text-[var(--text-2)]">{dbName}</span>
-        <span className="ml-auto shrink-0 rounded-full bg-[var(--surface-2)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--text-3)]">
+        <span className="ml-auto shrink-0 rounded-full bg-[var(--surface-2)] px-1.5 py-0.5 text-[11px] font-medium text-[var(--text-3)]">
           {tables.length} tables
         </span>
       </div>
@@ -236,8 +236,8 @@ export function TreeMap({ db, tables, dbName }: TreeMapProps) {
           placeholder="Filter tables…"
           className="min-w-0 flex-1 rounded-md border border-[var(--inner-border)] bg-[var(--surface-1)] px-2 py-1 text-[11px] text-[var(--text-2)] placeholder:text-[var(--text-3)]/50 focus:border-[var(--accent)] focus:outline-none"
         />
-        <button type="button" onClick={expandAll} className="shrink-0 rounded-md border border-[var(--inner-border)] px-1.5 py-1 text-[10px] text-[var(--text-3)] hover:bg-[var(--surface-1)]">All</button>
-        <button type="button" onClick={collapseAll} className="shrink-0 rounded-md border border-[var(--inner-border)] px-1.5 py-1 text-[10px] text-[var(--text-3)] hover:bg-[var(--surface-1)]">None</button>
+        <button type="button" onClick={expandAll} className="shrink-0 rounded-md border border-[var(--inner-border)] px-1.5 py-1 text-[11px] text-[var(--text-3)] hover:bg-[var(--surface-1)]">All</button>
+        <button type="button" onClick={collapseAll} className="shrink-0 rounded-md border border-[var(--inner-border)] px-1.5 py-1 text-[11px] text-[var(--text-3)] hover:bg-[var(--surface-1)]">None</button>
       </div>
 
       {/* Tree nodes */}

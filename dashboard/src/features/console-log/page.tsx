@@ -21,7 +21,7 @@ import { useConsoleLogStream, type ConsoleLogLevel } from "../../hooks/use-conso
 
 const LEVEL_COLORS: Record<ConsoleLogLevel, string> = {
   debug: "text-[var(--text-3)]",
-  info: "text-[#0fa3d1] dark:text-[var(--teal)]",
+  info: "text-[var(--teal)]",
   warn: "text-[var(--orange)]",
   error: "text-[var(--red)]",
 };
@@ -294,12 +294,12 @@ function RequestHistoryTab() {
                   {/* Status */}
                   <div className="flex flex-col items-start gap-0.5">
                     <Badge tone={statusTone(item.statusCode)}>{item.statusCode || "—"}</Badge>
-                    {item.errorKind && <span className="max-w-full truncate text-[9px] text-[var(--red)]" title={item.errorKind}>{item.errorKind}</span>}
+                    {item.errorKind && <span className="max-w-full truncate text-[11px] text-[var(--red)]" title={item.errorKind}>{item.errorKind}</span>}
                   </div>
                   {/* Tokens */}
                   <div className="min-w-0">
                     <div className="tabular-nums text-[var(--text-2)]">{item.totalTokens != null ? formatNumber(item.totalTokens) : "—"}</div>
-                    <div className="text-[9px] text-[var(--text-3)]">
+                    <div className="text-[11px] text-[var(--text-3)]">
                       {item.inputTokens != null && <span>in {formatTokens(item.inputTokens)}</span>}
                       {item.cachedTokens != null && item.cachedTokens > 0 && <span> · cached {formatTokens(item.cachedTokens)}</span>}
                     </div>
@@ -307,7 +307,7 @@ function RequestHistoryTab() {
                   {/* Duration */}
                   <div className="min-w-0">
                     <div className="tabular-nums text-[var(--text-2)]">{formatDuration(item.durationMs)}</div>
-                    {item.tfftMs != null && <div className="text-[9px] text-[var(--text-3)]">ttft {formatDuration(item.tfftMs)}</div>}
+                    {item.tfftMs != null && <div className="text-[11px] text-[var(--text-3)]">ttft {formatDuration(item.tfftMs)}</div>}
                   </div>
                   {/* Key */}
                   <div className="min-w-0">

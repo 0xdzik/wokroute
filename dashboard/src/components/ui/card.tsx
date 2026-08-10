@@ -5,15 +5,15 @@ export type CardDensity = "compact" | "default" | "comfortable";
 export type CardSurface = "base" | "muted" | "elevated";
 
 const densityClasses: Record<CardDensity, string> = {
-  compact: "p-3",
-  default: "p-4",
-  comfortable: "p-5",
+  compact: "p-3.5",
+  default: "p-5",
+  comfortable: "p-6",
 };
 
 const surfaceClasses: Record<CardSurface, string> = {
   base: "glass",
-  muted: "glass bg-[var(--surface-muted)]",
-  elevated: "glass-2",
+  muted: "bg-[var(--surface-2)] border border-[var(--border-subtle)]",
+  elevated: "bg-[var(--surface-2)] border border-[var(--glass-border-2)] shadow-[var(--shadow-soft)]",
 };
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
@@ -53,8 +53,8 @@ export function CardHeader({
       <div className="flex w-full min-w-0 flex-1 items-start gap-2.5 sm:w-auto">
         {Icon && (
           <span
-            className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-            style={{ backgroundColor: `color-mix(in srgb, ${iconColor ?? "var(--accent)"} 15%, transparent)`, color: iconColor ?? "var(--accent)" }}
+            className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[9px]"
+            style={{ backgroundColor: `color-mix(in srgb, ${iconColor ?? "var(--accent)"} 12%, transparent)`, color: iconColor ?? "var(--accent)" }}
           >
             <Icon size={15} aria-hidden={true} />
           </span>
