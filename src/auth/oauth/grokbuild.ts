@@ -67,7 +67,7 @@ function parseGrokBuildTokenResponse(
  * Grok Build device-code OAuth driver. Implements start/poll/refresh on the
  * standard OAuth2 device-authorization grant (RFC 8628). The Grok Build
  * adapter builds its own wire headers (grok-shell User-Agent and
- * `x-xai-token-auth` marker — never a Cartethyia identity).
+ * `x-xai-token-auth` marker — never a wokroute identity).
  */
 export class GrokBuildOAuthDriver implements AuthDriver {
   readonly kind = "oauth" as const;

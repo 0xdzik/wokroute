@@ -529,7 +529,7 @@ export interface ProviderCallError {
 }
 
 /**
- * Derives whether a failure originated inside Cartethyia, from an upstream
+ * Derives whether a failure originated inside Wokroute, from an upstream
  * provider response, or from the client. Uses the error kind and route
  * scope — callers never set this manually, so the classification stays
  * consistent across all construction sites.

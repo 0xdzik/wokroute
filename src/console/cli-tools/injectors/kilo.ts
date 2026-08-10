@@ -56,7 +56,7 @@ export const kiloInjector: ToolInjector = {
       return { toolId: "kilo", installed: false, configured: false, settingsPath: null, currentEndpoint: null, currentApiKeyPrefix: null, currentModels: null };
     }
     const auth = (await readJsonFile(path)) as Record<string, { baseUrl?: string; baseURL?: string; apiKey?: string; model?: string }> | null;
-    const entry = auth?.[AUTH_KEY] ?? auth?.["cartethyia"];
+    const entry = auth?.[AUTH_KEY] ?? auth?.["wokroute"];
     if (!entry) {
       return { toolId: "kilo", installed: true, configured: false, settingsPath: path, currentEndpoint: null, currentApiKeyPrefix: null, currentModels: null };
     }
@@ -79,7 +79,7 @@ export const kiloInjector: ToolInjector = {
     const baseUrl = ensureV1Suffix(input.endpoint);
     const auth = ((await readJsonFile(authPath())) as Record<string, unknown> | null) ?? {};
     auth[AUTH_KEY] = { baseUrl, apiKey: input.apiKey, model };
-    auth["cartethyia"] = { baseUrl, apiKey: input.apiKey, model };
+    auth["wokroute"] = { baseUrl, apiKey: input.apiKey, model };
     await writeJsonFile(authPath(), auth);
 
     // VS Code settings — set Kilo to use openai-compatible provider.
@@ -95,7 +95,7 @@ export const kiloInjector: ToolInjector = {
     const auth = (await readJsonFile(path)) as Record<string, unknown> | null;
     if (!auth) return { success: true, message: "No auth file to reset" };
     delete auth[AUTH_KEY];
-    delete auth["cartethyia"];
+    delete auth["wokroute"];
     await writeJsonFile(path, auth);
 
     // VS Code settings — remove override.
@@ -104,7 +104,7 @@ export const kiloInjector: ToolInjector = {
       delete settings["kilo.code.authProviderOverride"];
       await writeJsonFile(vscodeSettingsPath(), settings);
     }
-    return { success: true, settingsPath: path, message: "Cartethyia settings removed from Kilo Code" };
+    return { success: true, settingsPath: path, message: "Wokroute settings removed from Kilo Code" };
   },
 
   async download(input: ApplyInput): Promise<DownloadResult> {
@@ -112,7 +112,7 @@ export const kiloInjector: ToolInjector = {
     const baseUrl = ensureV1Suffix(input.endpoint);
     const content = JSON.stringify({
       [AUTH_KEY]: { baseUrl, apiKey: input.apiKey, model },
-      cartethyia: { baseUrl, apiKey: input.apiKey, model },
+      wokroute: { baseUrl, apiKey: input.apiKey, model },
     }, null, 2);
     return { content, filename: "auth.json", mimeType: "application/json" };
   },

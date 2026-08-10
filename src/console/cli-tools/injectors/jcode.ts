@@ -1,15 +1,15 @@
 /**
  * jcode injector — writes ~/.jcode/config.toml (TOML) and
- * ~/.config/jcode/provider-cartethyia.env (env file).
+ * ~/.config/jcode/provider-wokroute.env (env file).
  *
  * config.toml structure:
- *   [providers.cartethyia]
+ *   [providers.wokroute]
  *     type = "openai"
  *     base_url = "http://host:12800/v1"
- *     env_file = "provider-cartethyia.env"
+ *     env_file = "provider-wokroute.env"
  *     model = "model-id"
  *
- * provider-cartethyia.env:
+ * provider-wokroute.env:
  *   OPENAI_API_KEY=key
  */
 
@@ -46,10 +46,10 @@ function envFileDir(): string {
 }
 
 function envFilePath(): string {
-  return join(envFileDir(), "provider-cartethyia.env");
+  return join(envFileDir(), "provider-wokroute.env");
 }
 
-const PROVIDER = "cartethyia";
+const PROVIDER = "wokroute";
 const ENV_KEY = "OPENAI_API_KEY";
 
 export const jcodeInjector: ToolInjector = {
@@ -90,7 +90,7 @@ export const jcodeInjector: ToolInjector = {
     text = tomlUpsertSection(text, `providers.${PROVIDER}`, [
       `  type = "openai"`,
       `  base_url = "${baseUrl}"`,
-      `  env_file = "provider-cartethyia.env"`,
+      `  env_file = "provider-wokroute.env"`,
       `  model = "${model}"`,
     ].join("\n"));
     await writeTextFile(configPath(), text);
@@ -115,7 +115,7 @@ export const jcodeInjector: ToolInjector = {
     if (envText) {
       await writeTextFile(envFilePath(), envRemove(envText, ENV_KEY));
     }
-    return { success: true, settingsPath: path, message: "Cartethyia settings removed from jcode" };
+    return { success: true, settingsPath: path, message: "Wokroute settings removed from jcode" };
   },
 
   async download(input: ApplyInput): Promise<DownloadResult> {
@@ -125,12 +125,12 @@ export const jcodeInjector: ToolInjector = {
       `[providers.${PROVIDER}]`,
       `  type = "openai"`,
       `  base_url = "${baseUrl}"`,
-      `  env_file = "provider-cartethyia.env"`,
+      `  env_file = "provider-wokroute.env"`,
       `  model = "${model}"`,
       "",
     ].join("\n");
     const envFile = `${ENV_KEY}=${input.apiKey}\n`;
-    const content = `# config.toml\n${toml}\n# provider-cartethyia.env\n${envFile}`;
+    const content = `# config.toml\n${toml}\n# provider-wokroute.env\n${envFile}`;
     return { content, filename: "jcode-config.txt", mimeType: "text/plain" };
   },
 };

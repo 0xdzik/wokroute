@@ -1,9 +1,9 @@
 const envText = await Bun.file(".env").text().catch(() => "");
 const bootstrapKey = envText.match(/^BOOTSTRAP_PROXY_API_KEY=(.+)$/m)?.[1]?.trim();
-const apiKey = Bun.env.CARTETHYIA_CANARY_API_KEY ?? Bun.env.BOOTSTRAP_PROXY_API_KEY ?? bootstrapKey;
-const model = Bun.env.CARTETHYIA_CANARY_MODEL ?? "opencodeft/mimo-v2.5-free";
-const url = Bun.env.CARTETHYIA_CANARY_URL ?? "http://127.0.0.1:12800/v1/chat/completions";
-if (!apiKey) throw new Error("Set CARTETHYIA_CANARY_API_KEY or BOOTSTRAP_PROXY_API_KEY to run the real provider canary");
+const apiKey = Bun.env.wokroute_CANARY_API_KEY ?? Bun.env.BOOTSTRAP_PROXY_API_KEY ?? bootstrapKey;
+const model = Bun.env.wokroute_CANARY_MODEL ?? "opencodeft/mimo-v2.5-free";
+const url = Bun.env.wokroute_CANARY_URL ?? "http://127.0.0.1:12800/v1/chat/completions";
+if (!apiKey) throw new Error("Set wokroute_CANARY_API_KEY or BOOTSTRAP_PROXY_API_KEY to run the real provider canary");
 
 const response = await fetch(url, {
   method: "POST",

@@ -362,7 +362,7 @@ describe("security and persistence contracts", () => {
   });
 
   test("keeps configuration and runtime persistence in separate sqlite files", () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "cartethyia-contract-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "wokroute-contract-"));
     const env = testEnv(dataDir);
     const config = createConfigPersistence(env);
     const runtime = createRuntimePersistence(env);
@@ -375,7 +375,7 @@ describe("security and persistence contracts", () => {
   });
 
   test("preserves raw OAuth bearer credentials without fabricating refresh configuration", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "cartethyia-raw-oauth-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "wokroute-raw-oauth-"));
     const env = testEnv(dataDir);
     try {
       const config = createConfigPersistence(env);
@@ -388,7 +388,7 @@ describe("security and persistence contracts", () => {
   });
 
   test("persists routing preset and target concurrency across config reopen", () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "cartethyia-routing-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "wokroute-routing-"));
     const env = testEnv(dataDir);
     const first = createConfigPersistence(env);
     first.proxies.patchSettings({ routingPreset: "target-concurrent", targetConcurrent: 4 });
@@ -400,7 +400,7 @@ describe("security and persistence contracts", () => {
   });
 
   test("migrates renamed provider IDs across routing persistence", () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "cartethyia-provider-rename-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "wokroute-provider-rename-"));
     const env = testEnv(dataDir);
     const initial = createConfigPersistence(env);
     initial.settings.ensure();
@@ -427,7 +427,7 @@ describe("security and persistence contracts", () => {
   });
 
   test("persists both last proxy test outcomes across config reopen", () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "cartethyia-proxy-tests-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "wokroute-proxy-tests-"));
     const env = testEnv(dataDir);
     const first = createConfigPersistence(env);
     const proxy = first.proxies.create({ id: "proxy-history", name: "History", protocol: "http", host: "127.0.0.1", port: 8080 });
@@ -442,7 +442,7 @@ describe("security and persistence contracts", () => {
   });
 
   test("persists all API-key limits and rejects backup table injection", () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "cartethyia-backup-contract-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "wokroute-backup-contract-"));
     const env = testEnv(dataDir);
     const config = createConfigPersistence(env);
     const key = config.apiKeys.create({ id: "limits-key", name: "Limits", key: "secret-value", keyPrefix: "secret", rateLimitRpm: 12, dailyTokenLimit: 100, monthlyTokenLimit: 500, oneTimeTokenLimit: 50, maxConcurrentRequests: 2 });
@@ -454,7 +454,7 @@ describe("security and persistence contracts", () => {
   });
 
   test("opens a legacy config database and preserves rows after schema upgrade", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "cartethyia-legacy-config-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "wokroute-legacy-config-"));
     const env = testEnv(dataDir);
     createLegacyConfigDb(env);
     try {
@@ -504,7 +504,7 @@ describe("security and persistence contracts", () => {
   });
 
   test("writes through upgraded legacy config columns and keeps upgrade idempotent", () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "cartethyia-legacy-upgrade-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "wokroute-legacy-upgrade-"));
     const env = testEnv(dataDir);
     createLegacyConfigDb(env);
     try {
@@ -532,7 +532,7 @@ describe("security and persistence contracts", () => {
   });
 
   test("opens a legacy runtime database, upgrades it, and reuses legacy tables", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "cartethyia-legacy-runtime-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "wokroute-legacy-runtime-"));
     const env = testEnv(dataDir);
     createLegacyRuntimeDb(env);
     try {
@@ -577,7 +577,7 @@ describe("security and persistence contracts", () => {
   });
 
   test("legacy runtime databases with duplicate traces stay writable without a unique index", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "cartethyia-legacy-dup-runtime-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "wokroute-legacy-dup-runtime-"));
     const env = testEnv(dataDir);
     createLegacyDuplicateTraceRuntimeDb(env);
     try {
@@ -597,7 +597,7 @@ describe("security and persistence contracts", () => {
   });
 
   test("fresh runtime persistence creates the direct-cutover schema and serves writes on the next read", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "cartethyia-fresh-runtime-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "wokroute-fresh-runtime-"));
     const env = testEnv(dataDir);
     try {
       const runtime = createRuntimePersistence(env);
@@ -627,7 +627,7 @@ describe("security and persistence contracts", () => {
   });
 
   test("retention removes only rows past the cutoff and is idempotent", () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "cartethyia-retention-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "wokroute-retention-"));
     const env = testEnv(dataDir);
     mkdirSync(env.assetDir, { recursive: true });
     const assetPath = join(env.assetDir, "legacy-asset.bin");
@@ -665,8 +665,8 @@ describe("security and persistence contracts", () => {
   });
 
   test("backup export/validate/restore round-trips every supported table", () => {
-    const srcDir = mkdtempSync(join(tmpdir(), "cartethyia-backup-src-"));
-    const dstDir = mkdtempSync(join(tmpdir(), "cartethyia-backup-dst-"));
+    const srcDir = mkdtempSync(join(tmpdir(), "wokroute-backup-src-"));
+    const dstDir = mkdtempSync(join(tmpdir(), "wokroute-backup-dst-"));
     const srcEnv = testEnv(srcDir);
     const dstEnv = testEnv(dstDir);
     try {
@@ -723,8 +723,8 @@ describe("security and persistence contracts", () => {
   });
 
   test("restore replaces existing configuration instead of merging", () => {
-    const srcDir = mkdtempSync(join(tmpdir(), "cartethyia-replace-src-"));
-    const dstDir = mkdtempSync(join(tmpdir(), "cartethyia-replace-dst-"));
+    const srcDir = mkdtempSync(join(tmpdir(), "wokroute-replace-src-"));
+    const dstDir = mkdtempSync(join(tmpdir(), "wokroute-replace-dst-"));
     const srcEnv = testEnv(srcDir);
     const dstEnv = testEnv(dstDir);
     try {
@@ -750,7 +750,7 @@ describe("security and persistence contracts", () => {
   });
 
   test("restore rolls the whole payload back when a table insert fails", () => {
-    const dstDir = mkdtempSync(join(tmpdir(), "cartethyia-rollback-"));
+    const dstDir = mkdtempSync(join(tmpdir(), "wokroute-rollback-"));
     const dstEnv = testEnv(dstDir);
     try {
       const dst = createConfigPersistence(dstEnv);
@@ -772,8 +772,8 @@ describe("security and persistence contracts", () => {
     const malformed = [
       [null, /backup must be an object/],
       [[], /backup must be an object/],
-      ["cartethyia", /backup must be an object/],
-      [{ app: "other", version: 1, tables: {} }, /backup.app must be "cartethyia"/],
+      ["wokroute", /backup must be an object/],
+      [{ app: "other", version: 1, tables: {} }, /backup.app must be "wokroute"/],
       [{ app: BACKUP_APP, version: 2, tables: {} }, /unsupported backup version/],
       [{ app: BACKUP_APP, version: 1 }, /backup.tables must be an object/],
       [{ app: BACKUP_APP, version: 1, tables: [] }, /backup.tables must be an object/],
@@ -808,7 +808,7 @@ describe("security and persistence contracts", () => {
   });
 
   test("resetAll empties every configuration and runtime table", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "cartethyia-reset-all-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "wokroute-reset-all-"));
     const env = testEnv(dataDir);
     try {
       const initialConfig = createConfigPersistence(env);

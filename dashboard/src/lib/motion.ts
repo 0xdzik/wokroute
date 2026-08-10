@@ -10,7 +10,7 @@ export type MotionProfile = "desktop" | "mobile" | "reduced" | "max";
 
 /** Event dispatched when the motion profile changes (e.g. user toggles
  *  prefers-reduced-motion in OS settings, or rotates device). */
-export const MOTION_OVERRIDE_EVENT = "cartethyia:motion-override";
+export const MOTION_OVERRIDE_EVENT = "wokroute:motion-override";
 
 export interface MotionEnvironment {
   readonly reducedMotion: boolean;

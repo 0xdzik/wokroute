@@ -30,10 +30,10 @@ describe("LoginPage", () => {
     mockNavigate.mockReset();
   });
 
-  test("uses the provided artwork and Cartethyia logo without a public-page link", () => {
+  test("uses the provided artwork and Wokroute logo without a public-page link", () => {
     renderLogin();
 
-    expect(document.querySelector("img[src*='favicon_love.webp']")).toBeInTheDocument();
+    expect(document.querySelector("img[src*='logo.png']")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /back to public page/i })).not.toBeInTheDocument();
     expect(screen.queryByText(/single admin/i)).not.toBeInTheDocument();
   });

@@ -72,7 +72,7 @@ async function executeCommand(ws: ServerWebSocket<TerminalSession>, cmd: string)
     send(ws, {
       type: "output",
       data: [
-        "Cartethyia Terminal — root shell via WebSocket",
+        "Wokroute Terminal — root shell via WebSocket",
         "",
         "  Any command runs with full root access.",
         "  fastfetch       System info display",
@@ -140,7 +140,7 @@ async function executeCommand(ws: ServerWebSocket<TerminalSession>, cmd: string)
 /** WebSocket handler for Bun.serve — terminal command execution. */
 export const terminalWebSocket = {
   open(ws: ServerWebSocket<TerminalSession>) {
-    send(ws, { type: "connected", data: "Cartethyia Terminal — type 'help' for available commands." });
+    send(ws, { type: "connected", data: "Wokroute Terminal — type 'help' for available commands." });
   },
 
   async message(ws: ServerWebSocket<TerminalSession>, message: string | Buffer) {

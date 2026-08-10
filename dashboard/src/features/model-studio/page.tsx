@@ -69,7 +69,7 @@ interface StudioSession { id: string; title: string; model: string; systemPrompt
 
 const MAX_ATTACHMENTS = 4;
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
-const ACTIVE_SESSION_KEY = "cartethyia:model-studio:active-session";
+const ACTIVE_SESSION_KEY = "wokroute:model-studio:active-session";
 const AUTOSAVE_DELAY_MS = 600;
 
 const THINK_LEVELS = [

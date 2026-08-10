@@ -1,0 +1,32 @@
+# Tests & benchmarks
+test/
+test/bench/
+
+# Dashboard source (only the built dist/ ships)
+dashboard/src/
+dashboard/node_modules/
+dashboard/public/
+dashboard/bun.lock
+dashboard/package.json
+dashboard/index.html
+dashboard/tsconfig.json
+dashboard/vite.config.ts
+dashboard/vitest.config.ts
+
+# Runtime data
+data/
+
+# Dev tooling artifacts
+.playwright-mcp/
+.bench/
+coverage/
+*.log
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Env (secrets)
+.env

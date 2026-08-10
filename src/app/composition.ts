@@ -28,6 +28,7 @@ import { createConsoleLogStreamHub } from "../console/streams";
 import { ConsoleDiagnostics } from "../console/diagnostics";
 import { createConsoleServices } from "../console/services";
 import { createConsoleRepositories } from "../console/wiring";
+import type { ConsoleRepositories } from "../console/services";
 import { runtimeSettings } from "../console/runtime-settings";
 import { probeProviderModel } from "../console/probe";
 import { ApiKeyAdmission } from "../traffic/admission";
@@ -38,7 +39,7 @@ import { runtimeMemoryLimits } from "../traffic/limits";
 import { Elysia } from "elysia";
 import { runProxyRequest, type ProxyRequestDependencies, type ProxyRequestLogEvent, type ProxyRoutePlan } from "./request";
 
-export interface CartethyiaRuntime {
+export interface wokrouteRuntime {
   readonly config: ConfigPersistence;
   readonly runtime: RuntimePersistence;
   readonly registry: ProviderRegistry;
@@ -46,6 +47,9 @@ export interface CartethyiaRuntime {
   readonly consoleApp: { readonly handle: (request: Request) => Response | Promise<Response> };
   /** Canonical model metadata: sync per-model lookup + async name resolution. */
   readonly models: ModelMetadataResolver;
+  /** Console repositories — exposed so the CLI/startup layer can warm the
+   *  settings bootstrap (JWT secret + password hash) before serving traffic. */
+  readonly consoleRepositories: ConsoleRepositories;
   readonly close: () => void;
 }
 
@@ -354,7 +358,7 @@ function withRoutingRevisionTracking(config: ConfigPersistence, registry: Provid
   return { ...config, aliases, combos, proxies, accounts, customProviders, providerModels };
 }
 
-export async function createCartethyiaRuntime(): Promise<CartethyiaRuntime> {
+export async function createwokrouteRuntime(): Promise<wokrouteRuntime> {
   const baseConfig = createConfigPersistence();
   const registry = await createDefaultRegistry();
   const pool = new ProxyPool(baseConfig.stores.proxyPool);
@@ -551,7 +555,7 @@ export async function createCartethyiaRuntime(): Promise<CartethyiaRuntime> {
   const recoverySweep = new AccountRecoverySweep(accountHealth, config.stores.modelLocks);
   recoverySweep.start();
 
-  return { config, runtime, registry, proxy, consoleApp, models: modelMetadata, close: () => { clearInterval(gcInterval); cancelScheduledGc(); retention.stop(); logStream.close(); warpService.shutdown().catch(() => {}); oauthKeepalive.stop(); recoverySweep.stop(); runtime.close(); config.close(); } };
+  return { config, runtime, registry, proxy, consoleApp, models: modelMetadata, consoleRepositories, close: () => { clearInterval(gcInterval); cancelScheduledGc(); retention.stop(); logStream.close(); warpService.shutdown().catch(() => {}); oauthKeepalive.stop(); recoverySweep.stop(); runtime.close(); config.close(); } };
 }
 
 export { runProxyRequest };

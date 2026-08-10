@@ -9,9 +9,9 @@ import { removeTempDir } from "../support/temp";
 
 describe("runtime persistence throughput benchmarks", () => {
   test("bounds buffered telemetry when the runtime database is unavailable", async () => {
-    const root = mkdtempSync(join(tmpdir(), "cartethyia-runtime-stall-"));
+    const root = mkdtempSync(join(tmpdir(), "wokroute-runtime-stall-"));
     const blockedPath = join(root, "runtime.sqlite");
-    const configPath = join(root, "cartethyia.sqlite");
+    const configPath = join(root, "wokroute.sqlite");
     mkdirSync(blockedPath);
     const persistence = createRuntimePersistence({
       dataDir: root,
@@ -47,9 +47,9 @@ describe("runtime persistence throughput benchmarks", () => {
   });
 
   test("handles 10k metadata and runtime-log writes without unbounded buffering", async () => {
-    const root = mkdtempSync(join(tmpdir(), "cartethyia-runtime-bench-"));
+    const root = mkdtempSync(join(tmpdir(), "wokroute-runtime-bench-"));
     const runtimePath = join(root, "runtime.sqlite");
-    const configPath = join(root, "cartethyia.sqlite");
+    const configPath = join(root, "wokroute.sqlite");
     const operations = scaledCount(10_000);
     const persistence = createRuntimePersistence({
       dataDir: root,

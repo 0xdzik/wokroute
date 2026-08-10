@@ -42,11 +42,11 @@ function boundedInteger(name: string, fallback: number, minimum: number, maximum
 }
 
 const STREAM_LIMITS = Object.freeze({
-  maxClients: boundedInteger("CARTETHYIA_CONSOLE_LOG_CLIENTS", 16, 1, 64),
-  maxSnapshotLines: boundedInteger("CARTETHYIA_CONSOLE_LOG_SNAPSHOT_LINES", 200, 1, 1_000),
-  maxBatchLines: boundedInteger("CARTETHYIA_CONSOLE_LOG_BATCH_LINES", 100, 1, 500),
-  maxEventBytes: boundedInteger("CARTETHYIA_CONSOLE_LOG_EVENT_BYTES", 256 * 1024, 8 * 1024, 4 * 1024 * 1024),
-  tickMs: boundedInteger("CARTETHYIA_CONSOLE_LOG_TICK_MS", 2_000, 500, 30_000),
+  maxClients: boundedInteger("wokroute_CONSOLE_LOG_CLIENTS", 16, 1, 64),
+  maxSnapshotLines: boundedInteger("wokroute_CONSOLE_LOG_SNAPSHOT_LINES", 200, 1, 1_000),
+  maxBatchLines: boundedInteger("wokroute_CONSOLE_LOG_BATCH_LINES", 100, 1, 500),
+  maxEventBytes: boundedInteger("wokroute_CONSOLE_LOG_EVENT_BYTES", 256 * 1024, 8 * 1024, 4 * 1024 * 1024),
+  tickMs: boundedInteger("wokroute_CONSOLE_LOG_TICK_MS", 2_000, 500, 30_000),
 });
 
 interface LogStreamClient {

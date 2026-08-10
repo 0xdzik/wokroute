@@ -6,7 +6,7 @@
  *   GET    /cli-tools/all-statuses       — batch status for all tools
  *   GET    /cli-tools/:toolId            — single tool status
  *   POST   /cli-tools/:toolId            — apply config (inject to fs)
- *   DELETE /cli-tools/:toolId            — reset config (remove cartethyia fields)
+ *   DELETE /cli-tools/:toolId            — reset config (remove wokroute fields)
  *   POST   /cli-tools/:toolId/download   — download config as text
  *
  * All routes sit behind the console session guard (applied by the parent app).

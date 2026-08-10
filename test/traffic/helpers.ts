@@ -2,7 +2,7 @@ import type { ProxyConfig, ProxyPoolConfigStore } from "../../src/traffic/networ
 import type { ProxyHealthRecord, ProxyHealthStore } from "../../src/traffic/network";
 import { envBoolean, envNumber, proxyEnvSuffix, proxyIdFromSuffix } from "../../src/traffic/network";
 
-const PROXY_PREFIX = "CARTETHYIA_PROXY_";
+const PROXY_PREFIX = "wokroute_PROXY_";
 const URL_SUFFIX = "_URL";
 const DEFAULT_MAX_CONCURRENCY = 8;
 
@@ -14,7 +14,7 @@ export class EnvProxyPoolConfigStore implements ProxyPoolConfigStore {
   constructor(private readonly env: Readonly<Record<string, string | undefined>> = process.env) {}
 
   private poolEnabled(): boolean {
-    return envBoolean(this.env.CARTETHYIA_PROXY_POOL_ENABLED, true);
+    return envBoolean(this.env.wokroute_PROXY_POOL_ENABLED, true);
   }
 
   private readProxy(id: string): ProxyConfig | undefined {
@@ -45,7 +45,7 @@ export class EnvProxyPoolConfigStore implements ProxyPoolConfigStore {
     if (!this.poolEnabled()) return [];
     const proxies: ProxyConfig[] = [];
     for (const key of Object.keys(this.env)) {
-      const match = /^CARTETHYIA_PROXY_(.+)_URL$/.exec(key);
+      const match = /^wokroute_PROXY_(.+)_URL$/.exec(key);
       if (match === null) continue;
       const suffix = match[1];
       if (suffix === undefined) continue;

@@ -7,7 +7,7 @@ import { runtimeMemoryLimits } from "./limits";
  * is idempotent so disconnects or early returns cannot leak a slot. Stale,
  * zero-flight IPs are swept on access so scanner traffic that touches an IP
  * once and never returns cannot grow the map forever. The map is also bounded
- * by a configurable cap (env-tunable via `CARTETHYIA_MAX_TRACKED_IPS`, 0 = adaptive
+ * by a configurable cap (env-tunable via `wokroute_MAX_TRACKED_IPS`, 0 = adaptive
  * based on available memory) as a last line of defense against pathological
  * IP diversity. Eviction uses V8 Map insertion order — the oldest-inserted
  * entry is dropped in O(1) instead of scanning for the least-recently-seen.

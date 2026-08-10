@@ -135,7 +135,7 @@ export function benchmarkRequest(body: Record<string, unknown> = { model: BENCH_
     request: {
       endpoint: "/v1/chat/completions",
       surface: "openai-chat",
-      headers: new Headers({ "user-agent": "cartethyia-benchmark" }),
+      headers: new Headers({ "user-agent": "wokroute-benchmark" }),
       body: { ...body, stream },
       signal: new AbortController().signal,
     },

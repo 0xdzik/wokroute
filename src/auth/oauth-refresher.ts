@@ -92,7 +92,7 @@ export interface EnvOAuthRefresherOptions {
 /**
  * Bounded, env-configured OAuth refresh fallback for providers that have no
  * registered {@link AuthDriver}. Reads
- * `CARTETHYIA_OAUTH_<PROVIDER>_TOKEN_URL/CLIENT_ID/CLIENT_SECRET` from the
+ * `wokroute_OAUTH_<PROVIDER>_TOKEN_URL/CLIENT_ID/CLIENT_SECRET` from the
  * environment and refreshes with a hard byte bound, a bounded timeout, an
  * HTTPS-only SSRF guard, and strictly narrowed token parsing. This is the
  * legacy generic path, kept only as a safe fallback for providers without a
@@ -113,9 +113,9 @@ export function createEnvOAuthRefresher(options: EnvOAuthRefresherOptions): OAut
         return failure(503, "credential_unavailable", true, "OAuth refresh token is unavailable");
       }
       const suffix = providerId.toUpperCase().replace(/[^A-Z0-9]/g, "_");
-      const tokenUrl = env[`CARTETHYIA_OAUTH_${suffix}_TOKEN_URL`];
-      const clientId = env[`CARTETHYIA_OAUTH_${suffix}_CLIENT_ID`];
-      const clientSecret = env[`CARTETHYIA_OAUTH_${suffix}_CLIENT_SECRET`];
+      const tokenUrl = env[`wokroute_OAUTH_${suffix}_TOKEN_URL`];
+      const clientId = env[`wokroute_OAUTH_${suffix}_CLIENT_ID`];
+      const clientSecret = env[`wokroute_OAUTH_${suffix}_CLIENT_SECRET`];
       if (!tokenUrl || !clientId || !clientSecret) {
         return failure(503, "credential_unavailable", true, "OAuth refresh configuration is unavailable");
       }

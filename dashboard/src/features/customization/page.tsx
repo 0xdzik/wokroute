@@ -24,7 +24,7 @@ interface AppearanceSettingsResponse {
   };
 }
 
-const DEFAULT_SIDEBAR_ICON_URL = `${import.meta.env.BASE_URL}favicon_love.webp`;
+const DEFAULT_SIDEBAR_ICON_URL = `${import.meta.env.BASE_URL}logo.png`;
 const MAX_SIDEBAR_ICON_BYTES = 25 * 1024 * 1024;
 const SIDEBAR_ICON_TYPES = new Set(["image/png", "image/gif"]);
 

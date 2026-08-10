@@ -15,7 +15,7 @@ import { runtimeMemoryLimits } from "./limits";
  * for the current request, so it adds no extra `Date.now()` calls.
  *
  * The map is also bounded by `maxTrackedIps` (env-tunable via
- * `CARTETHYIA_MAX_TRACKED_IPS`, 0 = adaptive) as a last line of defense against
+ * `wokroute_MAX_TRACKED_IPS`, 0 = adaptive) as a last line of defense against
  * pathological IP diversity — mirroring {@link PerIpFlightTracker}. When the
  * cap is reached on a new-IP insertion, the oldest-inserted entry is dropped in
  * O(1) via V8 Map insertion order rather than scanning for least-recently-seen.

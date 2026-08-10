@@ -1,7 +1,7 @@
 ﻿
 # OAuth Drivers
 
-**How Cartethyia attaches upstream provider accounts through OAuth — the driver registry, the auth-driver contract, bundled drivers, and how to add a custom one (device flow, PKCE authorization-code, or browser-token).**
+**How Wokroute attaches upstream provider accounts through OAuth — the driver registry, the auth-driver contract, bundled drivers, and how to add a custom one (device flow, PKCE authorization-code, or browser-token).**
 
 ---
 

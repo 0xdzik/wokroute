@@ -20,12 +20,12 @@ export interface CustomizationSettings {
 
 const DEFAULT_BACKGROUND_URL = `${import.meta.env.BASE_URL}macos-big-sur-apple-layers-fluidic-colorful-dark-wwdc-2020-3840x2160-1432.jpg`;
 const BACKGROUND_PREFERENCE_VERSION = 1;
-const DATABASE_NAME = "cartethyia-customization";
+const DATABASE_NAME = "wokroute-customization";
 const DATABASE_VERSION = 1;
 const STORE_NAME = "settings";
 const RECORD_KEY = "current";
-const LEGACY_STORAGE_KEY = "cartethyia.customization";
-const CHANGE_EVENT = "cartethyia-customization-change";
+const LEGACY_STORAGE_KEY = "wokroute.customization";
+const CHANGE_EVENT = "wokroute-customization-change";
 export const MAX_CUSTOM_ASSET_BYTES = 200 * 1024 * 1024;
 
 const DEFAULTS: CustomizationSettings = {

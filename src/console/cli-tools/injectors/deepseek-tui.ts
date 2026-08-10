@@ -81,7 +81,7 @@ export const deepseekTuiInjector: ToolInjector = {
     text = tomlRemoveSection(text, "providers.openai");
     text = tomlUpsertFlat(text, "provider", "deepseek");
     await writeTextFile(path, text);
-    return { success: true, settingsPath: path, message: "Cartethyia settings removed from DeepSeek TUI" };
+    return { success: true, settingsPath: path, message: "Wokroute settings removed from DeepSeek TUI" };
   },
 
   async download(input: ApplyInput): Promise<DownloadResult> {

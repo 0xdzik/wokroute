@@ -1,9 +1,9 @@
 /**
  * Claude Cowork injector — writes to Claude Desktop's configLibrary/_meta.json
- * with MCP server bridge entries pointing at Cartethyia.
+ * with MCP server bridge entries pointing at wokroute.
  *
  * Cowork is an MCP-based integration, not a standard env/config injection.
- * Cartethyia acts as an OpenAI-compatible endpoint, so we register an
+ * wokroute acts as an OpenAI-compatible endpoint, so we register an
  * MCP server entry in the Claude Desktop config that routes through us.
  *
  * Config paths (Claude Desktop app data):
@@ -37,7 +37,7 @@ function metaPath(): string {
   return join(configDir(), "_meta.json");
 }
 
-const PROVIDER = "cartethyia";
+const PROVIDER = "wokroute";
 
 export const coworkInjector: ToolInjector = {
   toolId: "cowork",
@@ -86,7 +86,7 @@ export const coworkInjector: ToolInjector = {
     if (!meta?.managedServers) return { success: true, message: "No settings file to reset" };
     delete meta.managedServers[PROVIDER];
     await writeJsonFile(path, meta);
-    return { success: true, settingsPath: path, message: "Cartethyia settings removed from Claude Cowork" };
+    return { success: true, settingsPath: path, message: "Wokroute settings removed from Claude Cowork" };
   },
 
   async download(input: ApplyInput): Promise<DownloadResult> {

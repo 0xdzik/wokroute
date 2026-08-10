@@ -30,13 +30,13 @@ describe("env helper parsing", () => {
 
 describe("EnvProxyPoolConfigStore", () => {
   const env: Record<string, string | undefined> = {
-    CARTETHYIA_PROXY_POOL_ENABLED: "true",
-    CARTETHYIA_PROXY_PROXY_1_URL: "http://p1.example.com:1080",
-    CARTETHYIA_PROXY_PROXY_1_MAX_CONCURRENCY: "16",
-    CARTETHYIA_PROXY_PROXY_1_PRIORITY: "3",
-    CARTETHYIA_PROXY_PROXY_1_EXCLUDED_PROVIDERS: "openai, anthropic",
-    CARTETHYIA_PROXY_PROXY_2_URL: "http://p2.example.com:1080",
-    CARTETHYIA_PROXY_PROXY_2_ENABLED: "false",
+    wokroute_PROXY_POOL_ENABLED: "true",
+    wokroute_PROXY_PROXY_1_URL: "http://p1.example.com:1080",
+    wokroute_PROXY_PROXY_1_MAX_CONCURRENCY: "16",
+    wokroute_PROXY_PROXY_1_PRIORITY: "3",
+    wokroute_PROXY_PROXY_1_EXCLUDED_PROVIDERS: "openai, anthropic",
+    wokroute_PROXY_PROXY_2_URL: "http://p2.example.com:1080",
+    wokroute_PROXY_PROXY_2_ENABLED: "false",
   };
 
   test("parses a configured proxy with defaults and overrides", async () => {
@@ -65,7 +65,7 @@ describe("EnvProxyPoolConfigStore", () => {
   });
 
   test("honors an empty url (no proxy configured)", async () => {
-    const store = new EnvProxyPoolConfigStore({ CARTETHYIA_PROXY_POOL_ENABLED: "true" });
+    const store = new EnvProxyPoolConfigStore({ wokroute_PROXY_POOL_ENABLED: "true" });
     expect(await store.getProxy("x")).toBeUndefined();
   });
 

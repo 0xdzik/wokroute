@@ -293,7 +293,7 @@ export function createConsoleApi(deps: ConsoleRouterDependencies) {
           }
           const payload = services.backup.exportBackup();
           set.headers["content-type"] = "application/json; charset=utf-8";
-          set.headers["content-disposition"] = `attachment; filename="cartethyia-backup-${new Date().toISOString().slice(0, 10)}.json"`;
+          set.headers["content-disposition"] = `attachment; filename="wokroute-backup-${new Date().toISOString().slice(0, 10)}.json"`;
           set.headers["cache-control"] = "no-store";
           return payload;
         })

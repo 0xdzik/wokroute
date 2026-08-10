@@ -23,7 +23,7 @@ export async function guardLoader({ request }: { request: Request }): Promise<Re
  * by hand. Only a reload within the cooldown suppresses another one, which is
  * enough to stop a genuinely broken chunk from looping.
  */
-const RELOAD_STAMP = "cartethyia:chunk-reload-at";
+const RELOAD_STAMP = "wokroute:chunk-reload-at";
 const RELOAD_COOLDOWN_MS = 10_000;
 
 function reloadedRecently(): boolean {

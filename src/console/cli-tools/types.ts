@@ -4,13 +4,13 @@
  * Each CLI tool (Claude Code, Codex, Cline, etc.) has a ToolDef with metadata
  * and a ToolInjector that reads/writes the tool's config files on the host
  * filesystem. The dashboard picks an API key + models, POSTs to the backend,
- * and the injector merges Cartethyia-specific fields into the tool's config
+ * and the injector merges wokroute-specific fields into the tool's config
  * without clobbering user settings.
  */
 
 import type { ProviderSurface } from "../../domain/contracts";
 
-/** The Cartethyia proxy surface a CLI tool targets. */
+/** The wokroute proxy surface a CLI tool targets. */
 export type CliToolSurface = Extract<ProviderSurface, "openai-chat" | "openai-responses" | "anthropic-messages">;
 
 /** How the tool's config is managed. */
@@ -69,7 +69,7 @@ export interface ToolDef {
 export interface ToolStatus {
   readonly toolId: string;
   readonly installed: boolean;
-  /** True if the tool's config already points to a Cartethyia endpoint. */
+  /** True if the tool's config already points to a wokroute endpoint. */
   readonly configured: boolean;
   readonly settingsPath: string | null;
   readonly currentEndpoint: string | null;
@@ -79,11 +79,11 @@ export interface ToolStatus {
   readonly message?: string;
 }
 
-/** Input from the dashboard when applying Cartethyia config to a tool. */
+/** Input from the dashboard when applying wokroute config to a tool. */
 export interface ApplyInput {
   /** Raw endpoint URL, e.g. "http://localhost:12800". Each injector normalizes as needed. */
   readonly endpoint: string;
-  /** Full API key secret from Cartethyia's key store. */
+  /** Full API key secret from wokroute's key store. */
   readonly apiKey: string;
   /** Model IDs to configure. */
   readonly models: readonly string[];

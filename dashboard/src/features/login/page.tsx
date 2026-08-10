@@ -6,7 +6,7 @@ import { ApiError, apiPost } from "../../lib/api";
 import { Button } from "../../components/ui/button";
 import { Input, Label } from "../../components/ui/input";
 
-const LOGIN_LOGO_URL = `${import.meta.env.BASE_URL}favicon_love.webp`;
+const LOGIN_LOGO_URL = `${import.meta.env.BASE_URL}logo.png`;
 
 export function LoginPage() {
   const [password, setPassword] = useState("");
@@ -56,7 +56,7 @@ export function LoginPage() {
           </div>
           <div>
             <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--accent)]">Private workspace</p>
-            <h1 className="text-2xl font-bold tracking-tight text-[var(--text-1)]">Cartethyia</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-[var(--text-1)]">Wokroute</h1>
             <p className="mt-1 text-sm text-[var(--text-2)]">Sign in to manage your gateway</p>
           </div>
         </div>

@@ -5,10 +5,10 @@ import { createConfigPersistence, resetConfigPersistenceForTests } from "../../s
 import type { PersistenceEnv } from "../../src/storage/main/env";
 
 function testEnv(): PersistenceEnv {
-  const dir = join(tmpdir(), `cartethyia-config-test-${process.pid}-${Math.random().toString(36).slice(2)}`);
+  const dir = join(tmpdir(), `wokroute-config-test-${process.pid}-${Math.random().toString(36).slice(2)}`);
   return {
     dataDir: dir,
-    dbPath: join(dir, "cartethyia.sqlite"),
+    dbPath: join(dir, "wokroute.sqlite"),
     runtimeDbPath: join(dir, "runtime.sqlite"),
     assetDir: join(dir, "assets"),
     logRetentionDays: 14,

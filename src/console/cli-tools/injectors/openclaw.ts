@@ -3,10 +3,10 @@
  * model defaults, and per-agent model mappings.
  *
  * OpenClaw config structure:
- *   settings.models.providers.cartethyia = { baseUrl, apiKey, api, models }
- *   settings.agents.defaults.model.primary = "cartethyia/model"
- *   settings.agents.defaults.models["cartethyia/model"] = {}
- *   settings.agents.list[].model = "cartethyia/model" (per-agent override)
+ *   settings.models.providers.wokroute = { baseUrl, apiKey, api, models }
+ *   settings.agents.defaults.model.primary = "wokroute/model"
+ *   settings.agents.defaults.models["wokroute/model"] = {}
+ *   settings.agents.list[].model = "wokroute/model" (per-agent override)
  *
  * Per-agent models.json files are written to agent.agentDir if present.
  */
@@ -23,7 +23,7 @@ import {
   writeJsonFile,
 } from "../fs-ops";
 
-const PROVIDER = "cartethyia";
+const PROVIDER = "wokroute";
 
 function settingsPath(): string {
   return join(homeDir(), ".openclaw", "openclaw.json");
@@ -86,7 +86,7 @@ export const openclawInjector: ToolInjector = {
     const baseUrl = ensureV1Suffix(input.endpoint);
     const allModels = [...new Set([...input.models, ...(input.activeModel ? [input.activeModel] : [])])];
 
-    // Remove old cartethyia/* model entries.
+    // Remove old wokroute/* model entries.
     const defaultModels = defaults.models as Record<string, unknown>;
     for (const key of Object.keys(defaultModels)) {
       if (key.startsWith(`${PROVIDER}/`)) delete defaultModels[key];
@@ -108,7 +108,7 @@ export const openclawInjector: ToolInjector = {
       models: allModels.map((m) => ({ id: m, name: m.split("/").pop() ?? m })),
     };
 
-    // Remove old cartethyia model from agent list entries.
+    // Remove old wokroute model from agent list entries.
     if (Array.isArray(agents.list)) {
       agents.list = (agents.list as Array<Record<string, unknown>>).map((agent) => {
         if (resolveAgentModel(agent.model).startsWith(`${PROVIDER}/`)) {
@@ -135,7 +135,7 @@ export const openclawInjector: ToolInjector = {
     // Remove provider.
     settings.models?.providers && delete settings.models.providers[PROVIDER];
 
-    // Remove cartethyia/* model entries.
+    // Remove wokroute/* model entries.
     const defaultModels = settings.agents?.defaults?.models;
     if (defaultModels) {
       for (const key of Object.keys(defaultModels)) {
@@ -143,7 +143,7 @@ export const openclawInjector: ToolInjector = {
       }
     }
 
-    // Clear default model if it points to cartethyia.
+    // Clear default model if it points to wokroute.
     const primary = resolveAgentModel(settings.agents?.defaults?.model);
     if (primary.startsWith(`${PROVIDER}/`)) {
       if (settings.agents?.defaults?.model && typeof settings.agents.defaults.model === "object") {
@@ -152,7 +152,7 @@ export const openclawInjector: ToolInjector = {
     }
 
     await writeJsonFile(path, settings);
-    return { success: true, settingsPath: path, message: "Cartethyia settings removed from Open Claw" };
+    return { success: true, settingsPath: path, message: "Wokroute settings removed from Open Claw" };
   },
 
   async download(input: ApplyInput): Promise<DownloadResult> {

@@ -5,12 +5,12 @@
  * backed ProxyPoolConfigStore behind the same interface.
  *
  * Environment format (ids use `[a-zA-Z0-9-]`; `-` maps to `_` in env suffixes):
- *   CARTETHYIA_PROXY_POOL_ENABLED=true|false          (default true)
- *   CARTETHYIA_PROXY_<ID>_URL=http://host:port        (required per proxy)
- *   CARTETHYIA_PROXY_<ID>_ENABLED=true|false          (default true)
- *   CARTETHYIA_PROXY_<ID>_MAX_CONCURRENCY=8           (default 8)
- *   CARTETHYIA_PROXY_<ID>_PRIORITY=0                  (default 0, higher first)
- *   CARTETHYIA_PROXY_<ID>_EXCLUDED_PROVIDERS=a,b      (comma-separated)
+ *   wokroute_PROXY_POOL_ENABLED=true|false          (default true)
+ *   wokroute_PROXY_<ID>_URL=http://host:port        (required per proxy)
+ *   wokroute_PROXY_<ID>_ENABLED=true|false          (default true)
+ *   wokroute_PROXY_<ID>_MAX_CONCURRENCY=8           (default 8)
+ *   wokroute_PROXY_<ID>_PRIORITY=0                  (default 0, higher first)
+ *   wokroute_PROXY_<ID>_EXCLUDED_PROVIDERS=a,b      (comma-separated)
  */
 
 export interface ProxyConfig {

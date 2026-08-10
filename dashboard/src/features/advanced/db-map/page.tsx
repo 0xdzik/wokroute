@@ -31,7 +31,7 @@ import type { DbTarget } from "./types";
 import { TreeMap } from "./tree-map";
 import { SqlConsole } from "./sql-console";
 
-const DB_MAP_AUTH_KEY = "cartethyia:db-map-auth";
+const DB_MAP_AUTH_KEY = "wokroute:db-map-auth";
 const DB_MAP_AUTH_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
 function isAuthed(): boolean {
@@ -127,7 +127,7 @@ export function DatabaseMapPage() {
   const importMut = useImportDb();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const dbName = db === "config" ? "cartethyia.sqlite" : "runtime.sqlite";
+  const dbName = db === "config" ? "wokroute.sqlite" : "runtime.sqlite";
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -225,7 +225,7 @@ export function DatabaseMapPage() {
           <TreeMap
             db={db}
             tables={schemaQuery.data.tables}
-            dbName={db === "config" ? "cartethyia.sqlite" : "runtime.sqlite"}
+            dbName={db === "config" ? "wokroute.sqlite" : "runtime.sqlite"}
           />
         )}
       </div>

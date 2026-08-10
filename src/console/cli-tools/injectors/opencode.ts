@@ -1,19 +1,19 @@
 /**
  * OpenCode injector — writes `~/.config/opencode/opencode.json` (JSON merge).
  *
- * OpenCode uses an OpenAI-compatible provider plugin. Cartethyia registers as
- * the "cartethyia" provider with `@ai-sdk/openai-compatible`, lists each model
+ * OpenCode uses an OpenAI-compatible provider plugin. wokroute registers as
+ * the "wokroute" provider with `@ai-sdk/openai-compatible`, lists each model
  * with text/image input modalities, and sets the active `model` to
- * `cartethyia/<activeModel>`. A fast `explorer` subagent is also wired to
- * `cartethyia/<subagentModel>`.
+ * `wokroute/<activeModel>`. A fast `explorer` subagent is also wired to
+ * `wokroute/<subagentModel>`.
  *
  * - getStatus: `which`/`where opencode` with config-file fallback; configured
- *   iff `provider.cartethyia` exists.
+ *   iff `provider.wokroute` exists.
  * - apply: merge provider entry, models map, active model, and explorer
  *   subagent into existing JSON, preserving all other fields.
- * - reset: remove only Cartethyia-injected fields — `provider.cartethyia`,
- *   `model` when it starts with `cartethyia/`, and `agent.explorer` when its
- *   model points at Cartethyia.
+ * - reset: remove only wokroute-injected fields — `provider.wokroute`,
+ *   `model` when it starts with `wokroute/`, and `agent.explorer` when its
+ *   model points at wokroute.
  * - download: render the opencode.json body without touching the filesystem.
  */
 
@@ -29,7 +29,7 @@ import {
   writeJsonFile,
 } from "../fs-ops";
 
-const PROVIDER = "cartethyia";
+const PROVIDER = "wokroute";
 const NPM = "@ai-sdk/openai-compatible";
 
 interface OpencodeModel {
@@ -129,7 +129,7 @@ export const opencodeInjector: ToolInjector = {
     // Ensure provider object exists; preserve other providers.
     if (!config.provider) config.provider = {};
 
-    // Merge cartethyia provider entry, preserving any existing models.
+    // Merge wokroute provider entry, preserving any existing models.
     const prior = config.provider[PROVIDER];
     const provider: OpencodeProvider = {
       npm: NPM,
@@ -151,7 +151,7 @@ export const opencodeInjector: ToolInjector = {
       config.model = `${PROVIDER}/${activeModel}`;
     }
 
-    // Wire the explorer subagent to Cartethyia.
+    // Wire the explorer subagent to wokroute.
     if (!config.agent) config.agent = {};
     const subagentModel = input.subagentModel ?? input.models[0] ?? activeModel;
     config.agent.explorer = {
@@ -169,25 +169,25 @@ export const opencodeInjector: ToolInjector = {
     const config = (await readJsonFile(path)) as OpencodeConfig | null;
     if (!config) return { success: true, message: "No config file to reset" };
 
-    // Remove only the Cartethyia provider entry.
+    // Remove only the wokroute provider entry.
     if (config.provider) {
       delete config.provider[PROVIDER];
       if (Object.keys(config.provider).length === 0) delete config.provider;
     }
 
-    // Clear the active model only if it points at Cartethyia.
+    // Clear the active model only if it points at wokroute.
     if (typeof config.model === "string" && config.model.startsWith(`${PROVIDER}/`)) {
       delete config.model;
     }
 
-    // Remove the explorer subagent only if it was wired to Cartethyia.
+    // Remove the explorer subagent only if it was wired to wokroute.
     if (config.agent?.explorer?.model?.startsWith(`${PROVIDER}/`)) {
       delete config.agent.explorer;
       if (Object.keys(config.agent).length === 0) delete config.agent;
     }
 
     await writeJsonFile(path, config);
-    return { success: true, settingsPath: path, message: "Cartethyia settings removed from OpenCode" };
+    return { success: true, settingsPath: path, message: "Wokroute settings removed from OpenCode" };
   },
 
   async download(input: ApplyInput): Promise<DownloadResult> {

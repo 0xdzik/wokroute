@@ -1,6 +1,6 @@
 # Auth & Security
 
-**How Cartethyia authenticates and authorizes across two distinct boundaries — the public data plane (API keys) and the authenticated console (sessions) — plus the account/credential lease layer, refresh lifecycle, and the network-egress security guards (SSRF + redirect policy).**
+**How Wokroute authenticates and authorizes across two distinct boundaries — the public data plane (API keys) and the authenticated console (sessions) — plus the account/credential lease layer, refresh lifecycle, and the network-egress security guards (SSRF + redirect policy).**
 
 ---
 
@@ -21,14 +21,14 @@ Keys are created in the console and carry an ACL enforced at dispatch time:
 
 - **Model ACL**: `modelAllowlist` / `modelDenylist` apply to **resolved** model IDs (after alias/combo resolution), so `GET /v1/models` shows only what the key may route.
 - **Provider/route scope**: which providers and routing policies a key may use.
-- **Per-IP admission**: bounded in-flight per IP (`MAX_FLIGHTS_PER_IP`); excess → rejected typed error. The in-memory tracking table auto-scales to available process memory (override via `CARTETHYIA_MAX_TRACKED_IPS`; default `0` = adaptive).
+- **Per-IP admission**: bounded in-flight per IP (`MAX_FLIGHTS_PER_IP`); excess → rejected typed error. The in-memory tracking table auto-scales to available process memory (override via `wokroute_MAX_TRACKED_IPS`; default `0` = adaptive).
 - **Limits**: usage limits and quota enforced through the limits + telemetry boundary.
 
 ### Auth headers
 
 ```bash
-Authorization: Bearer <CARTETHYIA_API_KEY>
-x-api-key: <CARTETHYIA_API_KEY>
+Authorization: Bearer <wokroute_API_KEY>
+x-api-key: <wokroute_API_KEY>
 ```
 
 Never log the key, bearer token, or raw authorization headers.

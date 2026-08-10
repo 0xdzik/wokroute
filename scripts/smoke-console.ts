@@ -1,9 +1,9 @@
 const port = 12999;
 const dataDir = `${process.cwd()}/.tmp-console-smoke-${Date.now()}`;
-const password = "cartethyia-smoke-password";
+const password = "wokroute-smoke-password";
 const processHandle = Bun.spawn(["bun", "run", "src/main.ts"], {
   cwd: process.cwd(),
-  env: { ...Bun.env, PORT: String(port), DATA_DIR: dataDir, CONSOLE_PASSWORD: password, CONSOLE_JWT_SECRET: "cartethyia-smoke-secret-123456789" },
+  env: { ...Bun.env, PORT: String(port), DATA_DIR: dataDir, CONSOLE_PASSWORD: password, CONSOLE_JWT_SECRET: "wokroute-smoke-secret-123456789" },
   stdout: "ignore",
   stderr: "pipe",
 });

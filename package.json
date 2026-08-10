@@ -1,14 +1,56 @@
 {
-  "name": "cartethyia",
-  "version": "1.0.8-alpha",
-  "description": "OpenAI <-> Anthropic compat reverse proxy (Chat Completions, Responses, Messages) with prompt-cache passthrough and image decode.",
-  "private": true,
+  "name": "wokroute",
+  "version": "1.0.0",
+  "description": "Self-hosted Bun + Elysia AI proxy with an authenticated web console. Forwards OpenAI Chat Completions, OpenAI Responses, and Anthropic Messages across 30+ provider adapters with OAuth and API-key credentials, translates responses cross-protocol, and manages everything from a real-time dashboard.",
+  "license": "GPL-3.0-only",
+  "author": "0xdzik",
+  "homepage": "https://github.com/0xdzik/wokroute",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0xdzik/wokroute.git"
+  },
+  "bugs": {
+    "url": "https://github.com/0xdzik/wokroute/issues"
+  },
+  "keywords": [
+    "proxy",
+    "openai",
+    "anthropic",
+    "ai-gateway",
+    "elysia",
+    "bun",
+    "reverse-proxy",
+    "oauth",
+    "claude",
+    "gemini",
+    "model-routing"
+  ],
   "type": "module",
   "module": "src/main.ts",
+  "main": "src/main.ts",
+  "bin": {
+    "wokroute": "src/main.ts"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "files": [
+    "src",
+    "vendor",
+    "scripts",
+    "dashboard/dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    ".env.example"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "bun run --watch src/main.ts",
     "start": "bun run src/main.ts",
-    "build": "bun build --compile --minify --bytecode --target bun --outfile dist/cartethyia src/main.ts",
+    "build": "bun build --compile --minify --bytecode --target bun --outfile dist/wokroute src/main.ts",
     "test": "bun test ./test/**/*.test.ts",
     "test:coverage": "bun test --coverage --timeout 60000 test/",
     "smoke:console": "bun run scripts/smoke-console.ts",

@@ -1,9 +1,9 @@
 services:
-  cartethyia:
+  wokroute:
     build:
       context: .
       dockerfile: Dockerfile
-    image: cartethyia
+    image: wokroute
     restart: unless-stopped
     ports:
       - "12800:8080"
@@ -38,7 +38,7 @@ services:
       - CONSOLE_PASSWORD=${CONSOLE_PASSWORD:-change-me}
       - CONSOLE_JWT_SECRET=${CONSOLE_JWT_SECRET:-replace-with-a-long-random-secret}
     volumes:
-      - cartethyia-data:/app/data
+      - wokroute-data:/app/data
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
       interval: 30s
@@ -47,4 +47,4 @@ services:
       retries: 3
 
 volumes:
-  cartethyia-data:
+  wokroute-data:

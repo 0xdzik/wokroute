@@ -429,7 +429,9 @@ function toResponsesItem(message: NormalizedMessage): readonly Record<string, un
     }
     case "tool": {
       const block = message.content[0];
-      return [{ type: "function_call_output", call_id: block?.toolCallId ?? "", output: block?.text ?? "" }];
+      // The Responses API nests `function_call_output` inside a `role:"user"`
+      // message item — a bare top-level item is rejected by the wire surface.
+      return [{ role: "user", content: [{ type: "function_call_output", call_id: block?.toolCallId ?? "", output: block?.text ?? "" }] }];
     }
   }
 }

@@ -5,6 +5,6 @@ set -eu
 # the mount can be root-owned even though the image data directory is not.
 # Repair ownership before dropping privileges to the application user.
 mkdir -p /app/data /app/data/warp /app/bin
-chown -R cartethyia:cartethyia /app/data /app/bin
+chown -R wokroute:wokroute /app/data /app/bin
 
-exec su-exec cartethyia "$@"
+exec su-exec wokroute "$@"

@@ -1,12 +1,27 @@
-# Cartethyia
-
-> # WARNING WARNING WARNING
-> ## CARTETHYIA IS STILL FRAGILE. GUNAKAN DENGAN RISIKO SENDIRI.
-> ## PROJECT INI TIDAK MENERIMA PR.
+# Wokroute
 
 A self-hosted Bun + Elysia AI proxy with an authenticated web console. Accepts OpenAI Chat Completions, OpenAI Responses, and Anthropic Messages requests, routes them across 30+ provider adapters with OAuth and API-key credentials, translates responses cross-protocol, and manages everything from a real-time dashboard.
 
-**Current release:** `1.0.8-alpha` (2026-08-06)
+![Wokroute dashboard overview](docs/overview.png)
+
+**Current release:** `1.0.0`
+
+## Table of contents
+
+- [Features](#features)
+  - [Proxy core](#proxy-core)
+  - [Routing and failover](#routing-and-failover)
+  - [Providers](#providers)
+  - [Dashboard](#dashboard)
+  - [Security](#security)
+- [Quick start](#quick-start)
+- [API](#api)
+- [Configuration](#configuration)
+- [Docker](#docker)
+- [Development](#development)
+- [Documentation](#documentation)
+- [Project boundaries](#project-boundaries)
+- [Credits](#credits)
 
 ## Features
 
@@ -43,7 +58,7 @@ A self-hosted Bun + Elysia AI proxy with an authenticated web console. Accepts O
 | **Compatible** | AgentRouter, Command Code, Qoder, Kimchi |
 | **Custom** | Console-managed OpenAI-compatible and Anthropic-compatible endpoints with custom headers, model metadata, and `<slug>/<model>` routing |
 
-Provider adapters that proxy as a specific upstream client identity (Claude Code, Grok Build, Kiro, Qoder, etc.) emit that client's canonical `User-Agent` fingerprint so the upstream sees a legitimate session. Cartethyia never presents its own identity upstream.
+Provider adapters that proxy as a specific upstream client identity (Claude Code, Grok Build, Kiro, Qoder, etc.) emit that client's canonical `User-Agent` fingerprint so the upstream sees a legitimate session. Wokroute never presents its own identity upstream.
 
 ### Dashboard
 
@@ -74,19 +89,59 @@ Provider adapters that proxy as a specific upstream client identity (Claude Code
 
 Requirements: Bun 1.x and a writable data directory.
 
+### 1. Install dependencies
+
 ```bash
 bun install
 cd dashboard && bun install && cd ..
+```
+
+### 2. Configure environment
+
+```bash
 cp .env.example .env
+```
+
+Edit `.env` and set the two required secrets before first run:
+
+| Variable | Purpose |
+| --- | --- |
+| `CONSOLE_PASSWORD` | Console login password |
+| `BOOTSTRAP_PROXY_API_KEY` | Initial proxy API key |
+
+Optional: `CONSOLE_JWT_SECRET` (auto-generated on first run if unset), `DATA_DIR` (default `./data`).
+
+### 3. Run the server
+
+```bash
 bun run dev
 ```
 
-Open:
+### 4. Open the console
 
-- Console: <http://localhost:12800/console/login>
-- Health: <http://localhost:12800/health>
+Once running, visit:
 
-Set `CONSOLE_PASSWORD` and `BOOTSTRAP_PROXY_API_KEY` in `.env` for local use.
+- **Console:** <http://localhost:12800/console/login>
+- **Health:** <http://localhost:12800/health>
+
+Log in with the `CONSOLE_PASSWORD` you set, then create or manage API keys from the dashboard.
+
+## Usage (npm global install)
+
+After `npm i -g wokroute` (requires [Bun](https://bun.sh) on `PATH`):
+
+| Command | Action |
+| --- | --- |
+| `wokroute` | Run the server in the foreground |
+| `wokroute -d`, `wokroute --daemon` | Run in the background (writes a PID file to the data dir) |
+| `wokroute stop` | Stop a background daemon |
+| `wokroute install` | Install boot autostart (systemd / launchd / Windows startup) |
+| `wokroute uninstall` | Remove boot autostart |
+| `wokroute -h`, `wokroute --help` | Show help |
+
+On first run with no `CONSOLE_PASSWORD` set, the default password is `wokroute` — a warning is printed; change it from the console or set the env var.
+
+The data directory defaults to `~/.local/share/wokroute` (Linux), `~/Library/Application Support/wokroute` (macOS), or `%APPDATA%/wokroute` (Windows); override with `DATA_DIR`.
 
 ## API
 
@@ -103,15 +158,15 @@ Set `CONSOLE_PASSWORD` and `BOOTSTRAP_PROXY_API_KEY` in `.env` for local use.
 Authenticate proxy requests with either header:
 
 ```bash
-Authorization: Bearer <CARTETHYIA_API_KEY>
-x-api-key: <CARTETHYIA_API_KEY>
+Authorization: Bearer <WOKROUTE_API_KEY>
+x-api-key: <WOKROUTE_API_KEY>
 ```
 
 Example:
 
 ```bash
 curl http://localhost:12800/v1/chat/completions \
-  -H "Authorization: Bearer $CARTETHYIA_API_KEY" \
+  -H "Authorization: Bearer $WOKROUTE_API_KEY" \
   -H "content-type: application/json" \
   -d '{"model":"openai/gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}'
 ```
@@ -133,22 +188,22 @@ LOG_RETENTION_DAYS           # console log retention
 ASSET_RETENTION_DAYS         # asset retention
 ```
 
-Adaptive scaling is enabled by default — per-IP flight tracking, API-key admission, login rate limiting, and GC interval auto-derive from available process memory. Override via `CARTETHYIA_MAX_TRACKED_IPS`, `CARTETHYIA_MAX_TRACKED_KEYS`, `CARTETHYIA_LOGIN_MAX_TRACKED_IPS`, and `CARTETHYIA_GC_INTERVAL_MS` (all default `0` = adaptive).
+Adaptive scaling is enabled by default — per-IP flight tracking, API-key admission, login rate limiting, and GC interval auto-derive from available process memory. Override via `WOKROUTE_MAX_TRACKED_IPS`, `WOKROUTE_MAX_TRACKED_KEYS`, `WOKROUTE_LOGIN_MAX_TRACKED_IPS`, and `WOKROUTE_GC_INTERVAL_MS` (all default `0` = adaptive).
 
 For deployment, persist `DATA_DIR` and configure the console password, proxy API key, and JWT secret through the platform's secret manager.
 
 ## Docker
 
 ```bash
-docker build -t cartethyia .
+docker build -t wokroute .
 docker run --rm -p 12800:8080 \
   -e PORT=8080 \
   -e DATA_DIR=/app/data \
   -e CONSOLE_PASSWORD=change-me \
   -e CONSOLE_JWT_SECRET=replace-with-a-long-random-secret \
   -e BOOTSTRAP_PROXY_API_KEY=change-me \
-  -v cartethyia-data:/app/data \
-  cartethyia
+  -v wokroute-data:/app/data \
+    wokroute
 ```
 
 The container also exposes Warp SOCKS5 proxy ports `40001-40020` (internal `127.0.0.1` only). These are declared via `EXPOSE` and `expose:` so Railway and similar platforms are aware of the port range — the proxy pool connects to them over loopback inside the container. They are not mapped to the host.

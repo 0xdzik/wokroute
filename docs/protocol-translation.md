@@ -1,12 +1,12 @@
 ﻿# Protocol Translation & Response Shaping
 
-**How Cartethyia normalizes every client surface into one canonical contract, dispatches to the provider's native wire surface, and translates responses back to the client's requested surface — preserving text, reasoning, tool calls, usage, stop reasons, and refusals.**
+**How Wokroute normalizes every client surface into one canonical contract, dispatches to the provider's native wire surface, and translates responses back to the client's requested surface — preserving text, reasoning, tool calls, usage, stop reasons, and refusals.**
 
 ---
 
 ## Why this exists
 
-Cartethyia is an HTTP proxy and control plane, not a provider SDK. A single request can arrive on any of four public surfaces and route to any provider whose protocol differs:
+Wokroute is an HTTP proxy and control plane, not a provider SDK. A single request can arrive on any of four public surfaces and route to any provider whose protocol differs:
 
 | Client surface (endpoint) | Provider wire surface |
 |---|---|
@@ -209,7 +209,7 @@ interface ProviderUsage {
 - **Provider/transport failures** use the provider-call error contract (`ProviderCallError`): typed kind, `retryable`, `routeScope`, `detached` `retryAt`, and a **sanitized** message.
 - **Stream decode failures** (`StreamDecodeError`) convert to `ProviderCallError` via `toProviderCallError()`; never retryable by default.
 - **Safety refusals** map to `content_filter` stop reason and are surfaced on the requested surface without leaking raw upstream body.
-- No fake `Cartethyia`/`claude-code`/other upstream `User-Agent` is ever added; a client header is forwarded only when the adapter explicitly permits it.
+- No fake `Wokroute`/`claude-code`/other upstream `User-Agent` is ever added; a client header is forwarded only when the adapter explicitly permits it.
 
 ---
 

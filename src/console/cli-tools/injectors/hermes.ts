@@ -11,7 +11,7 @@
  *     base_url: "http://localhost:12800/v1"
  *
  * The `provider: "custom"` field is Hermes's own provider-type selector
- * (meaning "custom OpenAI-compatible endpoint"), not the Cartethyia provider
+ * (meaning "custom OpenAI-compatible endpoint"), not the wokroute provider
  * name, so it is kept verbatim from the 9router reference to match Hermes's
  * expected schema. We upsert/remove the whole `model:` block via regex so
  * all other YAML content is preserved.
@@ -137,7 +137,7 @@ export const hermesInjector: ToolInjector = {
     if (envText) {
       await writeTextFile(envPath(), envRemove(envText, API_KEY_ENV));
     }
-    return { success: true, settingsPath: path, message: "Cartethyia settings removed from Hermes Agent" };
+    return { success: true, settingsPath: path, message: "Wokroute settings removed from Hermes Agent" };
   },
 
   async download(input: ApplyInput): Promise<DownloadResult> {

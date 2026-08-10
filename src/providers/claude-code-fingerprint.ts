@@ -2,7 +2,7 @@
  * Claude Code compatibility constants kept in a leaf module. This avoids an
  * import cycle between the provider, OAuth driver, and registry.
  *
- * These constants describe the supported OAuth wire contract. Cartethyia does
+ * These constants describe the supported OAuth wire contract. wokroute does
  * not invent a User-Agent; an incoming Claude Code User-Agent is forwarded
  * only by the Claude adapter when the client actually supplied one.
  */

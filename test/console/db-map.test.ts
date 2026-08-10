@@ -8,7 +8,7 @@ import { isSensitiveColumn, SENSITIVE_COLUMN_NAMES } from "../../src/console/db-
 import type { PersistenceEnv } from "../../src/storage/main/env";
 
 function testEnv(): PersistenceEnv {
-  const dir = join(tmpdir(), `cartethyia-dbmap-test-${process.pid}-${Math.random().toString(36).slice(2)}`);
+  const dir = join(tmpdir(), `wokroute-dbmap-test-${process.pid}-${Math.random().toString(36).slice(2)}`);
   mkdirSync(dir, { recursive: true });
   const dbPath = join(dir, "config.sqlite");
   const runtimeDbPath = join(dir, "runtime.sqlite");
@@ -329,7 +329,7 @@ describe("DbMapService — exportDb", () => {
     const result = service.exportDb("config");
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.filename).toContain("cartethyia");
+      expect(result.filename).toContain("wokroute");
       expect(result.filename).toContain(".sqlite");
       expect(result.data.byteLength).toBeGreaterThan(0);
       // Verify magic header

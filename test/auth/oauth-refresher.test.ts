@@ -13,9 +13,9 @@ const PUBLIC_LOOKUP: (h: string) => Promise<readonly { address: string }[]> = as
 
 describe("createEnvOAuthRefresher", () => {
   const env = {
-    CARTETHYIA_OAUTH_CLAUDE_TOKEN_URL: "https://auth.example.com/token",
-    CARTETHYIA_OAUTH_CLAUDE_CLIENT_ID: "cid",
-    CARTETHYIA_OAUTH_CLAUDE_CLIENT_SECRET: "csecret",
+    wokroute_OAUTH_CLAUDE_TOKEN_URL: "https://auth.example.com/token",
+    wokroute_OAUTH_CLAUDE_CLIENT_ID: "cid",
+    wokroute_OAUTH_CLAUDE_CLIENT_SECRET: "csecret",
   };
 
   test("refreshes a token with bounded parse", async () => {
@@ -126,7 +126,7 @@ describe("driver-aware OAuth refresher", () => {
     const registry = new MapAuthDriverRegistry();
     const fallback = createEnvOAuthRefresher({
       resolveProvider: async () => "sample",
-      env: { CARTETHYIA_OAUTH_SAMPLE_TOKEN_URL: "https://token.example.com/refresh", CARTETHYIA_OAUTH_SAMPLE_CLIENT_ID: "client", CARTETHYIA_OAUTH_SAMPLE_CLIENT_SECRET: "secret" },
+      env: { wokroute_OAUTH_SAMPLE_TOKEN_URL: "https://token.example.com/refresh", wokroute_OAUTH_SAMPLE_CLIENT_ID: "client", wokroute_OAUTH_SAMPLE_CLIENT_SECRET: "secret" },
       lookup: async () => [{ address: "93.184.216.34" }],
       fetchFn: async () => new Response(JSON.stringify({ access_token: "env-access", refresh_token: "env-refresh", expires_in: 3_600 }), { status: 200 }),
     });
@@ -159,7 +159,7 @@ describe("bounded env OAuth refresher", () => {
   test("rejects an oversized response body", async () => {
     const refresher = createEnvOAuthRefresher({
       resolveProvider: async () => "sample",
-      env: { CARTETHYIA_OAUTH_SAMPLE_TOKEN_URL: "https://token.example.com/refresh", CARTETHYIA_OAUTH_SAMPLE_CLIENT_ID: "client", CARTETHYIA_OAUTH_SAMPLE_CLIENT_SECRET: "secret" },
+      env: { wokroute_OAUTH_SAMPLE_TOKEN_URL: "https://token.example.com/refresh", wokroute_OAUTH_SAMPLE_CLIENT_ID: "client", wokroute_OAUTH_SAMPLE_CLIENT_SECRET: "secret" },
       fetchFn: async () => new Response(JSON.stringify({ access_token: "a".repeat(4_000), expires_in: 60 }), { status: 200 }),
       lookup: async () => [{ address: "93.184.216.34" }],
       maxBytes: 1_024,
@@ -172,7 +172,7 @@ describe("bounded env OAuth refresher", () => {
   test("rejects a non-HTTPS token URL through the SSRF guard", async () => {
     const refresher = createEnvOAuthRefresher({
       resolveProvider: async () => "sample",
-      env: { CARTETHYIA_OAUTH_SAMPLE_TOKEN_URL: "http://token.example.com/refresh", CARTETHYIA_OAUTH_SAMPLE_CLIENT_ID: "client", CARTETHYIA_OAUTH_SAMPLE_CLIENT_SECRET: "secret" },
+      env: { wokroute_OAUTH_SAMPLE_TOKEN_URL: "http://token.example.com/refresh", wokroute_OAUTH_SAMPLE_CLIENT_ID: "client", wokroute_OAUTH_SAMPLE_CLIENT_SECRET: "secret" },
     });
     const result = await refresher.refresh({ accountId: "account-1", token: { accessToken: "old", refreshToken: "refresh", expiresAtMs: 1, kind: "oauth" } });
     expect(result.ok).toBe(false);
@@ -182,7 +182,7 @@ describe("bounded env OAuth refresher", () => {
   test("rejects a 401 token endpoint response as authentication failure", async () => {
     const refresher = createEnvOAuthRefresher({
       resolveProvider: async () => "sample",
-      env: { CARTETHYIA_OAUTH_SAMPLE_TOKEN_URL: "https://token.example.com/refresh", CARTETHYIA_OAUTH_SAMPLE_CLIENT_ID: "client", CARTETHYIA_OAUTH_SAMPLE_CLIENT_SECRET: "secret" },
+      env: { wokroute_OAUTH_SAMPLE_TOKEN_URL: "https://token.example.com/refresh", wokroute_OAUTH_SAMPLE_CLIENT_ID: "client", wokroute_OAUTH_SAMPLE_CLIENT_SECRET: "secret" },
       fetchFn: async () => new Response("denied", { status: 401 }),
       lookup: async () => [{ address: "93.184.216.34" }],
     });

@@ -20,7 +20,7 @@
  */
 import { Database } from "bun:sqlite";
 
-export const BACKUP_APP = "cartethyia";
+export const BACKUP_APP = "wokroute";
 export const BACKUP_VERSION = 1;
 
 /** Max accepted restore payload size (bytes). Sidebar icon data URLs alone can reach ~36 MiB. */

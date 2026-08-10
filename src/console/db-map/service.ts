@@ -444,7 +444,7 @@ export class DbMapService {
 
     try {
       const data = readFileSync(path);
-      const filename = `${target === "config" ? "cartethyia" : "runtime"}-${new Date().toISOString().slice(0, 10)}.sqlite`;
+      const filename = `${target === "config" ? "wokroute" : "runtime"}-${new Date().toISOString().slice(0, 10)}.sqlite`;
       return { ok: true, filename, data: new Uint8Array(data.buffer, data.byteOffset, data.byteLength) };
     } catch (error) {
       return { ok: false, error: sanitizeMessage(error instanceof Error ? error.message : "export failed") };
@@ -469,7 +469,7 @@ export class DbMapService {
     }
 
     // Write to a temp file and validate it opens
-    const tempPath = join(tmpdir(), `cartethyia-import-${target}-${process.pid}-${Date.now()}.sqlite`);
+    const tempPath = join(tmpdir(), `wokroute-import-${target}-${process.pid}-${Date.now()}.sqlite`);
     try {
       writeFileSync(tempPath, data);
 

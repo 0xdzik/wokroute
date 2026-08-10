@@ -2,18 +2,18 @@
  * OpenAI Codex CLI injector — writes ~/.codex/config.toml (TOML merge) and
  * ~/.codex/auth.json (API key). Codex uses the Responses API surface.
  *
- * config.toml structure (Cartethyia-injected fields):
+ * config.toml structure (wokroute-injected fields):
  *   model = "model-id"
- *   model_provider = "cartethyia"
- *   [model_providers.cartethyia]
- *     name = "Cartethyia"
+ *   model_provider = "wokroute"
+ *   [model_providers.wokroute]
+ *     name = "wokroute"
  *     base_url = "http://host:12800/v1"
  *     wire_api = "responses"
  *   [agents.subagent]
  *     model = "subagent-model"
  *
  * auth.json:
- *   { "cartethyia": "api-key-secret" }
+ *   { "wokroute": "api-key-secret" }
  */
 
 import type { ApplyInput, ApplyResult, DownloadResult, ToolInjector, ToolStatus } from "../types";
@@ -34,7 +34,7 @@ import {
   writeTextFile,
 } from "../fs-ops";
 
-const PROVIDER = "cartethyia";
+const PROVIDER = "wokroute";
 
 function configPath(): string {
   return `${homeDir()}/.codex/config.toml`;
@@ -84,7 +84,7 @@ export const codexInjector: ToolInjector = {
     text = tomlUpsertFlat(text, "model", model);
     text = tomlUpsertFlat(text, "model_provider", PROVIDER);
     text = tomlUpsertSection(text, `model_providers.${PROVIDER}`, [
-    `  name = "Cartethyia"`,
+    `  name = "wokroute"`,
     `  base_url = "${baseUrl}"`,
     `  wire_api = "responses"`,
     ].join("\n"));
@@ -117,7 +117,7 @@ export const codexInjector: ToolInjector = {
       delete auth[PROVIDER];
       await writeJsonFile(authPath(), auth);
     }
-    return { success: true, settingsPath: path, message: "Cartethyia settings removed from Codex" };
+    return { success: true, settingsPath: path, message: "Wokroute settings removed from Codex" };
   },
 
   async download(input: ApplyInput): Promise<DownloadResult> {
@@ -129,7 +129,7 @@ export const codexInjector: ToolInjector = {
       `model_provider = "${PROVIDER}"`,
       "",
       `[model_providers.${PROVIDER}]`,
-      `  name = "Cartethyia"`,
+      `  name = "wokroute"`,
       `  base_url = "${baseUrl}"`,
       `  wire_api = "responses"`,
       "",

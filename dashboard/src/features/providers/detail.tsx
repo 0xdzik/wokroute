@@ -1145,7 +1145,7 @@ export function ProviderDetailPage() {
     mutationFn: () => apiPost<OAuthLoginStart>(`/providers/${id}/oauth/start`, { name: `${data?.name ?? id} ${(data?.accounts.length ?? 0) + 1}` }),
     onSuccess: (session) => {
       setOauthSession(session);
-      oauthPopupRef.current = window.open(session.authorizationUrl, "cartethyia-oauth", "popup,width=720,height=820");
+      oauthPopupRef.current = window.open(session.authorizationUrl, "wokroute-oauth", "popup,width=720,height=820");
       if (!oauthPopupRef.current) toast.error("Allow popups to start OAuth authorization, or use the authorization URL in the dialog.");
     },
     onError: (error) => toast.error(errorMessage(error)),

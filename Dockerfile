@@ -34,10 +34,10 @@ ENV NODE_ENV=production \
     DATA_DIR=/app/data
 
 RUN apk add --no-cache su-exec \
-    && addgroup -S cartethyia \
-    && adduser -S -G cartethyia cartethyia \
+    && addgroup -S wokroute \
+    && adduser -S -G wokroute wokroute \
     && mkdir -p /app/data /app/data/warp /app/bin \
-    && chown -R cartethyia:cartethyia /app
+    && chown -R wokroute:wokroute /app
 
 # CLI tools for the Terminal page.
 RUN apk add --no-cache \
@@ -49,20 +49,20 @@ RUN apk add --no-cache \
       htop \
       iproute2 \
       bind-tools \
-    && echo 'export PS1="cartethyia@localhost:\\w\\$ "' >> /etc/profile.d/cartethyia.sh
+    && echo 'export PS1="wokroute@localhost:\\w\\$ "' >> /etc/profile.d/wokroute.sh
 
 # Copy Go-built binaries (statically linked, no runtime deps).
-COPY --from=go-build --chown=cartethyia:cartethyia /out/wgcf /app/bin/wgcf
-COPY --from=go-build --chown=cartethyia:cartethyia /out/wireproxy /app/bin/wireproxy
+COPY --from=go-build --chown=wokroute:wokroute /out/wgcf /app/bin/wgcf
+COPY --from=go-build --chown=wokroute:wokroute /out/wireproxy /app/bin/wireproxy
 
-COPY --from=build --chown=cartethyia:cartethyia /app/package.json /app/bun.lock ./
-COPY --from=build --chown=cartethyia:cartethyia /app/node_modules ./node_modules
-COPY --from=build --chown=cartethyia:cartethyia /app/src ./src
-COPY --from=build --chown=cartethyia:cartethyia /app/dashboard/dist ./dashboard/dist
+COPY --from=build --chown=wokroute:wokroute /app/package.json /app/bun.lock ./
+COPY --from=build --chown=wokroute:wokroute /app/node_modules ./node_modules
+COPY --from=build --chown=wokroute:wokroute /app/src ./src
+COPY --from=build --chown=wokroute:wokroute /app/dashboard/dist ./dashboard/dist
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod 0755 /usr/local/bin/docker-entrypoint.sh
 
-# Cartethyia main HTTP server — Railway auto-detects this port.
+# wokroute main HTTP server — Railway auto-detects this port.
 EXPOSE 8080
 
 # Warp SOCKS5 proxy ports (internal 127.0.0.1, used by the proxy pool).

@@ -4,7 +4,7 @@
  *
  * - settings.json: merge env block (ANTHROPIC_BASE_URL, ANTHROPIC_AUTH_TOKEN,
  *   model defaults) into existing JSON, preserving all other fields.
- * - .claude.json: no MCP injection for Cartethyia (we are the proxy, not an
+ * - .claude.json: no MCP injection for wokroute (we are the proxy, not an
  *   MCP server). Only settings.json env is managed.
  */
 
@@ -90,7 +90,7 @@ export const claudeInjector: ToolInjector = {
       for (const key of envKeys()) delete settings.env[key];
     }
     await writeJsonFile(path, settings);
-    return { success: true, settingsPath: path, message: "Cartethyia settings removed from Claude Code" };
+    return { success: true, settingsPath: path, message: "Wokroute settings removed from Claude Code" };
   },
 
   async download(input: ApplyInput): Promise<DownloadResult> {

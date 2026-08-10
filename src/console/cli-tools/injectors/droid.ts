@@ -1,11 +1,11 @@
 /**
  * Factory Droid injector — writes customModels to ~/.factory/settings.json.
  *
- * - settings.customModels: remove existing Cartethyia entries, then add one
- *   per model: { id: "custom:Cartethyia:<model>", name, baseUrl, apiKey,
+ * - settings.customModels: remove existing wokroute entries, then add one
+ *   per model: { id: "custom:wokroute:<model>", name, baseUrl, apiKey,
  *   provider: "openai" }. Other user-defined customModels are preserved.
  * - settings.model: set to activeModel when provided.
- * - Reset removes only Cartethyia entries (id starts "custom:Cartethyia").
+ * - Reset removes only wokroute entries (id starts "custom:wokroute").
  */
 
 import type { ApplyInput, ApplyResult, DownloadResult, ToolInjector, ToolStatus } from "../types";
@@ -19,8 +19,8 @@ import {
   writeJsonFile,
 } from "../fs-ops";
 
-/** ID prefix marking a Cartethyia-managed custom model entry. */
-const CARTETHYIA_PREFIX = "custom:Cartethyia";
+/** ID prefix marking a wokroute-managed custom model entry. */
+const wokroute_PREFIX = "custom:wokroute";
 
 function settingsPath(): string {
   return `${homeDir()}/.factory/settings.json`;
@@ -40,8 +40,8 @@ interface DroidSettings {
   [k: string]: unknown;
 }
 
-function isCartethyiaModel(m: { id?: string } | null | undefined): boolean {
-  return typeof m?.id === "string" && m.id.startsWith(CARTETHYIA_PREFIX);
+function iswokrouteModel(m: { id?: string } | null | undefined): boolean {
+  return typeof m?.id === "string" && m.id.startsWith(wokroute_PREFIX);
 }
 
 export const droidInjector: ToolInjector = {
@@ -54,7 +54,7 @@ export const droidInjector: ToolInjector = {
       return { toolId: "droid", installed: false, configured: false, settingsPath: null, currentEndpoint: null, currentApiKeyPrefix: null, currentModels: null };
     }
     const settings = (await readJsonFile(path)) as DroidSettings | null;
-    const ours = (settings?.customModels ?? []).filter(isCartethyiaModel);
+    const ours = (settings?.customModels ?? []).filter(iswokrouteModel);
     if (ours.length === 0) {
       return { toolId: "droid", installed: true, configured: false, settingsPath: path, currentEndpoint: null, currentApiKeyPrefix: null, currentModels: null };
     }
@@ -75,13 +75,13 @@ export const droidInjector: ToolInjector = {
     await ensureDir(`${homeDir()}/.factory`);
     const existing = ((await readJsonFile(path)) as DroidSettings | null) ?? {};
     const settings: DroidSettings = { ...existing };
-    // Merge: keep user's non-Cartethyia models, drop our stale entries.
-    const kept = (settings.customModels ?? []).filter((m) => !isCartethyiaModel(m));
+    // Merge: keep user's non-wokroute models, drop our stale entries.
+    const kept = (settings.customModels ?? []).filter((m) => !iswokrouteModel(m));
     const baseUrl = ensureV1Suffix(input.endpoint);
     const apiKey = input.apiKey || "your_api_key";
     const added = input.models.map(
       (m): DroidCustomModel => ({
-        id: `${CARTETHYIA_PREFIX}:${m}`,
+        id: `${wokroute_PREFIX}:${m}`,
         name: m,
         baseUrl,
         apiKey,
@@ -99,18 +99,18 @@ export const droidInjector: ToolInjector = {
     const settings = (await readJsonFile(path)) as DroidSettings | null;
     if (!settings) return { success: true, message: "No settings file to reset" };
     if (settings.customModels) {
-      settings.customModels = settings.customModels.filter((m) => !isCartethyiaModel(m));
+      settings.customModels = settings.customModels.filter((m) => !iswokrouteModel(m));
       if (settings.customModels.length === 0) delete settings.customModels;
     }
     await writeJsonFile(path, settings);
-    return { success: true, settingsPath: path, message: "Cartethyia settings removed from Factory Droid" };
+    return { success: true, settingsPath: path, message: "Wokroute settings removed from Factory Droid" };
   },
 
   async download(input: ApplyInput): Promise<DownloadResult> {
     const baseUrl = ensureV1Suffix(input.endpoint);
     const apiKey = input.apiKey || "your_api_key";
     const customModels = input.models.map((m): DroidCustomModel => ({
-      id: `${CARTETHYIA_PREFIX}:${m}`,
+      id: `${wokroute_PREFIX}:${m}`,
       name: m,
       baseUrl,
       apiKey,

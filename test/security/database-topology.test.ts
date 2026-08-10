@@ -19,7 +19,7 @@ function names(db: Database, kind: "table" | "index", table?: string): string[] 
 
 describe("database topology", () => {
   test("does not reopen closed databases or retain stalled runtime writes", async () => {
-    const root = mkdtempSync(join(tmpdir(), "cartethyia-close-"));
+    const root = mkdtempSync(join(tmpdir(), "wokroute-close-"));
     const persistenceEnv = env(root);
     const config = createConfigPersistence(persistenceEnv);
     const runtime = createRuntimePersistence({ ...persistenceEnv, runtimeDbPath: join(root, "blocked-runtime") });
@@ -52,7 +52,7 @@ describe("database topology", () => {
   });
 
   test("persists and clears console logs through runtime storage", () => {
-    const root = mkdtempSync(join(tmpdir(), "cartethyia-logs-"));
+    const root = mkdtempSync(join(tmpdir(), "wokroute-logs-"));
     const persistenceEnv = env(root);
     const runtime = createRuntimePersistence(persistenceEnv);
     try {
@@ -68,7 +68,7 @@ describe("database topology", () => {
   });
 
   test("keeps config state and runtime logs/history in separate fast schemas", () => {
-    const root = mkdtempSync(join(tmpdir(), "cartethyia-topology-"));
+    const root = mkdtempSync(join(tmpdir(), "wokroute-topology-"));
     const persistenceEnv = env(root);
     const config = createConfigPersistence(persistenceEnv);
     config.settings.getSettingsJson();

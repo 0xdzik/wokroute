@@ -60,7 +60,7 @@ interface AppearanceSettingsResponse {
   };
 }
 
-const GITHUB_REPO = "risunCode/Cartethyia";
+const GITHUB_REPO = "0xdzik/wokroute";
 
 // ---------------------------------------------------------------------------
 // StatusClock — header status pill (operational state + server clocks +
@@ -85,7 +85,6 @@ function StatusClock({ statusData, isError }: { statusData: HealthStatus | undef
   }, [statusData]);
 
   const serverNowMs = nowMs + clockOffsetRef.current;
-  const serverNow = new Date(serverNowMs);
   const serverLocalNow = new Date(serverNowMs - tzOffsetRef.current * 60_000);
   const liveUptimeSeconds = startedAtRef.current !== null
     ? (serverNowMs - startedAtRef.current) / 1000
@@ -112,10 +111,6 @@ function StatusClock({ statusData, isError }: { statusData: HealthStatus | undef
         )}
       </span>
       <span className="h-3.5 w-px bg-[var(--border-subtle)]" aria-hidden="true" />
-      <span className="flex items-center gap-1.5 tabular-nums" title="UTC time">
-        <Globe size={12} className="shrink-0" />
-        {serverNow.toLocaleTimeString("en-GB", { timeZone: "UTC", hour12: false })} UTC
-      </span>
       <span className="hidden items-center gap-1.5 tabular-nums md:flex" title="Server system time">
         <Clock size={12} className="shrink-0" />
         {serverLocalNow.toLocaleTimeString("en-GB", { timeZone: "UTC", hour12: false })}
@@ -318,7 +313,7 @@ function NotificationsDialog({
               </span>
               <div className="min-w-0">
                 <p className="font-semibold text-[var(--text-1)]">{isHealthError ? "System status unavailable" : statusData ? "All systems operational" : "Checking system status"}</p>
-                <p className="mt-0.5 text-xs leading-relaxed text-[var(--text-2)]">{isHealthError ? "The dashboard could not reach the local health endpoint." : "Live status from this Cartethyia instance."}</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-[var(--text-2)]">{isHealthError ? "The dashboard could not reach the local health endpoint." : "Live status from this Wokroute instance."}</p>
               </div>
             </div>
             {updateAvailable ? (
@@ -385,17 +380,17 @@ export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [railCollapsed, setRailCollapsed] = useState(() => localStorage.getItem("cartethyia.railCollapsed") === "1");
+  const [railCollapsed, setRailCollapsed] = useState(() => localStorage.getItem("wokroute.railCollapsed") === "1");
   const toggleRailCollapsed = () => {
     setRailCollapsed((collapsed) => {
       const next = !collapsed;
-      localStorage.setItem("cartethyia.railCollapsed", next ? "1" : "0");
+      localStorage.setItem("wokroute.railCollapsed", next ? "1" : "0");
       return next;
     });
   };
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [adminName, setAdminName] = useState(() => localStorage.getItem("cartethyia.adminName") ?? "Admin");
+  const [adminName, setAdminName] = useState(() => localStorage.getItem("wokroute.adminName") ?? "Admin");
   const [adminNameDraft, setAdminNameDraft] = useState(adminName);
   const [editingAdminName, setEditingAdminName] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -556,15 +551,15 @@ export function AppShell() {
           href={`https://github.com/${GITHUB_REPO}`}
           target="_blank"
           rel="noreferrer"
-          title="Cartethyia Router on GitHub"
+          title="Wokroute Router on GitHub"
           className="block shrink-0 transition-transform hover:scale-105 active:scale-95"
         >
           <img
-            src={appearanceQuery.data?.settings.runtime.sidebarIconDataUrl || `${import.meta.env.BASE_URL}favicon_love.webp`}
-            alt="Cartethyia"
+            src={appearanceQuery.data?.settings.runtime.sidebarIconDataUrl || `${import.meta.env.BASE_URL}logo.png`}
+            alt="Wokroute"
             onError={(event) => {
               event.currentTarget.onerror = null;
-              event.currentTarget.src = `${import.meta.env.BASE_URL}favicon_love.webp`;
+              event.currentTarget.src = `${import.meta.env.BASE_URL}logo.png`;
             }}
             className="size-9 rounded-xl object-cover"
           />
@@ -576,7 +571,7 @@ export function AppShell() {
             rel="noreferrer"
             className="block truncate text-[13.5px] font-bold tracking-tight text-[var(--text-1)] transition-colors hover:text-[var(--accent)]"
           >
-            Cartethyia
+            Wokroute
           </a>
           <a
             href={releaseQuery.data?.html_url ?? `https://github.com/${GITHUB_REPO}/releases`}
@@ -703,7 +698,7 @@ export function AppShell() {
               </div>
               <div className="min-w-0">
                 <div className="truncate text-[13px] font-bold leading-tight">{adminName}</div>
-                <div className="text-[10.5px] text-[var(--text-3)]">Cartethyia console</div>
+                <div className="text-[10.5px] text-[var(--text-3)]">Wokroute console</div>
               </div>
             </div>
             <div className="pt-2">
@@ -714,7 +709,7 @@ export function AppShell() {
                     event.preventDefault();
                     const next = adminNameDraft.trim() || "Admin";
                     setAdminName(next);
-                    localStorage.setItem("cartethyia.adminName", next);
+                    localStorage.setItem("wokroute.adminName", next);
                     setEditingAdminName(false);
                   }}
                 >
@@ -766,7 +761,7 @@ export function AppShell() {
           </span>
           <span className={cn("min-w-0 flex-1", railCollapsed && "lg:hidden")}>
             <span className="block truncate text-[12.5px] font-bold leading-tight text-[var(--text-1)]">{adminName}</span>
-            <span className="block truncate text-[10.5px] text-[var(--text-3)]">Cartethyia console</span>
+            <span className="block truncate text-[10.5px] text-[var(--text-3)]">Wokroute console</span>
           </span>
         </button>
       </div>

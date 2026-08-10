@@ -12,7 +12,7 @@ import { toast } from "../../lib/toast";
 import { ApiError, apiDelete, apiGet, apiPatch, apiPost } from "../../lib/api";
 import { qk } from "../../lib/query-keys";
 import { Button } from "../../components/ui/button";
-import { Card, CardHeader } from "../../components/ui/card";
+import { Card } from "../../components/ui/card";
 import { Dialog } from "../../components/ui/dialog";
 import { Input, Label, Textarea } from "../../components/ui/input";
 import { Badge } from "../../components/ui/badge";
@@ -259,27 +259,39 @@ function ProxyPoolSection() {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = "cartethyia-proxies.txt";
+    anchor.download = "wokroute-proxies.txt";
     anchor.click();
     URL.revokeObjectURL(url);
     toast.success(`Exported ${targets.length} proxies`);
   };
 
   return (
-    <Card className="space-y-4">
-      <CardHeader title="Proxy Pool" icon={ShieldCheck} sub="Outbound proxy servers - HTTP, HTTPS, and SOCKS5, with automatic failover">
-        <Button size="sm" className="w-full sm:w-auto" onClick={() => openModal(null)}>
-          <Plus size={14} /> New proxy
-        </Button>
-      </CardHeader>
-
+    <>
+    <section>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <StatCard label="Enabled pool" icon={ShieldCheck} tone="accent" value={<>{items.filter((proxy) => proxy.active).length}<span className="ml-1 text-[11px] font-normal text-[var(--text-3)]">/ {items.length}</span></>} loading={poolLoading} />
         <StatCard label="Route capacity" icon={Gauge} tone="info" value={<>{items.reduce((total, proxy) => total + (proxy.active ? proxy.maxConcurrency : 0), 0)}<span className="ml-1 text-[11px] font-normal text-[var(--text-3)]">in-flight</span></>} loading={poolLoading} />
         <StatCard label="Weighted units" icon={Activity} tone="neutral" value={items.reduce((total, proxy) => total + (proxy.active ? proxy.weight : 0), 0)} loading={poolLoading} />
       </div>
+    </section>
+    <section className="space-y-2">
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex items-start gap-2.5">
+          <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[9px]" style={{ backgroundColor: "color-mix(in srgb, var(--accent) 12%, transparent)", color: "var(--accent)" }}>
+            <ShieldCheck size={15} aria-hidden={true} />
+          </span>
+          <div className="min-w-0">
+            <h2 className="truncate text-sm font-bold">Proxy Pool</h2>
+            <p className="mt-0.5 truncate text-[11.5px] text-[var(--text-2)]">Outbound proxy servers — HTTP, HTTPS, and SOCKS5, with automatic failover</p>
+          </div>
+        </div>
+        <Button size="sm" className="w-full sm:w-auto" onClick={() => openModal(null)}>
+          <Plus size={14} /> New proxy
+        </Button>
+      </div>
+      <Card className="space-y-4">
 
-      <div className="flex flex-col gap-2 rounded-xl border border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-3">
           <label className="flex items-center gap-2 text-[11px] text-[var(--text-2)]">
             <input type="checkbox" checked={allSelected} onChange={toggleAll} aria-label="Select all proxies" />
@@ -309,13 +321,11 @@ function ProxyPoolSection() {
       </div>
 
       <div className="scrollbar-fade max-h-[28rem] overflow-y-auto pr-0.5">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="divide-y divide-[var(--inner-border)]">
         {poolLoading ? (
-          <div className="sm:col-span-2 xl:col-span-3">
-            <StatePanel kind="loading" title="Loading proxies" description="Reading the proxy pool…" icon={ShieldCheck} />
-          </div>
+          <StatePanel kind="loading" title="Loading proxies" description="Reading the proxy pool…" icon={ShieldCheck} />
         ) : items.length === 0 ? (
-          <div className="sm:col-span-2 xl:col-span-3 flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[var(--accent)]/30 bg-[var(--accent-soft)]/40 px-6 py-12 text-center">
+          <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[var(--accent)]/30 bg-[var(--accent-soft)]/40 px-6 py-12 text-center">
             <Network size={28} className="text-[var(--accent)]" />
             <div>
               <p className="text-sm font-bold">No proxies yet</p>
@@ -333,7 +343,7 @@ function ProxyPoolSection() {
           const isTesting = testingIds.has(proxy.id);
           const hasError = proxy.health?.status === "error";
           return (
-            <article key={proxy.id} className="rounded-2xl border border-[var(--inner-border)] bg-[var(--surface)] p-3.5 transition-colors hover:border-[var(--accent)]/40 hover:bg-[var(--surface-muted)]">
+            <article key={proxy.id} className="flex flex-col gap-3 py-3 transition-colors first:pt-0 last:pb-0">
               <div className="flex items-start gap-3">
                 <input className="mt-1 size-3.5 shrink-0" type="checkbox" checked={selectedIds.has(proxy.id)} onChange={() => toggleSelected(proxy.id)} aria-label={`Select ${proxy.name}`} />
                 <div className="min-w-0 flex-1">
@@ -350,7 +360,7 @@ function ProxyPoolSection() {
                   </div>
                 </div>
               </div>
-              <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-[var(--inner-border)] pt-3">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <Button variant="secondary" size="sm" disabled={isTesting} onClick={() => void runSavedTest(proxy)}>
                   {isTesting ? <Loader2 size={12} className="animate-spin" /> : <FlaskConical size={12} />} Test
                 </Button>
@@ -393,7 +403,9 @@ function ProxyPoolSection() {
           onConfirm={() => void deleteProxy()}
         />
       )}
-    </Card>
+      </Card>
+    </section>
+    </>
   );
 }
 
@@ -477,8 +489,17 @@ function RoutingAndExceptionsSection() {
   const globalStickyLimit = eligibleProviders.at(0)?.routing?.stickyLimit ?? 1;
 
   return (
-    <Card className="space-y-3">
-      <CardHeader title="Routing Strategy" icon={Route} sub="Account rotation strategy, sticky limits, and proxy-pool exceptions per provider">
+    <section className="space-y-2">
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex items-start gap-2.5">
+          <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[9px]" style={{ backgroundColor: "color-mix(in srgb, var(--accent) 12%, transparent)", color: "var(--accent)" }}>
+            <Route size={15} aria-hidden={true} />
+          </span>
+          <div className="min-w-0">
+            <h2 className="truncate text-sm font-bold">Routing Strategy</h2>
+            <p className="mt-0.5 truncate text-[11.5px] text-[var(--text-2)]">Account rotation strategy, sticky limits, and proxy-pool exceptions per provider</p>
+          </div>
+        </div>
         <div className="flex flex-wrap items-center justify-end gap-1.5">
           <span className="text-[11px] text-[var(--text-3)]">Set all:</span>
           <Button variant="secondary" size="sm" disabled={batchApplying !== null || stickyApplying} onClick={() => void applyStrategyToAll("priority")}>
@@ -488,8 +509,9 @@ function RoutingAndExceptionsSection() {
             {batchApplying === "round-robin" ? <Loader2 size={12} className="animate-spin" /> : null} Round-robin
           </Button>
         </div>
-      </CardHeader>
-      <div className="flex flex-col gap-2 rounded-xl border border-[var(--inner-border)] bg-[var(--hover)] px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between">
+      </div>
+      <Card className="space-y-3">
+      <div className="flex flex-col gap-2 px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <div className="text-xs font-semibold">Use sticky limit</div>
           <div className="mt-0.5 text-[11px] text-[var(--text-3)]">Apply sticky account routing across every provider with configured accounts.</div>
@@ -526,51 +548,49 @@ function RoutingAndExceptionsSection() {
               const excluded = excludedProviders.includes(provider.id);
               const routing = provider.routing ?? { strategy: "priority" as const, stickyLimit: 1 };
               return (
-                <article key={provider.id} className="rounded-2xl border border-[var(--inner-border)] bg-[var(--surface)] p-3.5 transition-colors hover:border-[var(--accent)]/40 hover:bg-[var(--surface-muted)]">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex min-w-0 items-center gap-2.5">
-                      <ProviderIcon icon={icon} name={provider.name} size={24} />
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-xs font-semibold">{provider.name}</div>
-                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                          <Badge tone={hasAccounts ? "info" : "default"}>{hasAccounts ? authKind : "No accounts"}</Badge>
-                          <Badge tone={excluded ? "warn" : "ok"}>{excluded ? "Direct connection" : "Proxy pool eligible"}</Badge>
-                        </div>
+                <article key={provider.id} className="rounded-[var(--radius-control)] border border-[var(--inner-border)] bg-[var(--surface)] p-3.5 transition-colors hover:border-[var(--accent)]/40 hover:bg-[var(--surface-muted)]">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <ProviderIcon icon={icon} name={provider.name} size={24} />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-xs font-semibold">{provider.name}</div>
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                        <Badge tone={hasAccounts ? "info" : "default"}>{hasAccounts ? authKind : "No accounts"}</Badge>
+                        <Badge tone={excluded ? "warn" : "ok"}>{excluded ? "Direct connection" : "Proxy pool eligible"}</Badge>
                       </div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 border-t border-[var(--inner-border)] pt-3">
-                      <label className="flex items-center gap-1.5 text-[10px] text-[var(--text-3)]">
-                        Strategy
-                        {hasAccounts ? (
-                          <Select
-                            ariaLabel={`${provider.name} strategy`}
-                            className="w-40"
-                            value={routing.strategy}
-                            onChange={(v) => routingMutation.mutate({ id: provider.id, config: { strategy: v } })}
-                            options={[{ value: "priority", label: "Priority (failover)" }, { value: "round-robin", label: "Round-robin" }]}
-                          />
-                        ) : (
-                          <span className="rounded-lg border border-[var(--inner-border)] px-2.5 py-2 text-[10px]">No accounts</span>
-                        )}
-                      </label>
-                      {stickyVisible && <label className="flex items-center gap-1.5 text-[10px] text-[var(--text-3)]">
-                        Sticky
-                        {hasAccounts ? (
-                          <Input
-                            aria-label={`${provider.name} sticky limit`}
-                            type="number"
-                            min={1}
-                            max={100}
-                            value={routing.stickyLimit}
-                            onChange={(event) => routingMutation.mutate({ id: provider.id, config: { stickyLimit: Math.max(1, Math.min(100, Number(event.target.value) || 1)) } })}
-                            className="h-8 w-16 px-2 text-center text-xs"
-                          />
-                        ) : <span>—</span>}
-                      </label>}
-                      <div className="ml-auto flex items-center gap-1.5">
-                        <span className="text-[10px] text-[var(--text-3)]">Always direct</span>
-                        <Switch checked={excluded} onChange={(next) => toggleExcluded(provider.id, next)} label={`${provider.name} always direct`} />
-                      </div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[var(--inner-border)] pt-3">
+                    <label className="flex items-center gap-1.5 text-[10px] text-[var(--text-3)]">
+                      Strategy
+                      {hasAccounts ? (
+                        <Select
+                          ariaLabel={`${provider.name} strategy`}
+                          className="w-40"
+                          value={routing.strategy}
+                          onChange={(v) => routingMutation.mutate({ id: provider.id, config: { strategy: v } })}
+                          options={[{ value: "priority", label: "Priority (failover)" }, { value: "round-robin", label: "Round-robin" }]}
+                        />
+                      ) : (
+                        <span className="text-[var(--text-3)]">No accounts</span>
+                      )}
+                    </label>
+                    {stickyVisible && <label className="flex items-center gap-1.5 text-[10px] text-[var(--text-3)]">
+                      Sticky
+                      {hasAccounts ? (
+                        <Input
+                          aria-label={`${provider.name} sticky limit`}
+                          type="number"
+                          min={1}
+                          max={100}
+                          value={routing.stickyLimit}
+                          onChange={(event) => routingMutation.mutate({ id: provider.id, config: { stickyLimit: Math.max(1, Math.min(100, Number(event.target.value) || 1)) } })}
+                          className="h-8 w-16 px-2 text-center text-xs"
+                        />
+                      ) : <span>—</span>}
+                    </label>}
+                    <div className="ml-auto flex items-center gap-1.5">
+                      <span className="text-[10px] text-[var(--text-3)]">Always direct</span>
+                      <Switch checked={excluded} onChange={(next) => toggleExcluded(provider.id, next)} label={`${provider.name} always direct`} />
                     </div>
                   </div>
                 </article>
@@ -579,7 +599,8 @@ function RoutingAndExceptionsSection() {
           </div>
         </div>
       )}
-    </Card>
+      </Card>
+    </section>
   );
 }
 
@@ -753,7 +774,7 @@ function ProxyModal({ open, existing, onClose, onExited }: { open: boolean; exis
               <p className="mt-1 text-[10.5px] text-[var(--text-3)]">HTTP, HTTPS, and SOCKS5 are detected from each URL. Credentials are optional.</p>
             </div>
             <p className="text-[10.5px] text-[var(--text-3)]">Vercel and Cloudflare relays are detected automatically from their domain.</p>
-            <div className="flex flex-col gap-2 rounded-xl border border-[var(--inner-border)] bg-[var(--hover)] px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
               <label className="flex items-start gap-2 text-[11px] text-[var(--text-2)]">
                 <input className="mt-0.5 size-3.5" type="checkbox" checked={checkBeforeAdd} onChange={(event) => { setCheckBeforeAdd(event.target.checked); setBatchCheckResults(null); setCheckedBatchInput(""); }} />
                 <span><span className="block font-semibold">Check proxies before adding</span><span className="mt-0.5 block text-[10px] text-[var(--text-3)]">Only healthy proxies will be added as active.</span></span>

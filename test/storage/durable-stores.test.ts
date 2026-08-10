@@ -12,10 +12,10 @@ import type { WarpAccount, WarpAccountCreateData } from "../../src/console/warp/
 import type { RouteHealth } from "../../src/domain/contracts";
 
 function testEnv(): PersistenceEnv {
-  const dir = join(tmpdir(), `cartethyia-durable-test-${process.pid}-${Math.random().toString(36).slice(2)}`);
+  const dir = join(tmpdir(), `wokroute-durable-test-${process.pid}-${Math.random().toString(36).slice(2)}`);
   return {
     dataDir: dir,
-    dbPath: join(dir, "cartethyia.sqlite"),
+    dbPath: join(dir, "wokroute.sqlite"),
     runtimeDbPath: join(dir, "runtime.sqlite"),
     assetDir: join(dir, "assets"),
     logRetentionDays: 14,

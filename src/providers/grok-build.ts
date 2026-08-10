@@ -39,7 +39,7 @@ import type { ProviderCallError } from "../domain/contracts";
  * Codex). Reasoning effort is only accepted by `grok-4.5*` models.
  *
  * Source of truth: wire capture of official @xai-official/grok 0.2.99.
- * User-Agent follows the official client — never a Cartethyia identity.
+ * User-Agent follows the official client — never a wokroute identity.
  */
 
 const GROK_BUILD_SURFACES: readonly ProviderSurface[] = ["openai-responses"];

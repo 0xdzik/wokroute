@@ -70,7 +70,7 @@ export class CliToolService {
     return Object.fromEntries(entries);
   }
 
-  /** Apply Cartethyia config to a tool's config files. */
+  /** Apply wokroute config to a tool's config files. */
   async applyConfig(toolId: string, input: ApplyInput): Promise<ApplyResult> {
     const injector = injectorFor(toolId);
     if (injector === null) return { success: false, message: `Unknown tool: ${toolId}` };
@@ -84,7 +84,7 @@ export class CliToolService {
     }
   }
 
-  /** Reset a tool's Cartethyia-specific config fields. */
+  /** Reset a tool's wokroute-specific config fields. */
   async resetConfig(toolId: string): Promise<ApplyResult> {
     const injector = injectorFor(toolId);
     if (injector === null) return { success: false, message: `Unknown tool: ${toolId}` };

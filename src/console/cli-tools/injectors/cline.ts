@@ -3,7 +3,7 @@
  * model slots) and ~/.cline/data/secrets.json (API key). Cline uses the
  * OpenAI-compatible chat surface and expects base URLs WITHOUT a /v1 suffix.
  *
- * globalState.json (Cartethyia-injected fields, all merged into existing JSON):
+ * globalState.json (wokroute-injected fields, all merged into existing JSON):
  *   actModeApiProvider = "openai"
  *   planModeApiProvider = "openai"
  *   openAiBaseUrl = "http://host:12800"   (no /v1)
@@ -54,8 +54,8 @@ function secretsPath(): string {
   return `${dataDir()}/secrets.json`;
 }
 
-/** Cline is considered configured for Cartethyia when the act-mode provider is
- *  "openai" and the OpenAI base URL points at a local/Cartethyia endpoint. */
+/** Cline is considered configured for wokroute when the act-mode provider is
+ *  "openai" and the OpenAI base URL points at a local/wokroute endpoint. */
 function isConfigured(state: ClineGlobalState | null): boolean {
   if (!state) return false;
   return state.actModeApiProvider === "openai" && isLocalEndpoint(state.openAiBaseUrl);
@@ -132,7 +132,7 @@ export const clineInjector: ToolInjector = {
       await writeJsonFile(secretsPath(), secrets);
     }
 
-    return { success: true, settingsPath: path, message: "Cartethyia settings removed from Cline" };
+    return { success: true, settingsPath: path, message: "Wokroute settings removed from Cline" };
   },
 
   async download(input: ApplyInput): Promise<DownloadResult> {

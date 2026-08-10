@@ -22,8 +22,8 @@ import { ProviderRegistry } from "../../src/providers/registry";
 import type { AccountHealthManager, QuotaCoordinator } from "../../src/auth";
 
 function testEnv(): PersistenceEnv {
-  const dir = join(tmpdir(), `cartethyia-composition-test-${process.pid}-${Math.random().toString(36).slice(2)}`);
-  return { dataDir: dir, dbPath: join(dir, "cartethyia.sqlite"), runtimeDbPath: join(dir, "runtime.sqlite"), assetDir: join(dir, "assets"), logRetentionDays: 14, assetRetentionDays: 7, maxFlightsPerIp: 15 };
+  const dir = join(tmpdir(), `wokroute-composition-test-${process.pid}-${Math.random().toString(36).slice(2)}`);
+  return { dataDir: dir, dbPath: join(dir, "wokroute.sqlite"), runtimeDbPath: join(dir, "runtime.sqlite"), assetDir: join(dir, "assets"), logRetentionDays: 14, assetRetentionDays: 7, maxFlightsPerIp: 15 };
 }
 
 function makeLogEvent(overrides: Partial<ProxyRequestLogEvent> = {}): ProxyRequestLogEvent {

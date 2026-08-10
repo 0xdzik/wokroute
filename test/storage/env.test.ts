@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { getPersistenceEnv } from "../../src/storage/main/env";
 
 const ENV_KEYS = [
@@ -32,32 +32,39 @@ describe("getPersistenceEnv — defaults", () => {
     Bun.env.NODE_ENV = "test";
     delete Bun.env.DATA_DIR;
     const env = getPersistenceEnv();
-    expect(env.dataDir).toBe(join(tmpdir(), `cartethyia-test-${process.pid}`));
-    expect(env.dbPath).toBe(join(env.dataDir, "cartethyia.sqlite"));
+    expect(env.dataDir).toBe(join(tmpdir(), `wokroute-test-${process.pid}`));
+    expect(env.dbPath).toBe(join(env.dataDir, "wokroute.sqlite"));
     expect(env.runtimeDbPath).toBe(join(env.dataDir, "runtime.sqlite"));
     expect(env.assetDir).toBe(join(env.dataDir, "assets"));
   });
 
-  test("falls back to ./data under non-test NODE_ENV when DATA_DIR is absent", () => {
+  test("falls back to a per-user data dir under non-test NODE_ENV when DATA_DIR is absent", () => {
     Bun.env.NODE_ENV = "production";
     delete Bun.env.DATA_DIR;
+    delete Bun.env.XDG_DATA_HOME;
     const env = getPersistenceEnv();
-    expect(env.dataDir).toBe(join(process.cwd(), "data"));
+    const home = homedir();
+    const expected = process.platform === "darwin"
+      ? join(home, "Library", "Application Support", "wokroute")
+      : process.platform === "win32"
+        ? join(Bun.env.APPDATA ?? join(home, "AppData", "Roaming"), "wokroute")
+        : join(home, ".local", "share", "wokroute");
+    expect(env.dataDir).toBe(expected);
   });
 });
 
 describe("getPersistenceEnv — explicit overrides", () => {
   test("DATA_DIR drives every derived path", () => {
-    Bun.env.DATA_DIR = "/srv/cartethyia";
+    Bun.env.DATA_DIR = "/srv/wokroute";
     const env = getPersistenceEnv();
-    expect(env.dataDir).toBe("/srv/cartethyia");
-    expect(env.dbPath).toBe(join("/srv/cartethyia", "cartethyia.sqlite"));
-    expect(env.runtimeDbPath).toBe(join("/srv/cartethyia", "runtime.sqlite"));
-    expect(env.assetDir).toBe(join("/srv/cartethyia", "assets"));
+    expect(env.dataDir).toBe("/srv/wokroute");
+    expect(env.dbPath).toBe(join("/srv/wokroute", "wokroute.sqlite"));
+    expect(env.runtimeDbPath).toBe(join("/srv/wokroute", "runtime.sqlite"));
+    expect(env.assetDir).toBe(join("/srv/wokroute", "assets"));
   });
 
   test("individual path env vars override the derived defaults", () => {
-    Bun.env.DATA_DIR = "/srv/cartethyia";
+    Bun.env.DATA_DIR = "/srv/wokroute";
     Bun.env.DB_PATH = "/var/db/config.sqlite";
     Bun.env.RUNTIME_DB_PATH = "/var/db/runtime.sqlite";
     Bun.env.ASSET_DIR = "/var/assets";
@@ -66,7 +73,7 @@ describe("getPersistenceEnv — explicit overrides", () => {
     expect(env.runtimeDbPath).toBe("/var/db/runtime.sqlite");
     expect(env.assetDir).toBe("/var/assets");
     // dataDir is still the declared boundary, not a derived file path.
-    expect(env.dataDir).toBe("/srv/cartethyia");
+    expect(env.dataDir).toBe("/srv/wokroute");
   });
 });
 

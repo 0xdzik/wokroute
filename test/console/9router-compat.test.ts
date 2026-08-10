@@ -28,7 +28,7 @@ describe("convert9RouterBackup", () => {
     expect(report.skipped).toContain("invalid proxy p2");
     expect(report.warnings).toHaveLength(1);
 
-    expect(backup.app).toBe("cartethyia");
+    expect(backup.app).toBe("wokroute");
     const accounts = (backup.tables as unknown as { provider_accounts: Array<Record<string, unknown>> }).provider_accounts;
     expect(accounts).toHaveLength(3);
     const claude = accounts.find((acc) => acc.name === "claude") as { credential_kind: string; active: boolean };

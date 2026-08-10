@@ -1,7 +1,7 @@
 /**
  * Grok Build CLI injector — writes ~/.grok/config.toml (TOML merge).
  *
- * config.toml structure (Cartethyia-injected [model] section):
+ * config.toml structure (wokroute-injected [model] section):
  *   [model]
  *     default = "model-id"
  *     base_url = "http://localhost:12800/v1"
@@ -121,7 +121,7 @@ export const grokBuildInjector: ToolInjector = {
     if (!text) return { success: true, message: "No config file to reset" };
     text = tomlRemoveSection(text, SECTION);
     await writeTextFile(path, text);
-    return { success: true, settingsPath: path, message: "Cartethyia settings removed from Grok Build" };
+    return { success: true, settingsPath: path, message: "Wokroute settings removed from Grok Build" };
   },
 
   async download(input: ApplyInput): Promise<DownloadResult> {

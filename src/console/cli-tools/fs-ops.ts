@@ -96,10 +96,10 @@ export function stripTrailingSlash(url: string): string {
   return url.replace(/\/+$/, "");
 }
 
-/** Check if an endpoint URL points to a local Cartethyia instance. */
+/** Check if an endpoint URL points to a local wokroute instance. */
 export function isLocalEndpoint(url: string | null | undefined): boolean {
   if (!url) return false;
-  return /localhost|127\.0\.0\.1|0\.0\.0\.0|cartethyia/i.test(url);
+  return /localhost|127\.0\.0\.1|0\.0\.0\.0|wokroute/i.test(url);
 }
 
 /** Sanitize an API key to a prefix for display (first 8 chars + ...). */

@@ -3,7 +3,7 @@
  *
  * Consumed by the backend service (for injector dispatch) and sent to the
  * frontend via GET /cli-tools/registry. MITM-based tools are excluded —
- * Cartethyia does not run a MITM proxy.
+ * wokroute does not run a MITM proxy.
  */
 
 import type { ToolDef } from "./types";
@@ -281,14 +281,14 @@ export const TOOL_REGISTRY = {
       { id: "cc/claude-sonnet-5", name: "Claude Sonnet 5", alias: "sonnet" },
     ],
     notes: [
-      { type: "info", text: "Use Cartethyia model aliases to keep Amp shorthand mappings stable across provider updates." },
+      { type: "info", text: "Use wokroute model aliases to keep Amp shorthand mappings stable across provider updates." },
     ],
     guideSteps: [
       { step: 1, title: "Install Amp", desc: "Install the Amp CLI using the package manager supported by your environment." },
       { step: 2, title: "API Key", type: "apiKeySelector" },
       { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
       { step: 4, title: "Select Model", type: "modelSelector" },
-      { step: 5, title: "Add Shorthands", desc: "Map Amp shorthand names to Cartethyia aliases in your local config." },
+      { step: 5, title: "Add Shorthands", desc: "Map Amp shorthand names to wokroute aliases in your local config." },
     ],
     codeBlock: {
       language: "bash",
@@ -302,7 +302,7 @@ amp --model "{{model}}"`,
     id: "qwen",
     name: "Qwen Code",
     color: "#10B981",
-    description: "Alibaba Qwen Code CLI — OpenAI-compatible via Cartethyia",
+    description: "Alibaba Qwen Code CLI — OpenAI-compatible via wokroute",
     configType: "guide" as const,
     surface: "openai-chat" as const,
     docsUrl: "https://qwenlm.github.io/qwen-code-docs/en/users/configuration/model-providers/",

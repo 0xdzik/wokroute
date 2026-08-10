@@ -108,7 +108,7 @@ describe("terminalWebSocket — message handler", () => {
     const messages = await sendCommand("help");
     expect(messages).toHaveLength(1);
     expect(messages[0]!.type).toBe("output");
-    expect(messages[0]!.data).toContain("Cartethyia Terminal");
+    expect(messages[0]!.data).toContain("Wokroute Terminal");
     expect(messages[0]!.data).toContain("root shell");
   });
 

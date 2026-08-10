@@ -126,16 +126,27 @@ function modelView(row: ReturnType<ConfigPersistence["providerModels"]["list"]>[
   };
 }
 
+let usedDefaultPassword = false;
+/** True iff the console password was seeded from the literal `"wokroute"` default
+ *  because `CONSOLE_PASSWORD` was unset on first run. Cleared on process restart. */
+export function didUseDefaultPassword(): boolean { return usedDefaultPassword; }
+
 function makeSettingsRepository(config: ConfigPersistence): ConsoleSettingsRepository {
   return {
     async get() {
       const row = config.settings.ensure();
       if (row.jwtSecret === null) config.settings.rotateJwtSecret(crypto.randomUUID());
       if (row.passwordHash === null) {
-        const bootstrapPassword = Bun.env.CONSOLE_PASSWORD;
-        if (bootstrapPassword !== undefined && bootstrapPassword.length >= 5) {
-          config.settings.setPasswordHash(await hashConsolePassword(bootstrapPassword));
+        const env = Bun.env.CONSOLE_PASSWORD;
+        if (env !== undefined && env.length >= 5) {
+          config.settings.setPasswordHash(await hashConsolePassword(env));
+        } else if (env === undefined) {
+          // ponytail: literal default — no env, no interactive setup. Add
+          // interactive prompt when first-run UX wants to ask for a password.
+          config.settings.setPasswordHash(await hashConsolePassword("wokroute"));
+          usedDefaultPassword = true;
         }
+        // env set but <5 chars → stays null (explicit misconfig; login rejects all)
       }
       const current = config.settings.ensure();
       return { passwordHash: current.passwordHash, passwordVersion: current.passwordVersion, jwtSecret: current.jwtSecret ?? "", runtime: runtimeSettings(config), initializedAt: current.initializedAt, updatedAt: current.updatedAt };

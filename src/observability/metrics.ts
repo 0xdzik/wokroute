@@ -96,9 +96,9 @@ export class MetricsCollector {
   /** Get Prometheus-format metrics text. */
   toPrometheus(): string {
     const lines: string[] = [];
-    lines.push("# HELP cartethyia_build_info Build information");
-    lines.push("# TYPE cartethyia_build_info gauge");
-    lines.push(`cartethyia_build_info{version="${this.getVersion()}"} 1`);
+    lines.push("# HELP wokroute_build_info Build information");
+    lines.push("# TYPE wokroute_build_info gauge");
+    lines.push(`wokroute_build_info{version="${this.getVersion()}"} 1`);
 
     for (const [name, counters] of this.counters) {
       lines.push(`# HELP ${name} Counter`);
@@ -183,7 +183,7 @@ export class MetricsCollector {
 }
 
 /** Global metrics instance. */
-export const metrics = new MetricsCollector({ service: "cartethyia" });
+export const metrics = new MetricsCollector({ service: "wokroute" });
 
 /** Standard metric names. */
 export const MetricNames = {

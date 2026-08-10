@@ -14,7 +14,7 @@ import { runtimeMemoryLimits } from "../traffic/limits";
 // Security helpers: cookies, sessions, same-origin, mutation guard
 // ---------------------------------------------------------------------------
 
-export const SESSION_COOKIE_NAME = "cartethyia_console";
+export const SESSION_COOKIE_NAME = "wokroute_console";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 

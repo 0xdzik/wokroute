@@ -41,7 +41,7 @@ type DetectedBackupKind = "restore";
 function detectBackupKind(value: unknown): DetectedBackupKind | null {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
   const candidate = Object.fromEntries(Object.entries(value));
-  return candidate.app === "cartethyia" && typeof candidate.tables === "object" && candidate.tables !== null ? "restore" : null;
+  return candidate.app === "wokroute" && typeof candidate.tables === "object" && candidate.tables !== null ? "restore" : null;
 }
 
 function errorMessage(err: unknown): string {
@@ -119,7 +119,7 @@ export function SettingsPage() {
       const kind = detectBackupKind(parsed);
       if (!kind) throw new Error("Unsupported backup format");
       setRestoreKind(kind);
-      toast.success("Cartethyia backup detected");
+      toast.success("Wokroute backup detected");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to read backup file");
     }
@@ -142,7 +142,7 @@ export function SettingsPage() {
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement("a");
         anchor.href = url;
-        anchor.download = `cartethyia-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        anchor.download = `wokroute-backup-${new Date().toISOString().slice(0, 10)}.json`;
         anchor.click();
         URL.revokeObjectURL(url);
         toast.success("Backup downloaded");

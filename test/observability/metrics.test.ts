@@ -251,9 +251,9 @@ describe("toPrometheus", () => {
   test("always starts with build_info gauge", () => {
     const c = fresh();
     const out = c.toPrometheus();
-    expect(out.startsWith("# HELP cartethyia_build_info Build information")).toBe(true);
-    expect(out).toContain("# TYPE cartethyia_build_info gauge");
-    expect(out).toContain('cartethyia_build_info{version="');
+    expect(out.startsWith("# HELP wokroute_build_info Build information")).toBe(true);
+    expect(out).toContain("# TYPE wokroute_build_info gauge");
+    expect(out).toContain('wokroute_build_info{version="');
   });
 
   test("ends with a trailing newline", () => {
@@ -275,13 +275,13 @@ describe("toPrometheus", () => {
   test("renders an empty exposition (only build_info) when no metrics recorded", () => {
     const c = fresh();
     const out = c.toPrometheus();
-    expect(out).toContain("cartethyia_build_info");
+    expect(out).toContain("wokroute_build_info");
     expect(out).not.toContain("# TYPE reqs| counter");
   });
 
   test("build_info version is a non-empty string", () => {
     const c = fresh();
-    const match = c.toPrometheus().match(/cartethyia_build_info\{version="([^"]*)"\} 1/);
+    const match = c.toPrometheus().match(/wokroute_build_info\{version="([^"]*)"\} 1/);
     expect(match).not.toBeNull();
     const version = match?.[1];
     expect(version).toBeDefined();
@@ -315,7 +315,7 @@ describe("reset", () => {
     const c = fresh();
     c.incrementCounter("a");
     c.reset();
-    expect(c.toPrometheus()).toContain("cartethyia_build_info");
+    expect(c.toPrometheus()).toContain("wokroute_build_info");
   });
 
   test("allows recording fresh metrics after reset", () => {
@@ -501,18 +501,18 @@ describe("histogram percentile estimation from buckets", () => {
 describe("global metrics instance", () => {
   test("is a MetricsCollector with default service label", () => {
     const out = metrics.toPrometheus();
-    expect(out).toContain("cartethyia_build_info");
+    expect(out).toContain("wokroute_build_info");
     metrics.reset();
     metrics.incrementCounter("global_test", { method: "GET" });
-    expect(metrics.toPrometheus()).toContain('global_test|method=GET{method="GET",service="cartethyia"} 1');
+    expect(metrics.toPrometheus()).toContain('global_test|method=GET{method="GET",service="wokroute"} 1');
     metrics.reset();
   });
 
   test("module-level toPrometheus() re-exports the global instance", () => {
     metrics.reset();
     metrics.setGauge("exported_gauge", 7);
-    // global instance merges its default label { service: "cartethyia" }
-    expect(toPrometheus()).toContain('exported_gauge|{service="cartethyia"} 7');
+    // global instance merges its default label { service: "wokroute" }
+    expect(toPrometheus()).toContain('exported_gauge|{service="wokroute"} 7');
     metrics.reset();
   });
 });

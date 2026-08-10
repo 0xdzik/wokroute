@@ -1,4 +1,4 @@
-import { createCartethyiaRuntime, runProxyRequest, type CartethyiaRuntime } from "./app/composition";
+import { createwokrouteRuntime, runProxyRequest, type wokrouteRuntime } from "./app/composition";
 import { lookupProxyEndpoint, readBoundedJson } from "./domain/protocols";
 import type { ProxyEndpoint } from "./domain/contracts";
 import { isRouteAllowed } from "./console/key-acl";
@@ -13,6 +13,8 @@ import { activePerIpFlights } from "./traffic/per-ip";
 import { SlidingWindowRateLimiter } from "./traffic/rate-limiter";
 import { terminalWebSocket, isTerminalUpgradeRequest, type TerminalWsData } from "./console/terminal-ws";
 import { guardConsoleRequest } from "./console/session";
+import { didUseDefaultPassword } from "./console/wiring";
+import { dispatch } from "./cli";
 
 const port = Number(Bun.env.PORT ?? "12800");
 const perIpFlights = activePerIpFlights;
@@ -22,7 +24,7 @@ let bannedIpsCache: ReadonlySet<string> = new Set();
 let bannedIpsCacheAt = 0;
 const BANNED_IPS_TTL_MS = 5_000;
 
-async function refreshBannedIps(runtime: CartethyiaRuntime): Promise<void> {
+async function refreshBannedIps(runtime: wokrouteRuntime): Promise<void> {
   bannedIpsCache = await runtime.config.ipBans.bannedSet();
   bannedIpsCacheAt = Date.now();
 }
@@ -38,13 +40,13 @@ interface CatalogCache {
 }
 let catalogCache: CatalogCache | null = null;
 
-function catalogRevision(runtime: CartethyiaRuntime): number {
+function catalogRevision(runtime: wokrouteRuntime): number {
   // Simple generation counter: sum of adapter count + alias count + combo count.
   // Any add/remove/update changes at least one of these.
   return runtime.registry.size + runtime.config.aliases.list().length + runtime.config.combos.list().length;
 }
 
-async function buildCatalog(runtime: CartethyiaRuntime): Promise<ReadonlyArray<{ readonly id: string; readonly owned_by: string; readonly metadata: unknown }>> {
+async function buildCatalog(runtime: wokrouteRuntime): Promise<ReadonlyArray<{ readonly id: string; readonly owned_by: string; readonly metadata: unknown }>> {
   const entries: Array<{ readonly id: string; readonly owned_by: string; readonly metadata: unknown }> = [];
   const seen = new Set<string>();
   for (const adapter of runtime.registry.list()) {
@@ -157,7 +159,7 @@ async function readProxyBody(request: Request, endpoint: ProxyEndpoint): Promise
 let cachedProxySettings: { maxFlightsPerIp: number; trustProxy: boolean } | null = null;
 let cachedProxySettingsJson: Record<string, unknown> | null = null;
 
-function proxyRuntimeSettings(runtime: CartethyiaRuntime): { maxFlightsPerIp: number; trustProxy: boolean } {
+function proxyRuntimeSettings(runtime: wokrouteRuntime): { maxFlightsPerIp: number; trustProxy: boolean } {
   const json = runtime.config.settings.getSettingsJson();
   if (cachedProxySettings !== null && json === cachedProxySettingsJson) return cachedProxySettings;
   const settings = runtimeSettings(runtime.config);
@@ -169,13 +171,25 @@ function proxyRuntimeSettings(runtime: CartethyiaRuntime): { maxFlightsPerIp: nu
 /** Hard cap on concurrent in-flight proxy requests to bound resource use under load. */
 const MAX_GLOBAL_IN_FLIGHT = 500;
 
-function recordAccessLog(runtime: CartethyiaRuntime, pathname: string, request: Request, requestId: string, status: number, startedAt: number): void {
+function recordAccessLog(runtime: wokrouteRuntime, pathname: string, request: Request, requestId: string, status: number, startedAt: number): void {
   const level = status >= 500 ? "error" : status >= 400 ? "warn" : "info";
   runtime.runtime.consoleLogs.push(level, "http", `${request.method} ${pathname} ${status} ${Math.max(0, performance.now() - startedAt).toFixed(1)}ms request_id=${requestId}`);
 }
 
 async function main(): Promise<void> {
-  const runtime = await createCartethyiaRuntime();
+  // If launched as a daemon, write our own PID file so the parent `wokroute -d`
+  // can report the real server pid (the parent only sees the `setsid`/`nohup`
+  // wrapper pid, which exits before the server starts).
+  const pidFile = Bun.env.WOKROUTE_PIDFILE;
+  if (pidFile) await Bun.write(pidFile, String(process.pid));
+  const runtime = await createwokrouteRuntime();
+  // Warm the settings bootstrap (JWT secret + password) once at startup so the
+  // default-password warning prints before the server accepts traffic. Cost is
+  // one argon2id hash (~30ms) on first boot only; subsequent boots read the row.
+  await runtime.consoleRepositories.settings.get();
+  if (didUseDefaultPassword()) {
+    console.warn('[wokroute] WARNING: default console password "wokroute" in use. Set CONSOLE_PASSWORD or change it in the console.');
+  }
   const rateLimiter = new SlidingWindowRateLimiter(runtimeMemoryLimits.rateLimitMaxRequests, runtimeMemoryLimits.rateLimitWindowMs);
   let globalInFlight = 0;
   const server = Bun.serve({
@@ -338,13 +352,13 @@ async function main(): Promise<void> {
       }
     },
   });
-  console.log(`[cartethyia] listening on ${server.url}`);
+  console.log(`[wokroute] listening on ${server.url}`);
   const close = (): void => { runtime.close(); server.stop(); };
   process.on("SIGTERM", close);
   process.on("SIGINT", close);
 }
 
-async function safeConsoleHandle(runtime: CartethyiaRuntime, request: Request): Promise<Response> {
+async function safeConsoleHandle(runtime: wokrouteRuntime, request: Request): Promise<Response> {
   const pathname = new URL(request.url).pathname;
 
   // Fast body-size rejection: a single header parse, no crypto or DB work.
@@ -395,4 +409,4 @@ async function safeConsoleHandle(runtime: CartethyiaRuntime, request: Request): 
   }
 }
 
-void main();
+void dispatch(main);

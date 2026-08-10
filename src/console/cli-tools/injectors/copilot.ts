@@ -1,9 +1,9 @@
 /**
- * GitHub Copilot injector — adds a Cartethyia language-model provider entry
+ * GitHub Copilot injector — adds a wokroute language-model provider entry
  * to VS Code's `chatLanguageModels.json`.
  *
- * The config file is a JSON array; Cartethyia adds or replaces the entry with
- * `name === "Cartethyia"`, preserving all other entries. The provider URL uses
+ * The config file is a JSON array; wokroute adds or replaces the entry with
+ * `name === "wokroute"`, preserving all other entries. The provider URL uses
  * the Azure vendor pattern required by VS Code:
  * `${ensureV1Suffix(endpoint)}/chat/completions#models.ai.azure.com`.
  *
@@ -26,7 +26,7 @@ import {
   writeJsonFile,
 } from "../fs-ops";
 
-const PROVIDER_NAME = "Cartethyia";
+const PROVIDER_NAME = "wokroute";
 
 interface CopilotModel {
   id: string;
@@ -57,7 +57,7 @@ function configPath(): string {
   return join(home, ".config", "Code", "User", "chatLanguageModels.json");
 }
 
-/** Build the Cartethyia array entry from apply/download input. */
+/** Build the wokroute array entry from apply/download input. */
 function buildEntry(input: ApplyInput): CopilotEntry {
   const url = `${ensureV1Suffix(input.endpoint)}/chat/completions#models.ai.azure.com`;
   return {
@@ -121,10 +121,10 @@ export const copilotInjector: ToolInjector = {
     const path = configPath();
     const existing = await readJsonFile(path);
     if (!existing) return { success: true, message: "No config file to reset" };
-    if (!Array.isArray(existing)) return { success: true, message: "No Cartethyia config to reset" };
+    if (!Array.isArray(existing)) return { success: true, message: "No Wokroute config to reset" };
     const config = (existing as CopilotEntry[]).filter((e) => e?.name !== PROVIDER_NAME);
     await writeJsonFile(path, config);
-    return { success: true, settingsPath: path, message: "Cartethyia removed from Copilot config" };
+    return { success: true, settingsPath: path, message: "Wokroute removed from Copilot config" };
   },
 
   async download(input: ApplyInput): Promise<DownloadResult> {

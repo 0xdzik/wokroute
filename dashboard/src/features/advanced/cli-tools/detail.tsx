@@ -108,7 +108,7 @@ function ToolDetailContent({
   }, [buildInput, applyMutation, def.id]);
 
   const handleReset = useCallback(() => {
-    if (!confirm(`Reset ${def.name} config? This removes only Cartethyia-injected fields.`)) return;
+    if (!confirm(`Reset ${def.name} config? This removes only Wokroute-injected fields.`)) return;
     resetMutation.mutate(def.id);
   }, [def.id, def.name, resetMutation]);
 

@@ -31,7 +31,7 @@ import {
   ensureV1Suffix,    // add /v1 if missing
   stripV1Suffix,     // remove /v1 if present
   stripTrailingSlash,
-  isLocalEndpoint,   // test localhost/127.0.0.1/cartethyia
+  isLocalEndpoint,   // test localhost/127.0.0.1/wokroute
   keyPrefix,         // first 8 chars + "..."
   tomlGet,           // read flat key="value" from TOML
   tomlUpsertFlat,    // upsert key="value" line
@@ -51,7 +51,7 @@ import {
 interface ToolStatus {
   toolId: string;
   installed: boolean;
-  configured: boolean;       // true if config already points to Cartethyia
+  configured: boolean;       // true if config already points to wokroute
   settingsPath: string | null;
   currentEndpoint: string | null;
   currentApiKeyPrefix: string | null;  // sanitized, never full secret
@@ -78,8 +78,8 @@ interface ApplyInput {
 2. NO dynamic imports
 3. NO thin wrapper functions (inline trivial expressions)
 4. Merge config, never overwrite user's existing settings
-5. Reset removes ONLY Cartethyia-injected fields, preserves everything else
+5. Reset removes ONLY wokroute-injected fields, preserves everything else
 6. Download generates config text without writing to filesystem
-7. Provider name in configs is "cartethyia" (NOT "9router")
+7. Provider name in configs is "wokroute" (NOT "9router")
 8. Use platform() for OS-specific paths (check IS_WIN in fs-ops or node:os)
 9. Export const named `xxxInjector` (e.g. `clineInjector`, `opencodeInjector`)

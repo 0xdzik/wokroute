@@ -15,7 +15,7 @@ function makeSettings(passwordHash: string | null): SettingsRepository {
 
 function makeBackups(): BackupRepository {
   return {
-    exportBackup: (): BackupPayload => ({ app: "cartethyia", version: 1, exportedAt: "2026-08-05T00:00:00.000Z", tables: {} as never }),
+    exportBackup: (): BackupPayload => ({ app: "wokroute", version: 1, exportedAt: "2026-08-05T00:00:00.000Z", tables: {} as never }),
     restore: (_validation: Extract<RestoreValidation, { ok: true }>): RestoreResult => ({ restored: {} }),
   } as unknown as BackupRepository;
 }
