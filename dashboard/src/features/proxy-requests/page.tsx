@@ -543,6 +543,7 @@ function RoutingAndExceptionsSection() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {items.map((provider) => {
               const icon = provider.icon ?? provider.id;
+              const isFreeTier = provider.credentialKind === "none";
               const authKind = provider.authKind ?? (provider.credentialKind === "oauth" ? "session" : provider.credentialKind === "api_key" ? "api-key" : "none");
               const hasAccounts = authKind !== "none";
               const excluded = excludedProviders.includes(provider.id);
@@ -554,7 +555,7 @@ function RoutingAndExceptionsSection() {
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-xs font-semibold">{provider.name}</div>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                        <Badge tone={hasAccounts ? "info" : "default"}>{hasAccounts ? authKind : "No accounts"}</Badge>
+                        <Badge tone={isFreeTier ? "ok" : hasAccounts ? "info" : "default"}>{isFreeTier ? "Free" : hasAccounts ? authKind : "No accounts"}</Badge>
                         <Badge tone={excluded ? "warn" : "ok"}>{excluded ? "Direct connection" : "Proxy pool eligible"}</Badge>
                       </div>
                     </div>
@@ -571,7 +572,7 @@ function RoutingAndExceptionsSection() {
                           options={[{ value: "priority", label: "Priority (failover)" }, { value: "round-robin", label: "Round-robin" }]}
                         />
                       ) : (
-                        <span className="text-[var(--text-3)]">No accounts</span>
+                        <span className="text-[var(--text-3)]">{isFreeTier ? "N/A" : "No accounts"}</span>
                       )}
                     </label>
                     {stickyVisible && <label className="flex items-center gap-1.5 text-[10px] text-[var(--text-3)]">

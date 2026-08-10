@@ -7,4 +7,5 @@ export { GrokBuildOAuthDriver } from "./grokbuild";
 export * from "./kiro";
 export * from "./cline";
 export * from "./clinepass";
-export * from "./kimchi";
+export { FreebuffOAuthDriver } from "./freebuff";
+export { KimchiOAuthDriver } from "./kimchi";
