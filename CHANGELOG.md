@@ -2,6 +2,10 @@
 
 All notable changes to Wokroute are documented here.
 
+## [1.0.1] - 2026-08-11
+
+Fix: add `#!/usr/bin/env bun` shebang to `src/main.ts` — without it the npm-global `wokroute` bin symlink silently failed because the shell had no interpreter directive. Restructure README Quick start into npm-global and git-clone paths.
+
 ## [1.0.0] - 2026-08-10
 
 Rebrand to Wokroute. Monochrome minimal dashboard redesign, modular overview split, collapsible sidebar pinned left, FK-constraint fix for custom-provider model testing, and zero-nested-cards flattening across all pages.

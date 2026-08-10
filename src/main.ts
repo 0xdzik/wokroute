@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { createwokrouteRuntime, runProxyRequest, type wokrouteRuntime } from "./app/composition";
 import { lookupProxyEndpoint, readBoundedJson } from "./domain/protocols";
 import type { ProxyEndpoint } from "./domain/contracts";
