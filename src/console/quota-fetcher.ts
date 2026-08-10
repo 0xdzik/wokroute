@@ -85,6 +85,39 @@ function qoder(body: unknown): ProviderQuotaResult {
   return { source: "qoder", plan: "Qoder AI Plan", windows, error: windows.length === 0 ? "Qoder usage payload contained no quota buckets." : null };
 }
 
+// Freebuff model id → display name (mirrors the registry model list).
+const FREEBUFF_MODEL_LABELS: Record<string, string> = {
+  "deepseek/deepseek-v4-flash": "DeepSeek V4 Flash",
+  "deepseek/deepseek-v4-pro": "DeepSeek V4 Pro",
+  "mimo/mimo-v2.5": "MiMo 2.5",
+  "minimax/minimax-m3": "MiniMax M3",
+  "openai/gpt-5.6-luna": "GPT 5.6 Luna",
+};
+
+// Freebuff quota: GET /api/v1/freebuff/session returns per-model session
+// quotas as rateLimitsByModel. POST would CLAIM a session and burn quota,
+// so quota reads are GET only.
+async function freebuff(access: string, fetcher: FetchLike): Promise<ProviderQuotaResult> {
+  const body = await getJson("https://www.codebuff.com/api/v1/freebuff/session", { authorization: `Bearer ${access}`, "user-agent": "codebuff-cli/0.0.138" }, fetcher);
+  const payload = record(body) ?? {};
+  const rateLimits: Record<string, unknown> = { ...(record(payload.rateLimitsByModel) ?? {}) };
+  // An active session carries its own rateLimit row — fold it in when the
+  // shared map omits the model (older servers).
+  if (payload.status === "active" && record(payload.rateLimit) && !rateLimits[payload.model as string]) {
+    rateLimits[payload.model as string] = payload.rateLimit as unknown;
+  }
+  const windows: AccountQuotaWindowView[] = [];
+  for (const [model, raw] of Object.entries(rateLimits)) {
+    const rl = record(raw); if (!rl) continue;
+    const used = number(rl.recentCount); const total = number(rl.limit);
+    if (total === null || total <= 0) continue;
+    const label = FREEBUFF_MODEL_LABELS[model] ?? model;
+    windows.push(percentWindow("daily", label, used === null ? null : used / total * 100, isoDate(rl.resetAt), used, total));
+  }
+  const plan = payload.accessTier === "limited" ? "Freebuff (Limited)" : "Freebuff";
+  return { source: "freebuff", plan, windows, error: windows.length === 0 ? "Freebuff connected. No session quota to report right now." : null };
+}
+
 async function cline(credential: string, fetcher: FetchLike): Promise<ProviderQuotaResult> {
   const fields = authCredential(credential); const access = text(fields.accessToken);
   if (!access) throw new Error("Cline credential has no access token.");
@@ -107,7 +140,7 @@ export async function fetchProviderQuota(providerId: string, credential: string,
     if (providerId === "codex") return codex(await getJson("https://chatgpt.com/backend-api/wham/usage", { authorization: `Bearer ${access}`, ...(text(fields.providerAccountId) ? { "chatgpt-account-id": text(fields.providerAccountId) as string } : {}) }, fetcher), fetchedAt);
     if (providerId === "claude") return anthropic(await getJson("https://api.anthropic.com/api/oauth/usage", { authorization: `Bearer ${access}`, "anthropic-beta": claudeCodeOAuthBetas.join(","), "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true", "x-app": "cli", "x-client-request-id": crypto.randomUUID(), "accept-encoding": "gzip, deflate, br", connection: "keep-alive" }, fetcher));
     if (providerId === "antigravity") return antigravity(await getJson("https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels", { authorization: `Bearer ${access}`, "user-agent": "antigravity/hub/2.1.4" }, fetcher, { project: fields.projectId ?? fields.providerAccountId }));
-    if (providerId === "kiro") { const region = text(fields.region) ?? "us-east-1"; return kiro(await getJson(`https://codewhisperer.${region}.amazonaws.com/getUsageLimits?origin=AI_EDITOR&resourceType=AGENTIC_REQUEST`, { authorization: `Bearer ${access}`, "user-agent": "aws-sdk-js/1.0.0 KiroIDE" }, fetcher)); }
+    if (providerId === "freebuff") return freebuff(access, fetcher);
     return { source: providerId, plan: null, windows: [], error: "Quota endpoint is not available for this provider." };
   } catch (error) {
     return { source: providerId, plan: null, windows: [], error: cleanError(error) };

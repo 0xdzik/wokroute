@@ -1,7 +1,7 @@
 import type { CredentialKind, ProviderAdapter } from "../domain/contracts";
 import type { AccountCandidate, AffinityKey, ModelLockRecord, RouteCandidate, RouteSwitch } from "../domain/contracts";
 import type { NormalizedProviderRequest } from "../domain/contracts";
-import { AccountHealthManager, AnthropicOAuthDriver, AntigravityOAuthDriver, ClineOAuthDriver, ClinePassOAuthDriver, createAuthDriverRegistry, GrokBuildOAuthDriver, KimchiOAuthDriver, KiroOAuthDriver } from "../auth";
+import { AccountHealthManager, AnthropicOAuthDriver, AntigravityOAuthDriver, ClineOAuthDriver, ClinePassOAuthDriver, createAuthDriverRegistry, FreebuffOAuthDriver, GrokBuildOAuthDriver, KimchiOAuthDriver, KiroOAuthDriver } from "../auth";
 import { QuotaCoordinator } from "../auth";
 import { CredentialSelector } from "../auth";
 import { OAuthCoordinator } from "../auth";
@@ -447,6 +447,7 @@ export async function createwokrouteRuntime(): Promise<wokrouteRuntime> {
     { providerId: "clinepass", driver: new ClinePassOAuthDriver() },
     { providerId: "kimchi", driver: new KimchiOAuthDriver() },
     { providerId: "grok-build", driver: new GrokBuildOAuthDriver() },
+    { providerId: "freebuff", driver: new FreebuffOAuthDriver() },
   ]);
   const resolveProvider = async (accountId: string): Promise<string | null> => config.accounts.get(accountId)?.provider ?? null;
   const oauthRefresher = createDriverAwareOAuthRefresher({

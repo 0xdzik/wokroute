@@ -95,7 +95,7 @@ export async function createDefaultRegistry(): Promise<ProviderRegistry> {
     { CodeBuddyAdapter, CodeBuddyChinaAdapter },
     { ExaAdapter },
     { GrokBuildAdapter },
-    { OpenRouterAdapter },
+    { FreebuffAdapter },
     { GroqAdapter },
     { AlibabaAdapter },
     { FireworksAdapter },
@@ -127,7 +127,7 @@ export async function createDefaultRegistry(): Promise<ProviderRegistry> {
     import("./codebuddy"),
     import("./exa"),
     import("./grok-build"),
-    import("./openrouter"),
+    import("./freebuff"),
     import("./groq"),
     import("./alibaba"),
     import("./fireworks"),
@@ -164,7 +164,7 @@ export async function createDefaultRegistry(): Promise<ProviderRegistry> {
   registry.register(new CodeBuddyChinaAdapter());
   registry.register(new ExaAdapter());
   registry.register(new GrokBuildAdapter());
-  registry.register(OpenRouterAdapter);
+  registry.register(new FreebuffAdapter());
   registry.register(GroqAdapter);
   registry.register(AlibabaAdapter);
   registry.register(FireworksAdapter);
