@@ -87,19 +87,41 @@ Provider adapters that proxy as a specific upstream client identity (Claude Code
 
 ## Quick start
 
-Requirements: Bun 1.x and a writable data directory.
+Requirements: [Bun](https://bun.sh) 1.x on `PATH`.
 
-### 1. Install dependencies
+### Via npm (recommended)
+
+Install the package globally and run it — no clone or build needed. The dashboard UI is pre-built and bundled.
 
 ```bash
-bun install
-cd dashboard && bun install && cd ..
+npm i -g wokroute
+wokroute
 ```
 
-### 2. Configure environment
+On first run with no `CONSOLE_PASSWORD` set, the default password is `wokroute` — a warning is printed; change it from the console or set the env var. The data directory defaults to `~/.local/share/wokroute` (Linux), `~/Library/Application Support/wokroute` (macOS), or `%APPDATA%/wokroute` (Windows); override with `DATA_DIR`.
+
+CLI commands:
+
+| Command | Action |
+| --- | --- |
+| `wokroute` | Run in the foreground |
+| `wokroute -d`, `wokroute --daemon` | Run in the background (PID file in data dir) |
+| `wokroute stop` | Stop a background daemon |
+| `wokroute install` | Install boot autostart (systemd / launchd / Windows startup) |
+| `wokroute uninstall` | Remove boot autostart |
+| `wokroute -h`, `wokroute --help` | Show help |
+
+### From source (git clone)
+
+For development or custom builds. Clone, install deps, configure, and run the dev server.
 
 ```bash
+git clone https://github.com/0xdzik/wokroute.git
+cd wokroute
+bun install
+cd dashboard && bun install && cd ..
 cp .env.example .env
+bun run dev
 ```
 
 Edit `.env` and set the two required secrets before first run:
@@ -111,13 +133,7 @@ Edit `.env` and set the two required secrets before first run:
 
 Optional: `CONSOLE_JWT_SECRET` (auto-generated on first run if unset), `DATA_DIR` (default `./data`).
 
-### 3. Run the server
-
-```bash
-bun run dev
-```
-
-### 4. Open the console
+### Open the console
 
 Once running, visit:
 
@@ -125,23 +141,6 @@ Once running, visit:
 - **Health:** <http://localhost:12800/health>
 
 Log in with the `CONSOLE_PASSWORD` you set, then create or manage API keys from the dashboard.
-
-## Usage (npm global install)
-
-After `npm i -g wokroute` (requires [Bun](https://bun.sh) on `PATH`):
-
-| Command | Action |
-| --- | --- |
-| `wokroute` | Run the server in the foreground |
-| `wokroute -d`, `wokroute --daemon` | Run in the background (writes a PID file to the data dir) |
-| `wokroute stop` | Stop a background daemon |
-| `wokroute install` | Install boot autostart (systemd / launchd / Windows startup) |
-| `wokroute uninstall` | Remove boot autostart |
-| `wokroute -h`, `wokroute --help` | Show help |
-
-On first run with no `CONSOLE_PASSWORD` set, the default password is `wokroute` — a warning is printed; change it from the console or set the env var.
-
-The data directory defaults to `~/.local/share/wokroute` (Linux), `~/Library/Application Support/wokroute` (macOS), or `%APPDATA%/wokroute` (Windows); override with `DATA_DIR`.
 
 ## API
 
