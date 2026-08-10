@@ -4,7 +4,7 @@ A self-hosted Bun + Elysia AI proxy with an authenticated web console. Accepts O
 
 ![Wokroute dashboard overview](docs/overview.png)
 
-**Current release:** `1.0.1`
+**Current release:** `1.0.2`
 
 ## Table of contents
 

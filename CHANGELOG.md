@@ -2,6 +2,10 @@
 
 All notable changes to Wokroute are documented here.
 
+## [1.0.2] - 2026-08-11
+
+Fix: console UI not served when running from a different cwd. `CONSOLE_ROOT` was a relative `dashboard/dist` path resolved against the process cwd; now resolved relative to the package root via `import.meta.dir` so a globally-installed `wokroute` finds the bundled dashboard regardless of where it is invoked.
+
 ## [1.0.1] - 2026-08-11
 
 Fix: add `#!/usr/bin/env bun` shebang to `src/main.ts` — without it the npm-global `wokroute` bin symlink silently failed because the shell had no interpreter directive. Restructure README Quick start into npm-global and git-clone paths.
