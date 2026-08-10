@@ -21,6 +21,7 @@ export interface OAuthLoginSessionView {
   readonly accountId: string | null;
   readonly errorKind: string | null;
   readonly errorMessage: string | null;
+  readonly deviceFlow: boolean;
   readonly createdAtMs: number;
   readonly expiresAtMs: number;
 }
@@ -57,6 +58,7 @@ export interface OAuthStartSessionResult {
   readonly userCode: string | null;
   readonly verificationUri: string | null;
   readonly intervalSeconds: number | null;
+  readonly deviceFlow: boolean;
   readonly state: string;
   readonly expiresAtMs: number;
 }
@@ -211,6 +213,7 @@ export class OAuthLoginSessionManager {
       userCode: session.userCode,
       verificationUri: session.verificationUri,
       intervalSeconds: session.intervalSeconds,
+      deviceFlow: session.deviceFlow,
       state: session.state,
       expiresAtMs: session.expiresAtMs,
     };
@@ -346,7 +349,6 @@ export class OAuthLoginSessionManager {
     this.evictExpired(nowMs);
     return this.sessions.size;
   }
-
   private view(session: SessionRecord): OAuthLoginSessionView {
     return {
       sessionId: session.sessionId,
@@ -361,6 +363,7 @@ export class OAuthLoginSessionManager {
       accountId: session.accountId,
       errorKind: session.errorKind,
       errorMessage: session.errorMessage,
+      deviceFlow: session.deviceFlow,
       createdAtMs: session.createdAtMs,
       expiresAtMs: session.expiresAtMs,
     };

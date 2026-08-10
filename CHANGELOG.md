@@ -2,6 +2,10 @@
 
 All notable changes to Wokroute are documented here.
 
+## [1.0.3] - 2026-08-11
+
+Fix: Freebuff provider (added in 1.0.2 via `41b0b76`) was not usable from the dashboard because `OAuthConnectDialog` only treated providers with a `userCode`+`verificationUri` pair as device-flow. Freebuff's device-flow has no user code — it returns a bare `authorizationUrl` and polls silently — so the dialog rendered a manual callback paste form that could never complete. Exposed `deviceFlow` from the OAuth session manager, the console OAuth service, and the frontend `OAuthLoginStart` shape; the dialog now hides the manual-callback section and shows a polling message for any `deviceFlow: true` session. Rebuilt `dashboard/dist`.
+
 ## [1.0.2] - 2026-08-11
 
 Fix: console UI not served when running from a different cwd. `CONSOLE_ROOT` was a relative `dashboard/dist` path resolved against the process cwd; now resolved relative to the package root via `import.meta.dir` so a globally-installed `wokroute` finds the bundled dashboard regardless of where it is invoked.

@@ -788,6 +788,7 @@ export type OAuthStartResultView =
       readonly userCode: string | null;
       readonly verificationUri: string | null;
       readonly intervalSeconds: number | null;
+      readonly deviceFlow: boolean;
       readonly state: string;
       readonly expiresAtMs: number;
     }
@@ -898,11 +899,12 @@ export class OAuthService {
         providerId: result.providerId,
         name: result.name,
         authorizationUrl: result.authorizationUrl,
-        instructions: result.userCode ? "Open the verification URL, enter the device code, then check authorization here." : "Complete authorization in the provider window, then return here to finish the connection.",
+        instructions: result.userCode ? "Open the verification URL, enter the device code, then check authorization here." : result.deviceFlow ? "Open the login URL and sign in — authorization is polled automatically." : "Complete authorization in the provider window, then return here to finish the connection.",
         redirectUri: result.redirectUri,
         userCode: result.userCode,
         verificationUri: result.verificationUri,
         intervalSeconds: result.intervalSeconds,
+        deviceFlow: result.deviceFlow,
         state: result.state,
         expiresAtMs: result.expiresAtMs,
       };

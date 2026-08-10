@@ -743,6 +743,7 @@ interface OAuthLoginStart {
   userCode?: string | null;
   verificationUri?: string | null;
   intervalSeconds?: number | null;
+  deviceFlow?: boolean;
 }
 
 interface OAuthLoginStatus {
@@ -868,8 +869,8 @@ function OAuthConnectDialog({
   onCancel: () => void;
   completing: boolean;
 }) {
+  const isDeviceFlow = Boolean(session.deviceFlow || (session.userCode && session.verificationUri));
   const waiting = status?.status === "waiting-for-user" || status?.status === "exchanging-code";
-  const isDeviceFlow = Boolean(session.userCode && session.verificationUri);
   const hasCallback = Boolean(callbackValue.trim());
   const statusMessage = status?.status === "exchanging-code"
     ? "Finishing authorization…"
@@ -878,7 +879,7 @@ function OAuthConnectDialog({
       : status && status.status !== "waiting-for-user"
         ? status.errorMessage ?? status.errorKind ?? "Authorization failed"
         : isDeviceFlow
-          ? "Polling for authorization — complete the device flow in your browser…"
+          ? "Polling for authorization — complete the login in your browser…"
           : "Waiting for popup authorization…";
   const statusTone = status?.status === "completed"
     ? "text-[var(--green)]"
