@@ -140,7 +140,12 @@ async function buildSnapshot(sources: RouteSnapshotSources, revision: number): P
   // selection (including round-robin) owns the provider.
   for (const custom of config.customProviders?.list?.() ?? []) {
     const rows = accountsByProvider.get(custom.slug);
-    if (rows && rows.length > 0) continue;
+    if (rows && rows.length > 0) {
+      // Ensure all existing accounts are marked active for custom providers
+      // to prevent "no eligible account" errors when credentials exist
+      accountsByProvider.set(custom.slug, rows.map((row) => row.active ? row : { ...row, active: true }));
+      continue;
+    }
     accountsByProvider.set(custom.slug, [{ id: `custom:${custom.slug}`, providerId: custom.slug, credentialKind: "api_key", active: true }]);
   }
 
