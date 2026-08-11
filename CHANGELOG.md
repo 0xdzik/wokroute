@@ -2,6 +2,10 @@
 
 All notable changes to Wokroute are documented here.
 
+## [1.0.4] - 2026-08-11
+
+Fix: Multi Warp unusable from npm-global installs — `wgcf`/`wireproxy` were resolved against `process.cwd()/bin` and no binaries ship in the tarball, so `npm install -g wokroute` failed with `ENOENT ... posix_spawn '/home/<user>/bin/wgcf'`. Added `scripts/install-warp-bins.mjs` (npm `postinstall`): downloads pinned official releases (wgcf v2.2.32, wireproxy v1.1.3) for darwin/linux amd64+arm64 and windows amd64, verifies SHA-256 against the upstream checksums, and installs into the package-root `bin/`. It never blocks `npm install` on failure — it warns with manual remediation instead; `WOKROUTE_SKIP_WARP_BINS=1` skips the download (set in the Dockerfile, where the Go build stage provides the binaries). Runtime resolution moved to `src/console/warp/bins.ts`: override env (`WOKROUTE_WGCF_BIN`/`WOKROUTE_WIREPROXY_BIN`) → package-root `bin/` → legacy cwd `bin/` → `$PATH`, with an actionable error when nothing is found. Wireproxy config files now live under the persistence data dir instead of `process.cwd()/data/warp`.
+
 ## [1.0.3] - 2026-08-11
 
 Fix: Freebuff provider (added in 1.0.2 via `41b0b76`) was not usable from the dashboard because `OAuthConnectDialog` only treated providers with a `userCode`+`verificationUri` pair as device-flow. Freebuff's device-flow has no user code — it returns a bare `authorizationUrl` and polls silently — so the dialog rendered a manual callback paste form that could never complete. Exposed `deviceFlow` from the OAuth session manager, the console OAuth service, and the frontend `OAuthLoginStart` shape; the dialog now hides the manual-callback section and shows a polling message for any `deviceFlow: true` session. Rebuilt `dashboard/dist`.

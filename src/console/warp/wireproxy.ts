@@ -17,14 +17,9 @@ import { join } from "node:path";
 import * as http from "node:http";
 import * as https from "node:https";
 import { SocksProxyAgent } from "socks-proxy-agent";
+import { resolveWireProxyBin } from "./bins";
+import { getPersistenceEnv } from "../../storage/main/env";
 
-/** Path to the bundled wireproxy binary (.exe on Windows, bare on Linux). */
-const WIREPROXY_BIN = join(process.cwd(), "bin", `wireproxy${process.platform === "win32" ? ".exe" : ""}`);
-
-/** Directory for wireproxy config files. */
-const WARP_CONF_DIR = join(process.cwd(), "data", "warp");
-
-/** Track running processes by account ID — pid is the REAL listening PID. */
 const runningProcesses = new Map<string, { pid: number; socksPort: number }>();
 
 /**
@@ -138,11 +133,18 @@ export async function startWireProxy(
     persistentKeepalive?: number;
   },
 ): Promise<{ pid: number; socksUrl: string }> {
+  // Resolve the native binary up front so a missing install fails with an
+  // actionable error instead of a raw ENOENT from spawn.
+  const wireproxyBin = resolveWireProxyBin();
+  // Lazily read the persistence env so DATA_DIR set after import still applies;
+  // conf files live under the data dir, never under the launch cwd.
+  const confDir = join(getPersistenceEnv().dataDir, "warp");
+
   // Kill existing process for this account if running.
   await stopWireProxy(accountId);
 
   // Ensure config directory exists.
-  await mkdir(WARP_CONF_DIR, { recursive: true });
+  await mkdir(confDir, { recursive: true });
 
   // Resolve endpoint — custom override takes priority, then prefer-IPv6.
   const endpointHost = config.customEndpoint?.trim()
@@ -175,14 +177,14 @@ export async function startWireProxy(
     "",
   ].filter((line) => line !== "").join("\n");
 
-  const confPath = join(WARP_CONF_DIR, `${accountId}.conf`);
+  const confPath = join(confDir, `${accountId}.conf`);
   await writeFile(confPath, confContent, "utf8");
 
   // Spawn wireproxy in silent mode.
   // wireproxy is a Go binary that forks itself — the parent exits immediately
   // and the child (actual listener) gets a different PID. We resolve the real
   // PID from the listening port after a brief wait.
-  const proc = Bun.spawn([WIREPROXY_BIN, "-c", confPath, "-s"], {
+  const proc = Bun.spawn([wireproxyBin, "-c", confPath, "-s"], {
     stdout: "ignore",
     stderr: "ignore",
   });
@@ -221,7 +223,7 @@ export async function stopWireProxy(accountId: string): Promise<boolean> {
   // Release the pooled SocksProxyAgent so its socket is torn down.
   destroyHealthAgent(entry.socksPort);
   // Clean up config file.
-  await rm(join(WARP_CONF_DIR, `${accountId}.conf`), { force: true }).catch(() => {});
+  await rm(join(getPersistenceEnv().dataDir, "warp", `${accountId}.conf`), { force: true }).catch(() => {});
   return true;
 }
 

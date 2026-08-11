@@ -1,5 +1,5 @@
 /**
- * wgcf wrapper — shells out to the bundled wgcf.exe binary to register Cloudflare
+ * wgcf wrapper — shells out to the resolved wgcf binary to register Cloudflare
  * Warp accounts and generate WireGuard profiles.
  *
  * Flow:
@@ -16,9 +16,7 @@
 import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-
-/** Path to the bundled wgcf binary (.exe on Windows, bare on Linux). */
-const WGCF_BIN = join(process.cwd(), "bin", `wgcf${process.platform === "win32" ? ".exe" : ""}`);
+import { resolveWgcfBin } from "./bins";
 
 /** Parsed WireGuard profile from wgcf generate. */
 export interface WgcfProfile {
@@ -67,12 +65,16 @@ async function runCmd(cmd: string, args: readonly string[], cwd: string, timeout
  * Returns all credentials needed to spawn a wireproxy instance.
  */
 export async function registerWarpAccount(id: string): Promise<WgcfRegisterResult> {
+  // Resolve the native binary up front so a missing install fails with an
+  // actionable error instead of a raw ENOENT from spawn.
+  const wgcfBin = resolveWgcfBin();
+
   // Create a temp working directory for wgcf.
   const workDir = await mkdtemp(join(tmpdir(), `warp-${id}-`));
 
   try {
     // Step 1: Register account.
-    const reg = await runCmd(WGCF_BIN, ["register", "--accept-tos"], workDir, 30000);
+    const reg = await runCmd(wgcfBin, ["register", "--accept-tos"], workDir, 30000);
     if (reg.exitCode !== 0) {
       throw new Error(`wgcf register failed (exit ${reg.exitCode}): ${reg.stderr || reg.stdout}`);
     }
@@ -82,7 +84,7 @@ export async function registerWarpAccount(id: string): Promise<WgcfRegisterResul
     const account = parseAccountToml(accountText);
 
     // Step 2: Generate WireGuard profile.
-    const gen = await runCmd(WGCF_BIN, ["generate", "--profile", "wgcf-profile.conf"], workDir, 15000);
+    const gen = await runCmd(wgcfBin, ["generate", "--profile", "wgcf-profile.conf"], workDir, 15000);
     if (gen.exitCode !== 0) {
       throw new Error(`wgcf generate failed (exit ${gen.exitCode}): ${gen.stderr || gen.stdout}`);
     }

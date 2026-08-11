@@ -15,6 +15,9 @@ dashboard/vitest.config.ts
 
 # Runtime data
 data/
+# Downloaded Warp native binaries (host-specific; fetched by postinstall)
+bin/
+
 
 # Dev tooling artifacts
 .playwright-mcp/

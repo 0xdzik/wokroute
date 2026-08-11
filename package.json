@@ -1,6 +1,6 @@
 {
   "name": "wokroute",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Self-hosted Bun + Elysia AI proxy with an authenticated web console. Forwards OpenAI Chat Completions, OpenAI Responses, and Anthropic Messages across 30+ provider adapters with OAuth and API-key credentials, translates responses cross-protocol, and manages everything from a real-time dashboard.",
   "license": "GPL-3.0-only",
   "author": "0xdzik",
@@ -59,7 +59,9 @@
     "maturity:gate": "bun run scripts/maturity-gate.ts",
     "canary:provider": "bun run scripts/provider-canary.ts",
     "bench": "bun test --timeout 60000 test/bench",
-    "bench:baseline": "bun test --timeout 60000 test/bench/benchmark-edge-cases.test.ts"
+    "bench:baseline": "bun test --timeout 60000 test/bench/benchmark-edge-cases.test.ts",
+    "postinstall": "node scripts/install-warp-bins.mjs || bun scripts/install-warp-bins.mjs",
+    "install:warp-bins": "node scripts/install-warp-bins.mjs --force"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.13.0",

@@ -16,6 +16,9 @@ RUN cd wireproxy && CGO_ENABLED=0 go build -ldflags="-s -w" -o /out/wireproxy ./
 FROM oven/bun:canary-alpine AS build
 WORKDIR /app
 
+# Warp binaries come from the Go build stage — skip the npm binary downloader.
+ENV WOKROUTE_SKIP_WARP_BINS=1
+
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
