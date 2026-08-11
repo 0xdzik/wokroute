@@ -24,6 +24,7 @@ import type { ConfigPersistence } from "../storage";
 import type { RuntimePersistence } from "../storage/runtime/runtime";
 import { createDbMapApi } from "./db-map/api-routes";
 import type { DbMapPersistence } from "./db-map/service";
+import { checkForUpdate } from "../update";
 import type { DbTarget } from "./db-map/types";
 import {
   buildSessionClearCookie,
@@ -767,6 +768,7 @@ export function createConsoleApi(deps: ConsoleRouterDependencies) {
         })
         // ---- diagnostics ----
         .get("/health/status", async () => diagnostics.status())
+        .get("/health/update", async () => checkForUpdate())
         .get("/health/metrics", async () => diagnostics.metrics())
         .get("/metrics", async ({ set }) => {
           set.headers["content-type"] = "text/plain; version=0.0.4; charset=utf-8";

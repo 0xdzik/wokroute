@@ -125,3 +125,13 @@ export const TOKEN_PRESETS = [
   { label: "1B", value: 1_000_000_000 },
   { label: "1T", value: 1_000_000_000_000 },
 ] as const;
+
+
+/** Response of GET /console/api/health/update — npm registry version check. */
+export type UpdateInfo = {
+  current: string;
+  latest: string | null;
+  updateAvailable: boolean;
+  checkedAt: number;
+  error?: string;
+};

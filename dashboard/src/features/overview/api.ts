@@ -8,7 +8,7 @@ import { ApiError, apiDelete, apiGet, apiPatch, apiPost } from "../../lib/api";
 import { copyText } from "../../lib/clipboard";
 import { qk } from "../../lib/query-keys";
 import { parseOverviewData } from "./overview-data";
-import type { ApiKeyRecord, CreatedKey, HealthMetrics, KeyLimitsInput, KeyUpdatePatch, RuntimeSettings, SettingsResponse, WarpMetricsSummary } from "./types";
+import type { ApiKeyRecord, CreatedKey, HealthMetrics, KeyLimitsInput, KeyUpdatePatch, RuntimeSettings, SettingsResponse, UpdateInfo, WarpMetricsSummary } from "./types";
 
 // ── Queries ────────────────────────────────────────────────────────────────
 
@@ -55,6 +55,17 @@ export function useWarpMetricsSummary() {
     queryKey: qk.warp.metricsSummary,
     queryFn: () => apiGet<WarpMetricsSummary>("/warp/metrics/summary"),
     refetchInterval: 5_000,
+  });
+}
+
+export function useUpdateInfo() {
+  return useQuery({
+    queryKey: qk.releases.updateInfo,
+    queryFn: () => apiGet<UpdateInfo>("/health/update"),
+    // Every Overview mount re-checks logically; the backend TTL-caches the
+    // registry hit, and this staleTime keeps remounts from refetching.
+    staleTime: 5 * 60_000,
+    retry: false,
   });
 }
 

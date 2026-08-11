@@ -40,9 +40,9 @@ export const qk = {
     metrics: ["health-metrics"] as const,
   },
 
-  /** GitHub releases API (external). */
+  /** `/console/api/health/update` — npm registry update check (backend-proxied; CSP blocks direct browser fetches). */
   releases: {
-    githubLatest: ["github-latest-release"] as const,
+    updateInfo: ["update-info"] as const,
   },
 
   /** `/console/api/providers` catalog surface. */

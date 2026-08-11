@@ -43,6 +43,7 @@ import { formatUptime } from "../lib/format";
 import { toast } from "../lib/toast";
 import { Dialog } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
+import type { UpdateInfo } from "../features/overview/types";
 
 interface HealthStatus {
   version: string;
@@ -319,7 +320,7 @@ function NotificationsDialog({
             {updateAvailable ? (
               <div className="rounded-[12px] bg-[var(--accent-soft)] p-3.5">
                 <p className="font-semibold text-[var(--accent)]">Update available</p>
-                <p className="mt-0.5 text-xs text-[var(--text-2)]">GitHub has {latestTag ? `v${latestTag}` : "a newer release"} available.</p>
+                <p className="mt-0.5 text-xs text-[var(--text-2)]">Version {latestTag ? `v${latestTag}` : "newer"} is available (current: v{statusData?.version ?? "?"}). Run <code className="font-mono">wokroute update</code> or <code className="font-mono">npm i -g wokroute@latest</code>.</p>
               </div>
             ) : (
               <p className="px-1 py-2.5 text-center text-xs text-[var(--text-3)]">No new notifications.</p>
@@ -507,18 +508,14 @@ export function AppShell() {
     staleTime: 30_000,
   });
   const releaseQuery = useQuery({
-    queryKey: qk.releases.githubLatest,
-    queryFn: async () => {
-      const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
-      if (!res.ok) throw new Error(`GitHub API ${res.status}`);
-      return (await res.json()) as { tag_name: string; html_url: string };
-    },
+    queryKey: qk.releases.updateInfo,
+    queryFn: () => apiGet<UpdateInfo>("/health/update"),
     staleTime: 30 * 60_000,
     retry: false,
   });
   const localVersion = statusQuery.data?.version;
-  const latestTag = releaseQuery.data?.tag_name?.replace(/^v/, "");
-  const updateAvailable = Boolean(localVersion && latestTag && latestTag !== localVersion);
+  const latestTag = releaseQuery.data?.latest ?? undefined;
+  const updateAvailable = releaseQuery.data?.updateAvailable ?? false;
 
   const initials = useMemo(() => {
     const parts = adminName.trim().split(/\s+/).filter(Boolean);
@@ -574,11 +571,11 @@ export function AppShell() {
             Wokroute
           </a>
           <a
-            href={releaseQuery.data?.html_url ?? `https://github.com/${GITHUB_REPO}/releases`}
+          href={`https://github.com/${GITHUB_REPO}/releases`}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-1 text-[10px] font-semibold text-[var(--text-3)] transition-colors hover:text-[var(--accent)]"
-            title={updateAvailable ? `Update available on GitHub: v${latestTag}` : "View releases on GitHub"}
+            title={updateAvailable ? `Update available: v${latestTag ?? "newer"}` : "View releases on GitHub"}
           >
             v{localVersion ?? "\u2026"}
             {updateAvailable && <span className="size-1.5 rounded-full bg-[var(--accent)]" aria-label="Update available" />}
@@ -767,7 +764,7 @@ export function AppShell() {
       </div>
     </aside>
 
-  ), [drawerOpen, openPanel, motionProfile, railCollapsed, appearanceQuery.data?.settings.runtime.sidebarIconDataUrl, localVersion, updateAvailable, releaseQuery.data?.html_url, latestTag, adminName, adminNameDraft, editingAdminName, initials]);
+  ), [drawerOpen, openPanel, motionProfile, railCollapsed, appearanceQuery.data?.settings.runtime.sidebarIconDataUrl, localVersion, updateAvailable, latestTag, adminName, adminNameDraft, editingAdminName, initials]);
 
   return (
     <>

@@ -16,7 +16,9 @@
 import { join, dirname } from "node:path";
 import { homedir } from "node:os";
 import { mkdir } from "node:fs/promises";
+import { createInterface } from "node:readline/promises";
 import { getPersistenceEnv } from "./storage/main/env";
+import { checkForUpdate, currentVersion } from "./update";
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -209,7 +211,7 @@ function windowsStartupPath(): string {
   return join(appdata, "Microsoft/Windows/Start Menu/Programs/Startup/wokroute.cmd");
 }
 
-async function installWindows(): Promise<void> {
+async function writeWindowsStartupShortcut(): Promise<void> {
   const path = windowsStartupPath();
   // ponytail: .cmd batch wrapper instead of a .lnk shortcut — avoids COM /
   // Task Scheduler. Upgrade to .lnk when Windows shell-scripting deps land.
@@ -217,6 +219,10 @@ async function installWindows(): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   await Bun.write(path, body);
   console.log(`[wokroute] startup shortcut installed: ${path}`);
+}
+
+async function installWindows(): Promise<void> {
+  await writeWindowsStartupShortcut();
   console.log(`[wokroute] log out and back in to start on boot`);
   process.exit(0);
 }
@@ -246,17 +252,94 @@ async function uninstallAutostart(): Promise<void> {
   }
 }
 
+/** Menu option: daemonize now AND install boot autostart in one step.
+ *  Linux (`enable --now`) and macOS (RunAtLoad + KeepAlive) start the daemon
+ *  the moment the unit is installed; the Windows startup shortcut only fires
+ *  at login, so the daemon is spawned there as well. */
+async function backgroundWithAutostart(): Promise<void> {
+  if (process.platform === "win32") {
+    await writeWindowsStartupShortcut();
+    console.log("[wokroute] autostart runs at next login — starting the daemon now");
+    return spawnDaemon([]); // spawnDaemon reports and exits
+  }
+  return installAutostart(); // installs the unit, starts the daemon, exits
+}
+
+// ── update ─────────────────────────────────────────────────────────────────
+
+async function runUpdate(): Promise<void> {
+  console.log(`[wokroute] current version: ${currentVersion()}`);
+  console.log("[wokroute] checking the npm registry…");
+  const info = await checkForUpdate(true);
+  if (info.error !== undefined) {
+    console.error(`[wokroute] update check failed: ${info.error}`);
+    process.exit(1);
+  }
+  console.log(`[wokroute] latest version: ${info.latest ?? "unknown"}`);
+  if (!info.updateAvailable) {
+    console.log("[wokroute] already up to date.");
+    process.exit(0);
+  }
+  console.log(`[wokroute] updating wokroute ${info.current} → ${info.latest}…`);
+  const proc = Bun.spawn({ cmd: ["npm", "install", "-g", "wokroute@latest"], stdout: "inherit", stderr: "inherit", stdin: "inherit" });
+  const code = await proc.exited;
+  if (code === 0) {
+    console.log(`[wokroute] updated to ${info.latest}. Restart the server to run the new version (background daemon: wokroute stop && wokroute -d).`);
+    process.exit(0);
+  }
+  console.error(`[wokroute] npm install failed (exit ${code}). Run it manually: npm i -g wokroute@latest`);
+  process.exit(1);
+}
+
+// ── interactive menu ───────────────────────────────────────────────────────
+
+async function interactiveMenu(serverStarter: () => Promise<void>): Promise<void> {
+  const readline = createInterface({ input: process.stdin, output: process.stdout });
+  console.log(`
+[wokroute] v${currentVersion()} — self-hosted AI proxy
+
+  1. Start server (foreground)
+  2. Run in background + install boot autostart
+  3. Update to the latest version
+  4. Stop background daemon
+  5. Help
+`);
+  let answer = "";
+  try {
+    answer = (await readline.question("Select an option [1-5] (Enter = 1): ")).trim();
+  } catch {
+    readline.close();
+    console.log("\n[wokroute] cancelled.");
+    process.exit(130);
+  }
+  readline.close();
+  switch (answer) {
+    case "":
+    case "1": return serverStarter();
+    case "2": return backgroundWithAutostart();
+    case "3": return runUpdate();
+    case "4": return stopDaemon();
+    case "5": return printHelp();
+    default:
+      console.log(`[wokroute] unknown option "${answer}" — starting the server.`);
+      return serverStarter();
+  }
+}
+
 // ── help ───────────────────────────────────────────────────────────────────
 
 function printHelp(): void {
   console.log(`wokroute — self-hosted AI proxy
 
 Usage:
-  wokroute                 Run the server in the foreground
+  wokroute                 Interactive menu in a terminal; starts the server
+                           directly when stdin is not a TTY (Docker/systemd)
   wokroute -d, --daemon    Run in the background (writes a PID file)
   wokroute stop            Stop a background daemon
+  wokroute update          Update to the latest version from npm
   wokroute install         Install boot autostart (systemd / launchd / Windows startup)
   wokroute uninstall       Remove boot autostart
+  wokroute -v, --version   Show the installed version
   wokroute -h, --help      Show this help
 
 Environment:
@@ -278,8 +361,17 @@ export async function dispatch(serverStarter: () => Promise<void>): Promise<void
   if (cmd === "stop") return stopDaemon();
   if (cmd === "install") return installAutostart();
   if (cmd === "uninstall") return uninstallAutostart();
+  if (cmd === "update") return runUpdate();
+  if (cmd === "-v" || cmd === "--version") {
+    console.log(`wokroute ${currentVersion()}`);
+    process.exit(0);
+  }
   if (cmd === "-h" || cmd === "--help") return printHelp();
   const daemon = argv.includes("-d") || argv.includes("--daemon");
   if (daemon) return spawnDaemon(argv);
+  // Interactive menu only for a human at a real terminal with no arguments.
+  // Docker / systemd / pipes (non-TTY) keep the long-standing behavior: the
+  // server starts in the foreground immediately, no prompt.
+  if (cmd === undefined && process.stdin.isTTY) return interactiveMenu(serverStarter);
   return serverStarter();
 }

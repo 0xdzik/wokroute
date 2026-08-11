@@ -8,9 +8,28 @@ import { formatDuration } from "../../lib/format";
 import { Button } from "../../components/ui/button";
 import { StatCard, StatePanel } from "../../components/ui/state";
 import { ApiKeysSection } from "./api-keys-section";
-import { useOverview } from "./api";
+import { useOverview, useUpdateInfo } from "./api";
 import { EndpointSection } from "./endpoint-card";
 import { HealthPanel } from "./health-panel";
+
+/** Non-blocking update notice — hidden unless the backend confirms a newer
+ *  npm version exists. Shares the layout header's query key, so the two
+ *  surfaces never double-fetch. */
+function UpdateBanner() {
+  const { data } = useUpdateInfo();
+  if (!data || !data.updateAvailable || !data.latest) return null;
+  return (
+    <section className="flex items-start gap-3 rounded-xl border border-[var(--orange)]/40 bg-[var(--orange-soft)] px-4 py-3">
+      <TriangleAlert size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-[var(--status-warning)]" />
+      <div className="min-w-0 text-[12.5px] leading-relaxed">
+        <span className="font-semibold text-[var(--text-1)]">Update available: </span>
+        <span className="text-[var(--text-2)]">
+          v{data.latest} is out (current: v{data.current}). Run <code className="rounded bg-[var(--hover)] px-1 py-0.5 font-mono text-[11px]">wokroute update</code> or <code className="rounded bg-[var(--hover)] px-1 py-0.5 font-mono text-[11px]">npm i -g wokroute@latest</code> to upgrade.
+        </span>
+      </div>
+    </section>
+  );
+}
 
 export function OverviewPage() {
   const { data, isLoading, isError, refetch } = useOverview();
@@ -24,6 +43,7 @@ export function OverviewPage() {
 
   return (
     <div className="dashboard-page space-y-6">
+      <UpdateBanner />
       {/* Traffic KPIs */}
       <section>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
