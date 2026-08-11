@@ -81,6 +81,7 @@ export type {
   RuntimeRequestFilters,
   RuntimeRequestPage,
   UsageSummary,
+  TrafficWindow,
   UsageCacheRow,
   UsageCacheSummary,
   ChartBucket,

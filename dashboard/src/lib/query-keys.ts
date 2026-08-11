@@ -79,11 +79,6 @@ export const qk = {
     all: ["console", "proxy-settings"] as const,
   },
 
-  /** `/console/api/providers` routing view (summary list for routing UI). */
-  routing: {
-    all: ["console", "providers-routing"] as const,
-  },
-
   /** `/console/api/filters` — request filter/sanitize rules. */
   filterRules: {
     all: ["filter-rules"] as const,

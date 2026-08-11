@@ -48,10 +48,11 @@ export interface HealthMetrics {
   coreCount: number;
   cpuModel: string;
   pid: number;
-  netReceivedKb: number | null;
-  netSentKb: number | null;
-  netTotalKb: number | null;
-  netRateKbps: number | null;
+  trafficWindowMs: number;
+  trafficRequests: number;
+  trafficErrors: number;
+  trafficP95Ms: number;
+  trafficRatePerSec: number;
 }
 
 export interface WarpMetricsSummary {

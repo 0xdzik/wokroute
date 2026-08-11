@@ -1,8 +1,8 @@
-/** "Health" section — one flat Card per metric (RAM, Warp, Network, CPU).
+/** "Health" section — one flat Card per metric (RAM, Warp, Traffic, CPU).
  *  Each metric is an independent card; nothing is nested inside another card. */
 
-import { Cpu, Globe, MemoryStick, Network } from "lucide-react";
-import { formatBandwidthKb, formatMemoryMb } from "../../lib/format";
+import { Activity, Cpu, Globe, MemoryStick } from "lucide-react";
+import { formatDuration, formatMemoryMb } from "../../lib/format";
 import { Badge } from "../../components/ui/badge";
 import { Card } from "../../components/ui/card";
 import { useHealthMetrics, useWarpMetricsSummary } from "./api";
@@ -24,6 +24,7 @@ export function HealthPanel() {
   const cpuPercent = health ? Math.min(100, Math.max(0, health.cpuPercent)) : 0;
   const cpuTone = cpuPercent >= 80 ? "err" : cpuPercent >= 50 ? "warn" : "ok";
   const ramSystemPercent = health && health.memoryTotalMb > 0 ? Math.min(100, Math.max(0, (health.memorySystemUsedMb / health.memoryTotalMb) * 100)) : 0;
+  const trafficErrorFraction = health && health.trafficRequests > 0 ? Math.min(1, health.trafficErrors / health.trafficRequests) : 0;
 
   return (
     <section>
@@ -109,44 +110,44 @@ export function HealthPanel() {
           <p className="mt-3 text-[11px] leading-relaxed text-[var(--text-3)]">Per-instance RSS summed across running wireproxy processes.</p>
         </Card>
 
-        {/* Network */}
+        {/* Traffic */}
         <Card>
           <div className="flex items-center gap-2">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[var(--teal-soft)] text-[var(--teal)]"><Network size={15} /></span>
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[var(--teal-soft)] text-[var(--teal)]"><Activity size={15} /></span>
             <div className="min-w-0 flex-1">
-              <h3 className="truncate text-[12.5px] font-bold tracking-tight">Network</h3>
-              <p className="truncate text-[11px] text-[var(--text-3)]">All interfaces</p>
+              <h3 className="truncate text-[12.5px] font-bold tracking-tight">Traffic</h3>
+              <p className="truncate text-[11px] text-[var(--text-3)]">Last 60 seconds</p>
             </div>
-            <Badge tone={health?.netTotalKb !== null ? "info" : "default"}>{health?.netTotalKb !== null ? "Live" : "N/A"}</Badge>
+            <Badge tone={health ? "info" : "default"}>{health ? "Live" : "N/A"}</Badge>
           </div>
           <div className="mt-3 flex items-baseline justify-between gap-2">
             <div className="flex items-baseline gap-2">
-              <span className="text-xl font-bold tracking-tight tabular-nums">{health ? formatBandwidthKb(health.netTotalKb) : "—"}</span>
-              <span className="text-[11px] text-[var(--text-3)]">total</span>
+              <span className="text-xl font-bold tracking-tight tabular-nums">{health ? health.trafficRatePerSec.toLocaleString("en-US") : "—"}</span>
+              <span className="text-[11px] text-[var(--text-3)]">req/s</span>
             </div>
-            <span className="text-[11px] tabular-nums text-[var(--text-2)]">{health?.netRateKbps != null ? `${health.netRateKbps.toLocaleString("en-US")} KB/s` : "—"}</span>
+            <span className="text-[11px] tabular-nums text-[var(--text-2)]">{health ? `p95 ${formatDuration(health.trafficP95Ms)}` : "—"}</span>
           </div>
           <div className="mt-3 space-y-2">
             <div>
               <div className="mb-1 flex justify-between text-[11px] text-[var(--text-3)]">
-                <span>Received</span>
-                <span className="tabular-nums">{health ? formatBandwidthKb(health.netReceivedKb) : "—"}</span>
+                <span>Requests</span>
+                <span className="tabular-nums">{health ? health.trafficRequests.toLocaleString("en-US") : "—"}</span>
               </div>
               <div className="h-1 overflow-hidden rounded-full bg-[var(--track)]">
-                <div className="h-full origin-left rounded-full bg-[var(--status-info)] transition-transform duration-500" style={{ transform: `scaleX(${health && health.netTotalKb && health.netReceivedKb ? Math.min(1, health.netReceivedKb / health.netTotalKb) : 0})` }} />
+                <div className="h-full origin-left rounded-full bg-[var(--status-info)] transition-transform duration-500" style={{ transform: `scaleX(${health && health.trafficRequests > 0 ? Math.max(0.02, 1 - trafficErrorFraction) : 0})` }} />
               </div>
             </div>
             <div>
               <div className="mb-1 flex justify-between text-[11px] text-[var(--text-3)]">
-                <span>Sent</span>
-                <span className="tabular-nums">{health ? formatBandwidthKb(health.netSentKb) : "—"}</span>
+                <span>Errors</span>
+                <span className="tabular-nums">{health ? `${health.trafficErrors.toLocaleString("en-US")} · ${(trafficErrorFraction * 100).toFixed(1)}%` : "—"}</span>
               </div>
               <div className="h-1 overflow-hidden rounded-full bg-[var(--track)]">
-                <div className="h-full origin-left rounded-full bg-[var(--status-success)] transition-transform duration-500" style={{ transform: `scaleX(${health && health.netTotalKb && health.netSentKb ? Math.min(1, health.netSentKb / health.netTotalKb) : 0})` }} />
+                <div className="h-full origin-left rounded-full bg-[var(--red)] transition-transform duration-500" style={{ transform: `scaleX(${trafficErrorFraction})` }} />
               </div>
             </div>
           </div>
-          <p className="mt-3 text-[11px] leading-relaxed text-[var(--text-3)]">Cumulative I/O since boot · rate sampled every 5s.</p>
+          <p className="mt-3 text-[11px] leading-relaxed text-[var(--text-3)]">Request rate, errors, and latency from request history · refreshes every 5s.</p>
         </Card>
 
         {/* CPU */}

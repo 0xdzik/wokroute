@@ -35,18 +35,39 @@ describe("ConsoleDiagnostics — status & metrics (no repositories needed)", () 
     expect(status.startedAt).toBeGreaterThan(0);
   });
 
-  test("metrics reports non-negative memory and heap figures with a core count", () => {
+  test("metrics reports non-negative memory and heap figures with a core count", async () => {
     const diag = makeDiagnostics();
-    const metrics = diag.metrics();
+    const metrics = await diag.metrics();
     expect(metrics.memoryUsedMb).toBeGreaterThanOrEqual(0);
     expect(metrics.heapUsedMb).toBeGreaterThanOrEqual(0);
     expect(metrics.coreCount).toBeGreaterThanOrEqual(1);
     expect(metrics.pid).toBe(process.pid);
   });
 
-  test("gc returns before/after metrics and a gc schedule result", () => {
+  test("metrics surfaces rolling-window traffic fields, zeroed without a repository", async () => {
     const diag = makeDiagnostics();
-    const result = diag.gc();
+    const metrics = await diag.metrics();
+    expect(metrics.trafficWindowMs).toBe(60_000);
+    expect(metrics.trafficRequests).toBe(0);
+    expect(metrics.trafficErrors).toBe(0);
+    expect(metrics.trafficP95Ms).toBe(0);
+    expect(metrics.trafficRatePerSec).toBe(0);
+  });
+
+  test("metrics derives the request rate from the traffic window", async () => {
+    const diag = makeDiagnostics({
+      repositories: { runtimeMetadata: { trafficWindow: async (windowMs: number) => ({ windowMs, requests: 120, errors: 3, p95DurationMs: 4321 }) } },
+    });
+    const metrics = await diag.metrics();
+    expect(metrics.trafficRequests).toBe(120);
+    expect(metrics.trafficErrors).toBe(3);
+    expect(metrics.trafficP95Ms).toBe(4321);
+    expect(metrics.trafficRatePerSec).toBe(2);
+  });
+
+  test("gc returns before/after metrics and a gc schedule result", async () => {
+    const diag = makeDiagnostics();
+    const result = await diag.gc();
     expect(result.before.memoryUsedMb).toBeGreaterThanOrEqual(0);
     expect(result.after.memoryUsedMb).toBeGreaterThanOrEqual(0);
     expect(result.gc.inFlight).toBeGreaterThanOrEqual(0);

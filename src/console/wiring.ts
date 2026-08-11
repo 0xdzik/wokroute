@@ -432,6 +432,7 @@ function makeRuntimeMetadataRepository(runtime: RuntimePersistence, registry: Pr
       }
       return { requests: summary.requests, inputTokens: summary.inputTokens, outputTokens: summary.outputTokens, cachedTokens: summary.cachedTokens, totalTokens: summary.inputTokens + summary.outputTokens, errors: summary.errors, avgDurationMs: summary.avgDurationMs, estimatedCostUsd: costUsd, partial };
     },
+    async trafficWindow(windowMs) { return runtime.metadata.trafficWindow(windowMs); },
     async queryUsageCache(period) { return runtime.metadata.queryCache(period); },
     async queryUsageChart(period) { return runtime.metadata.queryChart(period); },
     async queryUsageBy(dimension, period) {

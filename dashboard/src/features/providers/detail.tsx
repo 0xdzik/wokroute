@@ -4,7 +4,7 @@
  */
 
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowUpDown, Bot, Brain, Cable, CheckCircle2, Copy, Download, ExternalLink, Eye, FileJson, FileUp, FlaskConical, Globe, Info, Loader2, LockOpen, Pencil, Plus, PowerOff, RefreshCw, Route, Trash2, Users, AlertTriangle } from "lucide-react";
+import { ArrowLeft, ArrowUpDown, Ban, Bot, Brain, Cable, CheckCircle2, Copy, Download, ExternalLink, Eye, FileJson, FileUp, FlaskConical, Globe, Info, Loader2, LockOpen, Network, Pencil, Plus, PowerOff, RefreshCw, Route, Shuffle, Trash2, Users, AlertTriangle } from "lucide-react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "../../lib/toast";
@@ -29,6 +29,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardHeader } from "../../components/ui/card";
 import { Dialog } from "../../components/ui/dialog";
 import { Input, Label } from "../../components/ui/input";
+import { Select } from "../../components/ui/tabs";
 
 import { StatusDot } from "../../components/status-dot";
 import { ProviderIcon } from "../../components/provider-icon";
@@ -1114,6 +1115,143 @@ function RouteSwitchNotice({ event }: { event: RouteSwitchEvent }) {
   );
 }
 
+// ── Provider proxy modal ──────────────────────────────────────────────────
+
+type ProviderProxyMode = "random" | "single" | "direct";
+
+/**
+ * Per-provider proxy assignment (applies to every account of the provider):
+ * random pool proxy, one pinned proxy, or direct (proxy removed). Maps onto
+ * `routing.preferredProxyId` plus the pool-wide `excludedProviders` list.
+ */
+function ProviderProxyModal({
+  providerId,
+  providerName,
+  preferredProxyId,
+  onClose,
+}: {
+  providerId: string;
+  providerName: string;
+  preferredProxyId: string | null;
+  onClose: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const { data: proxySettings } = useQuery({
+    queryKey: qk.proxySettings.all,
+    queryFn: () => apiGet<{ excludedProviders: string[] }>("/proxy-settings"),
+  });
+  const { data: proxies } = useQuery({
+    queryKey: qk.proxies.all,
+    queryFn: () => apiGet<{ items: Array<{ id: string; name: string; active: boolean; protocol: string; host: string; port: number }> }>("/proxies?limit=100"),
+  });
+
+  const excluded = proxySettings?.excludedProviders?.includes(providerId) ?? false;
+  const [mode, setMode] = useState<ProviderProxyMode | null>(null);
+  const [singleProxyId, setSingleProxyId] = useState(preferredProxyId ?? "");
+  // Derived until the user picks one, so late-loading settings still show the true state.
+  const effectiveMode: ProviderProxyMode = mode ?? (excluded ? "direct" : preferredProxyId !== null ? "single" : "random");
+  const enabledProxies = (proxies?.items ?? []).filter((proxy) => proxy.active);
+  // The select shows the first active proxy when nothing is pinned yet — keep
+  // the applied value in sync with that visual default.
+  const effectiveSingleProxyId = singleProxyId !== "" ? singleProxyId : enabledProxies[0]?.id ?? "";
+
+  const applyMutation = useMutation({
+    mutationFn: async () => {
+      const excludedProviders = proxySettings?.excludedProviders ?? [];
+      if (effectiveMode === "direct") {
+        if (!excludedProviders.includes(providerId)) {
+          await apiPost("/proxy-settings", { excludedProviders: [...excludedProviders, providerId] });
+        }
+        if (preferredProxyId !== null) {
+          await apiPost(`/providers/${providerId}/routing`, { preferredProxyId: null });
+        }
+      } else {
+        if (excludedProviders.includes(providerId)) {
+          await apiPost("/proxy-settings", { excludedProviders: excludedProviders.filter((value) => value !== providerId) });
+        }
+        const nextPreferred = effectiveMode === "single" ? effectiveSingleProxyId : null;
+        if (nextPreferred !== preferredProxyId) {
+          await apiPost(`/providers/${providerId}/routing`, { preferredProxyId: nextPreferred });
+        }
+      }
+    },
+    onSuccess: () => {
+      toast.success(
+        effectiveMode === "random"
+          ? "Random proxy applied to all accounts"
+          : effectiveMode === "single"
+            ? "One proxy applied to all accounts"
+            : "Proxy removed from all accounts",
+      );
+      void queryClient.invalidateQueries({ queryKey: qk.provider.detail(providerId) });
+      void queryClient.invalidateQueries({ queryKey: qk.proxySettings.all });
+      onClose();
+    },
+    onError: (err) => toast.error(errorMessage(err)),
+  });
+
+  const options: Array<{ id: ProviderProxyMode; icon: typeof Shuffle; title: string; description: string }> = [
+    { id: "random", icon: Shuffle, title: "Random proxy", description: "Applied to all accounts — every request picks an available proxy from the pool (load balanced)." },
+    { id: "single", icon: Network, title: "One proxy for all accounts", description: "Pin every account of this provider to the same proxy." },
+    { id: "direct", icon: Ban, title: "Delete proxy", description: "Remove the proxy from all accounts — this provider connects directly." },
+  ];
+
+  return (
+    <Dialog open onClose={onClose} title={`Proxy · ${providerName}`}>
+      <div className="space-y-2.5" role="radiogroup" aria-label="Proxy assignment for all accounts">
+        {options.map((option) => {
+          const selected = effectiveMode === option.id;
+          const Icon = option.icon;
+          return (
+            <div
+              key={option.id}
+              role="radio"
+              aria-checked={selected}
+              tabIndex={0}
+              onClick={() => setMode(option.id)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setMode(option.id);
+                }
+              }}
+              className={cn(
+                "cursor-pointer rounded-xl border px-3.5 py-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]",
+                selected ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-[var(--inner-border)] bg-[var(--surface-2)] hover:border-[var(--accent)]/40",
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <Icon size={14} className={selected ? "text-[var(--accent)]" : "text-[var(--text-3)]"} aria-hidden={true} />
+                <span className="text-xs font-semibold">{option.title}</span>
+                {selected && <CheckCircle2 size={13} className="ml-auto shrink-0 text-[var(--accent)]" aria-hidden={true} />}
+              </div>
+              <p className="mt-1 text-[10.5px] leading-relaxed text-[var(--text-3)]">{option.description}</p>
+              {option.id === "single" && selected && (
+                <Select
+                  ariaLabel="Proxy for all accounts"
+                  className="mt-2 w-full"
+                  value={effectiveSingleProxyId}
+                  onChange={setSingleProxyId}
+                  options={enabledProxies.map((proxy) => ({ value: proxy.id, label: `${proxy.name} · ${proxy.protocol}://${proxy.host}:${proxy.port}` }))}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {effectiveMode === "single" && enabledProxies.length === 0 && (
+        <p className="mt-2 text-[10.5px] text-[var(--orange)]">No active proxies in the pool — add one under Proxy &amp; Requests first.</p>
+      )}
+      <div className="mt-4 flex items-center justify-end gap-2">
+        <Button variant="secondary" size="sm" onClick={onClose}>Cancel</Button>
+        <Button size="sm" disabled={applyMutation.isPending || (effectiveMode === "single" && effectiveSingleProxyId === "")} onClick={() => applyMutation.mutate()}>
+          {applyMutation.isPending ? <Loader2 size={13} className="animate-spin" /> : <Globe size={13} />} Apply
+        </Button>
+      </div>
+    </Dialog>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────
 
 export function ProviderDetailPage() {
@@ -1131,6 +1269,7 @@ export function ProviderDetailPage() {
   const [kiroOAuthModal, setKiroOAuthModal] = useState(false);
   const [deleteAccountConfirm, setDeleteAccountConfirm] = useState<{ open: boolean; account: AccountEntry | null }>({ open: false, account: null });
   const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
+  const [proxyModalOpen, setProxyModalOpen] = useState(false);
   const [deleteFetchedConfirmOpen, setDeleteFetchedConfirmOpen] = useState(false);
   const [addModelModalOpen, setAddModelModalOpen] = useState(false);
   const oauthPopupRef = useRef<Window | null>(null);
@@ -1380,10 +1519,14 @@ export function ProviderDetailPage() {
   }, []);
   const accountConnectionTest = useAccountConnectionTest(id ?? "", data?.models ?? [], updateAccountTestStatus);
 
-  // Proxy pools for preferred proxy selection
+  // Proxy pool + pool-wide exclusion list for the per-provider proxy modal.
   const proxiesQuery = useQuery({
-    queryKey: ["proxies"],
-    queryFn: () => apiGet<{ items: Array<{ id: string; name: string; enabled: boolean }> }>("/proxies"),
+    queryKey: qk.proxies.all,
+    queryFn: () => apiGet<{ items: Array<{ id: string; name: string; active: boolean; protocol: string; host: string; port: number }> }>("/proxies?limit=100"),
+  });
+  const proxySettingsQuery = useQuery({
+    queryKey: qk.proxySettings.all,
+    queryFn: () => apiGet<{ excludedProviders: string[] }>("/proxy-settings"),
   });
 
   const routingMutation = useMutation({
@@ -1433,6 +1576,9 @@ export function ProviderDetailPage() {
   const activeModels = data.models.filter((model) => model.enabled);
   const disabledModels = data.models.filter((model) => !model.enabled);
   const fetchedModels = data.models.filter((model) => model.source !== "built-in");
+  const providerExcluded = proxySettingsQuery.data?.excludedProviders?.includes(data.id) ?? false;
+  const preferredProxy = data.routing.preferredProxyId ? proxiesQuery.data?.items.find((proxy) => proxy.id === data.routing.preferredProxyId) ?? null : null;
+  const proxyModeLabel = providerExcluded ? "Direct" : preferredProxy ? preferredProxy.name : data.routing.preferredProxyId ? "Pinned" : "Random";
   const toggleAccountSort = (key: AccountSortKey) => {
     setAccountSort((current) => current.key === key
       ? { key, direction: current.direction === "asc" ? "desc" : "asc" }
@@ -1625,6 +1771,9 @@ export function ProviderDetailPage() {
                 <ExternalLink size={12} /> <span className="truncate">{oauthStartMutation.isPending ? "Starting…" : "Connect OAuth"}</span>
               </Button>
             )}
+            <Button variant="secondary" className="h-8 min-w-0 px-2.5 text-[11px]" size="sm" onClick={() => setProxyModalOpen(true)}>
+              <Globe size={12} /> <span className="truncate">Proxy · {proxyModeLabel}</span>
+            </Button>
             <Button className="h-8 min-w-0 px-2.5 text-[11px]" size="sm" onClick={() => setAccountModal({ open: true, existing: null })}>
               <Plus size={13} /> <span className="truncate">New account</span>
             </Button>
@@ -1852,7 +2001,7 @@ export function ProviderDetailPage() {
       <Card className="space-y-3">
         <CardHeader title="Routing" icon={Route} sub="Configure how requests are routed for this provider" />
         <div className="grid gap-3 sm:grid-cols-2">
-          <div>
+          <div className="max-w-xs">
             <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]">Strategy</label>
             <select
               className="w-full rounded-lg border border-[var(--inner-border)] bg-[var(--surface-2)] px-2.5 py-1.5 text-[11.5px] text-[var(--text-1)] focus:border-[var(--accent)] focus:outline-none"
@@ -1863,21 +2012,24 @@ export function ProviderDetailPage() {
               <option value="priority">Priority</option>
               <option value="round-robin">Round-robin</option>
             </select>
+            <p className="mt-1 text-[10.5px] text-[var(--text-3)]">Proxy assignment lives in the Proxy menu of the Accounts section above.</p>
           </div>
-          <div>
-            <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]">Preferred Proxy</label>
-            <select
-              className="w-full rounded-lg border border-[var(--inner-border)] bg-[var(--surface-2)] px-2.5 py-1.5 text-[11.5px] text-[var(--text-1)] focus:border-[var(--accent)] focus:outline-none"
-              value={data.routing.preferredProxyId ?? ""}
-              onChange={(e) => routingMutation.mutate({ preferredProxyId: e.target.value || null })}
-              disabled={routingMutation.isPending}
-            >
-              <option value="">Auto (load balance)</option>
-              {proxiesQuery.data?.items.filter((p) => p.enabled).map((proxy) => (
-                <option key={proxy.id} value={proxy.id}>{proxy.name}</option>
-              ))}
-            </select>
-            <p className="mt-1 text-[10.5px] text-[var(--text-3)]">Pin requests to a specific proxy pool, or auto-select based on health.</p>
+          <div className="max-w-xs">
+            <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]">Sticky limit</label>
+            <div className="flex items-center gap-2.5">
+              <input
+                type="number"
+                min={1}
+                max={100}
+                aria-label="Sticky limit"
+                className="h-8 w-16 rounded-[var(--radius-control)] border border-[var(--inner-border)] bg-[var(--surface-2)] px-2 text-center text-xs text-[var(--text-1)] focus:border-[var(--accent)] focus:outline-none disabled:opacity-50"
+                value={data.routing.stickyLimit}
+                onChange={(e) => routingMutation.mutate({ stickyLimit: Math.max(1, Math.min(100, Number(e.target.value) || 1)) })}
+                disabled={routingMutation.isPending || !data.routing.useStickyLimit}
+              />
+              <Switch checked={data.routing.useStickyLimit} disabled={routingMutation.isPending} onChange={(next) => routingMutation.mutate({ useStickyLimit: next })} label="Use sticky limit" />
+            </div>
+            <p className="mt-1 text-[10.5px] text-[var(--text-3)]">Reuse the same account for up to this many consecutive requests before rotating.</p>
           </div>
         </div>
       </Card>
@@ -1930,6 +2082,15 @@ export function ProviderDetailPage() {
           accounts={data.accounts}
           initialKind={accountModal.initialKind}
           onClose={() => setAccountModal({ open: false, existing: null })}
+        />
+      )}
+
+      {proxyModalOpen && (
+        <ProviderProxyModal
+          providerId={data.id}
+          providerName={data.name}
+          preferredProxyId={data.routing.preferredProxyId}
+          onClose={() => setProxyModalOpen(false)}
         />
       )}
 

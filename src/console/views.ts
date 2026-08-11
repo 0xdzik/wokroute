@@ -12,7 +12,7 @@
 import type { CredentialKind, ModelMetadata, ProviderModel, ProviderSurface, RoutingPreset, UsageDimension, UsagePeriod } from "../domain/contracts";
 import type { RouteHealth, RouteScope, RouteSwitch } from "../domain/contracts";
 import type { ModelMetadataResolver, ResolvedModelMetadata } from "../domain/model-metadata";
-import type { ChartBucket, ModelTokenTotalsRow, UsageByRow, UsageCacheSummary } from "../storage";
+import type { ChartBucket, ModelTokenTotalsRow, TrafficWindow, UsageByRow, UsageCacheSummary } from "../storage";
 import type { BackupPayload, RestoreResult, RestoreValidation } from "../storage";
 import type { OAuthTokenStore, QuotaSnapshotState, QuotaStateStore } from "../auth/credentials";
 
@@ -683,6 +683,8 @@ export interface RuntimeMetadataRepository {
   queryRequests(filters: RequestHistoryFilters): Promise<{ readonly items: readonly RequestHistoryRow[]; readonly nextCursor: string | null }>;
   getRequest(requestId: string): Promise<RequestHistoryRow | null>;
   queryUsageSummary(period: UsagePeriod): Promise<UsageSummaryView>;
+  /** Live golden signals (requests/errors/p95) over a recent rolling window. */
+  trafficWindow(windowMs: number): Promise<TrafficWindow>;
   queryUsageCache(period: UsagePeriod): Promise<UsageCacheSummary>;
   queryUsageChart(period: UsagePeriod): Promise<readonly ChartBucket[]>;
   queryUsageBy(dimension: UsageDimension, period: UsagePeriod): Promise<readonly UsageByRow[]>;
