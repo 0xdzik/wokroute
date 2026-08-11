@@ -45,7 +45,8 @@
     ".env.example"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "dev": "bun run --watch src/main.ts",

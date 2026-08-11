@@ -33,3 +33,7 @@ coverage/
 
 # Env (secrets)
 .env
+
+# CI/CD & release config
+.github/
+.releaserc.json
