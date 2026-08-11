@@ -1,8 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { normalizeRequest as normalizeFromDomain } from "../../src/domain";
 import { normalizeRequest as normalizeFromProtocols } from "../../src/domain/protocols/index";
-import { isRouteAllowed } from "../../src/console";
-import { resolveConsoleStatic } from "../../src/console";
+import { isRouteAllowed, resolveConsoleStatic, CONSOLE_ROOT } from "../../src/console";
 
 describe("stable source boundaries", () => {
   test("domain and grouped protocol barrels expose the same normalizer", () => {
@@ -21,7 +20,7 @@ describe("stable source boundaries", () => {
     expect(isRouteAllowed("openai", "gpt-4o", {})).toBe(true);
     expect(await resolveConsoleStatic("/console/login", async () => false)).toEqual({
       kind: "entry",
-      file: "dashboard/dist/index.html",
+      file: `${CONSOLE_ROOT}/index.html`,
     });
   });
 });

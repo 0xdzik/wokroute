@@ -2,8 +2,8 @@ import { join } from "node:path";
 
 /** Resolve the built dashboard relative to this module (package root), not the
  *  process cwd — so a globally-installed `wokroute` serves the UI regardless of
- *  where the user invoked it. */
-const CONSOLE_ROOT = join(import.meta.dir, "..", "..", "dashboard", "dist");
+ *  where the user invoked it. Exported so tests can build expected paths. */
+export const CONSOLE_ROOT = join(import.meta.dir, "..", "..", "dashboard", "dist");
 const CONSOLE_ENTRY = `${CONSOLE_ROOT}/index.html`;
 
 const CSP_HEADER = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self'; font-src 'self'";

@@ -266,6 +266,8 @@ describe("waitBeforeRetry", () => {
     expect(elapsed).toBeLessThan(5100);
   });
 
+  // The wait itself runs the full 5s cap, so this test needs a timeout
+  // larger than the delay it measures (bun's default 5s == the cap → race).
   test("caps the Retry-After delay to 5 seconds", async () => {
     const controller = new AbortController();
     const farFuture = new Date(Date.now() + 60_000).toISOString();
@@ -273,8 +275,10 @@ describe("waitBeforeRetry", () => {
     const start = Date.now();
     await waitBeforeRetry(error, 0, controller.signal);
     const elapsed = Date.now() - start;
-    expect(elapsed).toBeLessThan(5100);
-  });
+    // Lower bound too: a skipped wait would otherwise pass the cap check vacuously.
+    expect(elapsed).toBeGreaterThanOrEqual(4_900);
+    expect(elapsed).toBeLessThan(5_100);
+  }, 10_000);
 
   test("ignores a Retry-After in the past and applies backoff instead", async () => {
     const controller = new AbortController();
