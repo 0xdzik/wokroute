@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/0xdzik/wokroute/compare/v1.0.5...v1.1.0) (2026-08-11)
+
+
+### Features
+
+* interactive CLI menu, update command, and update notifications ([9cce21e](https://github.com/0xdzik/wokroute/commit/9cce21e160d0c7228ace89ce018f3c87363fb3c6))
+
 ## [1.0.5](https://github.com/0xdzik/wokroute/compare/v1.0.4...v1.0.5) (2026-08-11)
 
 
