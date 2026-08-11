@@ -4,7 +4,7 @@
  */
 
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowUpDown, Bot, Brain, Cable, CheckCircle2, Copy, Download, ExternalLink, Eye, FileJson, FileUp, FlaskConical, Globe, Info, Loader2, LockOpen, Pencil, Plus, PowerOff, RefreshCw, Trash2, Users, AlertTriangle } from "lucide-react";
+import { ArrowLeft, ArrowUpDown, Bot, Brain, Cable, CheckCircle2, Copy, Download, ExternalLink, Eye, FileJson, FileUp, FlaskConical, Globe, Info, Loader2, LockOpen, Pencil, Plus, PowerOff, RefreshCw, Route, Trash2, Users, AlertTriangle } from "lucide-react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "../../lib/toast";
@@ -126,7 +126,7 @@ interface ProviderDetail {
   status: "ok" | "warn";
   usageToday: { requestsToday: number; input: number; cached: number; output: number; errors: number; lastError: string | null } | null;
   accounts: AccountEntry[];
-  routing: { strategy: "priority" | "round-robin"; stickyLimit: number; useStickyLimit: boolean; proxyRouteId: string | null };
+  routing: { strategy: "priority" | "round-robin"; stickyLimit: number; useStickyLimit: boolean; proxyRouteId: string | null; preferredProxyId: string | null };
   health?: RouteHealthSnapshot | null;
   proxyHealth?: RouteHealthSnapshot | null;
   failedRoute?: RouteState | null;
@@ -159,7 +159,7 @@ interface ProviderDetailResponse {
   models: Array<{ modelId: string; displayName?: string; enabled: boolean; source?: "built-in" | "manual" | "imported"; metadata?: ModelMetadataResponse }>;
   modelManagement?: { canAddModels: boolean; canFetchModels: boolean };
   accounts: Array<AccountEntry & { providerId?: string }>;
-  routing?: { strategy?: "priority" | "round-robin"; stickyLimit?: number; useStickyLimit?: boolean; proxyRouteId?: string | null };
+  routing?: { strategy?: "priority" | "round-robin"; stickyLimit?: number; useStickyLimit?: boolean; proxyRouteId?: string | null; preferredProxyId?: string | null };
 }
 
 function normalizeProviderDetail(response: ProviderDetailResponse): ProviderDetail {
@@ -208,6 +208,7 @@ function normalizeProviderDetail(response: ProviderDetailResponse): ProviderDeta
       stickyLimit: response.routing?.stickyLimit ?? 1,
       useStickyLimit: response.routing?.useStickyLimit ?? false,
       proxyRouteId: response.routing?.proxyRouteId ?? null,
+      preferredProxyId: response.routing?.preferredProxyId ?? null,
     },
     health: null,
     proxyHealth: null,
@@ -1379,6 +1380,21 @@ export function ProviderDetailPage() {
   }, []);
   const accountConnectionTest = useAccountConnectionTest(id ?? "", data?.models ?? [], updateAccountTestStatus);
 
+  // Proxy pools for preferred proxy selection
+  const proxiesQuery = useQuery({
+    queryKey: ["proxies"],
+    queryFn: () => apiGet<{ items: Array<{ id: string; name: string; enabled: boolean }> }>("/proxies"),
+  });
+
+  const routingMutation = useMutation({
+    mutationFn: (patch: Record<string, unknown>) => apiPost(`/providers/${id}/routing`, patch),
+    onSuccess: () => {
+      toast.success("Routing settings updated");
+      void queryClient.invalidateQueries({ queryKey: qk.provider.detail(id) });
+    },
+    onError: (err) => toast.error(errorMessage(err)),
+  });
+
   // (OAuth terminal-state handling is in the useEffect above the status query.)
 
   if (!id) return null;
@@ -1830,6 +1846,39 @@ export function ProviderDetailPage() {
                 {accountsQuery.isFetchingNextPage && <div className="border-t border-[var(--inner-border)] p-2 text-center text-[11px] text-[var(--text-3)]">Loading more…</div>}
               </div>
           )}
+        </div>
+      </Card>
+
+      <Card className="space-y-3">
+        <CardHeader title="Routing" icon={Route} sub="Configure how requests are routed for this provider" />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]">Strategy</label>
+            <select
+              className="w-full rounded-lg border border-[var(--inner-border)] bg-[var(--surface-2)] px-2.5 py-1.5 text-[11.5px] text-[var(--text-1)] focus:border-[var(--accent)] focus:outline-none"
+              value={data.routing.strategy}
+              onChange={(e) => routingMutation.mutate({ strategy: e.target.value })}
+              disabled={routingMutation.isPending}
+            >
+              <option value="priority">Priority</option>
+              <option value="round-robin">Round-robin</option>
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]">Preferred Proxy</label>
+            <select
+              className="w-full rounded-lg border border-[var(--inner-border)] bg-[var(--surface-2)] px-2.5 py-1.5 text-[11.5px] text-[var(--text-1)] focus:border-[var(--accent)] focus:outline-none"
+              value={data.routing.preferredProxyId ?? ""}
+              onChange={(e) => routingMutation.mutate({ preferredProxyId: e.target.value || null })}
+              disabled={routingMutation.isPending}
+            >
+              <option value="">Auto (load balance)</option>
+              {proxiesQuery.data?.items.filter((p) => p.enabled).map((proxy) => (
+                <option key={proxy.id} value={proxy.id}>{proxy.name}</option>
+              ))}
+            </select>
+            <p className="mt-1 text-[10.5px] text-[var(--text-3)]">Pin requests to a specific proxy pool, or auto-select based on health.</p>
+          </div>
         </div>
       </Card>
 

@@ -104,6 +104,8 @@ export function sanitizeProviderRoutingPatch(value: unknown): WriteablePartial<P
   if (item.strategy === "priority" || item.strategy === "round-robin") patch.strategy = item.strategy;
   if (typeof item.stickyLimit === "number" && Number.isFinite(item.stickyLimit)) patch.stickyLimit = Math.max(0, Math.floor(item.stickyLimit));
   if (typeof item.useStickyLimit === "boolean") patch.useStickyLimit = item.useStickyLimit;
+  if (typeof item.preferredProxyId === "string") patch.preferredProxyId = item.preferredProxyId.trim() || null;
+  else if (item.preferredProxyId === null) patch.preferredProxyId = null;
   return patch;
 }
 
