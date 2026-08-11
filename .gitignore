@@ -12,3 +12,6 @@ __pycache__/
 # MultiWarp
 bin/
 .playwright-mcp/
+
+# Local agent guides
+AGENTS.md
