@@ -9,3 +9,4 @@ export * from "./cline";
 export * from "./clinepass";
 export { FreebuffOAuthDriver } from "./freebuff";
 export { KimchiOAuthDriver } from "./kimchi";
+export { GitHubCopilotOAuthDriver, GITHUB_COPILOT_CLIENT_ID, GITHUB_COPILOT_DEVICE_CODE_URL, GITHUB_COPILOT_TOKEN_URL, GITHUB_COPILOT_SCOPE, GITHUB_COPILOT_TOKEN_EXCHANGE_URL, GITHUB_COPILOT_USER_AGENT, GITHUB_COPILOT_VSCODE_VERSION, GITHUB_COPILOT_CHAT_VERSION, GITHUB_COPILOT_API_VERSION } from "./github-copilot";

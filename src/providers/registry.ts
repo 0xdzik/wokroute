@@ -107,6 +107,7 @@ export async function createDefaultRegistry(): Promise<ProviderRegistry> {
     { NvidiaNativeAdapter },
     { BlackboxAIAdapter },
     { OpenCodeGoAdapter },
+    { GitHubCopilotAdapter },
     { XiaomiPAYGAdapter },
     { XiaomiTokenPlanAdapter },
   ] = await Promise.all([
@@ -139,6 +140,7 @@ export async function createDefaultRegistry(): Promise<ProviderRegistry> {
     import("./nvidia-native"),
     import("./blackboxai"),
     import("./opencodego"),
+    import("./github-copilot"),
     import("./xiaomipg"),
     import("./xiaomitp"),
   ]);
@@ -176,6 +178,7 @@ export async function createDefaultRegistry(): Promise<ProviderRegistry> {
   registry.register(NvidiaNativeAdapter);
   registry.register(BlackboxAIAdapter);
   registry.register(OpenCodeGoAdapter);
+  registry.register(new GitHubCopilotAdapter());
   registry.register(XiaomiPAYGAdapter);
   registry.register(XiaomiTokenPlanAdapter);
   return registry;
