@@ -496,6 +496,7 @@ export async function createwokrouteRuntime(): Promise<wokrouteRuntime> {
         strategy: stored.strategy === "round-robin" ? "round-robin" : "priority",
         stickyLimit: typeof stored.stickyLimit === "number" ? Math.max(1, Math.min(100, Math.round(stored.stickyLimit))) : 1,
         useStickyLimit: stored.useStickyLimit === true,
+        preferredProxyId: typeof stored.preferredProxyId === "string" && stored.preferredProxyId.trim() ? stored.preferredProxyId.trim() : null,
       };
     },
     onRouteFailure: async (candidate, error, selected) => {

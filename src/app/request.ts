@@ -19,6 +19,7 @@ import { translateNonStreamResponse, wireSurfaceFor } from "../domain/protocols/
 import { writeErrorResponse, writeResponse } from "./response";
 import { applyTokenSaver, type TokenSaverConfig } from "../domain/token-saver";
 import { applyFilterRules, type FilterRuleConfig } from "../domain/filter-rules";
+import type { ProviderRoutingSettings } from "../console/views";
 
 export interface ProxyRoutePlan {
   readonly affinity: AffinityKey;
@@ -57,7 +58,7 @@ export interface ProxyRequestDependencies {
   readonly telemetry: TelemetryWriter;
   readonly resolveRoutes: (request: NormalizedProviderRequest, affinity: AffinityKey) => Promise<ProxyRoutePlan>;
   readonly accountCandidates: (providerId: string) => Promise<readonly AccountCandidate[]>;
-  readonly getProviderRouting?: (providerId: string) => { readonly strategy: "priority" | "round-robin"; readonly stickyLimit: number; readonly useStickyLimit: boolean };
+  readonly getProviderRouting?: (providerId: string) => ProviderRoutingSettings;
   readonly onRouteFailure?: (candidate: RouteCandidate, error: ProviderCallError, selected: RouteAttemptSelection | null) => Promise<void>;
   readonly onRouteSuccess?: (candidate: RouteCandidate, selected: RouteAttemptSelection | null) => Promise<void>;
   readonly onRouteSwitch?: (event: RouteSwitch) => Promise<void>;
@@ -275,7 +276,7 @@ export async function runProxyRequest(input: AuthorizedProxyRequestInput, depend
           } satisfies ProviderCallError;
         }
         if (credential !== null) attemptCleanup.add({ release: async () => dependencies.accounts.release(credential.selection.leaseId) });
-        const network = await dependencies.network.select({ providerId: candidate.providerId, affinityKey });
+        const network = await dependencies.network.select({ providerId: candidate.providerId, affinityKey, preferredProxyId: providerRouting?.preferredProxyId ?? null });
         if (network === null) {
           throw {
             statusCode: 503,

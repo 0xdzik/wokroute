@@ -180,6 +180,7 @@ export interface ProviderRoutingSettings {
   readonly strategy: "priority" | "round-robin";
   readonly stickyLimit: number;
   readonly useStickyLimit: boolean;
+  readonly preferredProxyId: string | null;
 }
 
 export interface ProviderConfigRepository {

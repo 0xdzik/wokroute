@@ -240,7 +240,7 @@ function makeKeyRepository(config: ConfigPersistence): ConsoleApiKeyRepository {
 
 function makeProviderConfigRepository(config: ConfigPersistence, registry: ProviderRegistry): ProviderConfigRepository {
   const enabled = new Map<string, boolean>();
-  const defaults = { strategy: "priority" as const, stickyLimit: 1, useStickyLimit: false };
+  const defaults = { strategy: "priority" as const, stickyLimit: 1, useStickyLimit: false, preferredProxyId: null as string | null };
   const readRouting = (id: string): ProviderRoutingSettings => {
     const settings = config.settings.getSettingsJson();
     const stored = typeof settings.providerRouting === "object" && settings.providerRouting !== null && !Array.isArray(settings.providerRouting)
@@ -252,6 +252,7 @@ function makeProviderConfigRepository(config: ConfigPersistence, registry: Provi
       strategy: value.strategy === "round-robin" ? "round-robin" : "priority",
       stickyLimit: typeof value.stickyLimit === "number" ? Math.max(1, Math.min(100, Math.round(value.stickyLimit))) : defaults.stickyLimit,
       useStickyLimit: value.useStickyLimit === true,
+      preferredProxyId: typeof value.preferredProxyId === "string" && value.preferredProxyId.trim() ? value.preferredProxyId.trim() : null,
     };
   };
   const writeRouting = (id: string, value: ProviderRoutingSettings): void => {
