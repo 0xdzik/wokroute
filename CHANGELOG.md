@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/0xdzik/wokroute/compare/v1.0.4...v1.0.5) (2026-08-11)
+
+
+### Bug Fixes
+
+* resolve CI test failures blocking automated releases ([02eb8ff](https://github.com/0xdzik/wokroute/commit/02eb8ff3d4efb048b6d8779e85140df329dc7c00))
+
 # Changelog
 
 All notable changes to Wokroute are documented here.
