@@ -34,10 +34,16 @@ jobs:
       - name: Run tests
         run: bun run test
 
+      - name: Build dashboard
+        run: |
+          cd dashboard
+          bun install --frozen-lockfile
+          bun run build
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Install semantic-release
         run: |
@@ -47,8 +53,29 @@ jobs:
           npm install -g @semantic-release/npm
           npm install -g @semantic-release/github
 
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Bumps version, writes CHANGELOG.md, commits, tags, and creates the
+      # GitHub release. npm publishing is intentionally NOT done here:
+      # @semantic-release/npm requires NPM_TOKEN, but we publish below via
+      # NPM Trusted Publishers (OIDC) instead.
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ""
         run: npx semantic-release
+
+      # Publishes the just-bumped version via NPM Trusted Publishers: npm
+      # exchanges the OIDC token (id-token: write + npm-publish environment)
+      # for a short-lived publish grant — no NPM_TOKEN anywhere. Skipped when
+      # semantic-release produced no release (no tag on HEAD), e.g. docs or
+      # chore-only commits, so a skipped release never attempts a publish.
+      - name: Publish to NPM (Trusted Publishers)
+        run: |
+          if git describe --tags --exact-match HEAD >/dev/null 2>&1; then
+            npm publish --provenance
+          else
+            echo "No release tag on HEAD — skipping npm publish."
+          fi
