@@ -15,6 +15,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardHeader } from "../../components/ui/card";
 import { Input, Label } from "../../components/ui/input";
 import { ConfirmDialog } from "../../components/shared";
+import { Dialog } from "../../components/ui/dialog";
 import { HeaderPairsEditor, headersToPairs, pairsToHeaders, type HeaderPair } from "../../components/header-pairs-editor";
 
 interface CustomProviderModel {
@@ -182,7 +183,7 @@ export function CustomProviderDetailPage() {
 
   const accountMutation = useMutation({
     mutationFn: async () => {
-      const values = accountCredentials.split(/\\r?\\n/).map((value) => value.trim()).filter(Boolean);
+      const values = accountCredentials.split(/\r?\n/).map((value) => value.trim()).filter(Boolean);
       if (!accountName.trim() || values.length === 0) throw new Error("Enter an account name and at least one API key.");
       await Promise.all(values.map((credential, index) => apiPost(`/providers/${id}/accounts`, {
         name: values.length === 1 ? accountName.trim() : `${accountName.trim()}-${index + 1}`,
@@ -460,11 +461,38 @@ export function CustomProviderDetailPage() {
           </div>
         )}
         {accountOpen && (
-          <div className="mt-3 space-y-3 rounded-xl border border-[var(--inner-border)] bg-[var(--hover)] p-3">
-            <Label>Account name<Input value={accountName} onChange={(event) => setAccountName(event.target.value)} placeholder="key-1" /></Label>
-            <Label>API keys<textarea value={accountCredentials} onChange={(event) => setAccountCredentials(event.target.value)} className="min-h-24 w-full rounded-xl border border-[var(--inner-border)] bg-[var(--input-bg)] p-3 font-mono text-xs text-[var(--text-1)] outline-none placeholder:text-[var(--text-3)]" placeholder="One API key per line" spellCheck={false} /></Label>
-            <div className="flex justify-end gap-2"><Button variant="ghost" onClick={() => setAccountOpen(false)}>Cancel</Button><Button disabled={accountMutation.isPending} onClick={() => accountMutation.mutate()}>{accountMutation.isPending ? "Adding…" : "Add accounts"}</Button></div>
-          </div>
+          <Dialog
+            open={accountOpen}
+            onClose={() => setAccountOpen(false)}
+            title="Add API Key Accounts"
+            footer={
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" onClick={() => setAccountOpen(false)}>Cancel</Button>
+                <Button disabled={accountMutation.isPending} onClick={() => accountMutation.mutate()}>
+                  {accountMutation.isPending ? "Adding…" : "Add accounts"}
+                </Button>
+              </div>
+            }
+          >
+            <div className="space-y-4">
+              <Label>Account name
+                <Input
+                  value={accountName}
+                  onChange={(event) => setAccountName(event.target.value)}
+                  placeholder="key-1"
+                />
+              </Label>
+              <Label>API keys
+                <textarea
+                  value={accountCredentials}
+                  onChange={(event) => setAccountCredentials(event.target.value)}
+                  className="min-h-24 w-full rounded-xl border border-[var(--inner-border)] bg-[var(--input-bg)] p-3 font-mono text-xs text-[var(--text-1)] outline-none placeholder:text-[var(--text-3)]"
+                  placeholder="One API key per line"
+                  spellCheck={false}
+                />
+              </Label>
+            </div>
+          </Dialog>
         )}
       </Card>
 
