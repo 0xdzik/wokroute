@@ -1,6 +1,6 @@
 {
   "name": "wokroute",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Self-hosted Bun + Elysia AI proxy with an authenticated web console. Forwards OpenAI Chat Completions, OpenAI Responses, and Anthropic Messages across 30+ provider adapters with OAuth and API-key credentials, translates responses cross-protocol, and manages everything from a real-time dashboard.",
   "license": "GPL-3.0-only",
   "author": "0xdzik",

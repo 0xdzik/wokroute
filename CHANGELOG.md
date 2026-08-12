@@ -1,3 +1,11 @@
+# [1.2.0](https://github.com/0xdzik/wokroute/compare/v1.1.0...v1.2.0) (2026-08-12)
+
+
+### Features
+
+* per-provider proxy assignment and live traffic health card ([4d7e31a](https://github.com/0xdzik/wokroute/commit/4d7e31a3f2e919700c717f47430776737bbfa9e0))
+* restructure provider detail, combos, and usage page layouts ([91dd8aa](https://github.com/0xdzik/wokroute/commit/91dd8aaaf164d98874c3fba3aaa1a74a86ac8786))
+
 # [1.1.0](https://github.com/0xdzik/wokroute/compare/v1.0.5...v1.1.0) (2026-08-11)
 
 
