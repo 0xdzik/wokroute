@@ -4,7 +4,7 @@
  */
 
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowUpDown, Ban, Bot, Brain, Cable, CheckCircle2, Copy, Download, ExternalLink, Eye, FileJson, FileUp, FlaskConical, Globe, Info, Loader2, LockOpen, Network, Pencil, Plus, PowerOff, RefreshCw, Route, Shuffle, Trash2, Users, AlertTriangle } from "lucide-react";
+import { ArrowLeft, ArrowUpDown, Ban, Bot, Brain, CheckCircle2, Copy, Download, ExternalLink, Eye, FileJson, FileUp, FlaskConical, Globe, Info, Loader2, LockOpen, Network, Pencil, Plus, PowerOff, RefreshCw, Shuffle, Trash2, Users, AlertTriangle } from "lucide-react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "../../lib/toast";
@@ -26,7 +26,7 @@ import { staggerClass } from "../../lib/motion";
 import { useWindowedList } from "../../hooks/use-windowed-list";
 import { Skeleton } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
-import { Card, CardHeader } from "../../components/ui/card";
+import { Card } from "../../components/ui/card";
 import { Dialog } from "../../components/ui/dialog";
 import { Input, Label } from "../../components/ui/input";
 import { Select } from "../../components/ui/tabs";
@@ -1763,8 +1763,12 @@ export function ProviderDetailPage() {
         </section>
       ) : null}
 
-      <Card className="space-y-4">
-        <CardHeader title="Accounts" icon={Cable} sub={`${data.accounts.length} account${data.accounts.length === 1 ? "" : "s"}`}>
+      <section>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h2 className="truncate text-[15px] font-bold tracking-tight">Accounts</h2>
+            <p className="mt-0.5 truncate text-[11.5px] text-[var(--text-3)]">{data.accounts.length} account{data.accounts.length === 1 ? "" : "s"}</p>
+          </div>
           <div className="grid w-full grid-cols-2 gap-1.5 sm:flex sm:w-auto sm:flex-wrap sm:justify-end">
             {data.supportsOAuth && (
               <Button variant="secondary" className="h-8 min-w-0 px-2.5 text-[11px]" size="sm" disabled={oauthStartMutation.isPending} onClick={() => oauthStartMutation.mutate()}>
@@ -1778,7 +1782,8 @@ export function ProviderDetailPage() {
               <Plus size={13} /> <span className="truncate">New account</span>
             </Button>
           </div>
-        </CardHeader>
+        </div>
+        <Card className="space-y-4">
 
         {/* Account summary stat boxes — only for providers that need auth */}
         {!noAuth && (
@@ -1996,10 +2001,15 @@ export function ProviderDetailPage() {
               </div>
           )}
         </div>
-      </Card>
+        </Card>
+      </section>
 
-      <Card className="space-y-3">
-        <CardHeader title="Routing" icon={Route} sub="Configure how requests are routed for this provider" />
+      <section>
+        <div className="mb-3 min-w-0">
+          <h2 className="truncate text-[15px] font-bold tracking-tight">Routing</h2>
+          <p className="mt-0.5 truncate text-[11.5px] text-[var(--text-3)]">Configure how requests are routed for this provider</p>
+        </div>
+        <Card className="space-y-3">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="max-w-xs">
             <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-[var(--text-3)]">Strategy</label>
@@ -2032,7 +2042,8 @@ export function ProviderDetailPage() {
             <p className="mt-1 text-[10.5px] text-[var(--text-3)]">Reuse the same account for up to this many consecutive requests before rotating.</p>
           </div>
         </div>
-      </Card>
+        </Card>
+      </section>
 
       <section>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">

@@ -5,7 +5,7 @@ export type CardDensity = "compact" | "default" | "comfortable";
 export type CardSurface = "base" | "muted" | "elevated";
 
 const densityClasses: Record<CardDensity, string> = {
-  compact: "p-3.5",
+  compact: "p-3",
   default: "p-5",
   comfortable: "p-6",
 };
