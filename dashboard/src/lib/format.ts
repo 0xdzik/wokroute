@@ -48,14 +48,6 @@ export function formatUptime(seconds: number | null | undefined): string {
   return `${secs}s`;
 }
 
-/** Formats a kilobyte amount as "1.2 GB", "456 MB", or "12 KB" — auto-scaling like formatMemoryMb. */
-export function formatBandwidthKb(kb: number | null | undefined): string {
-  if (kb === null || kb === undefined || !Number.isFinite(kb)) return "—";
-  if (kb >= 1_048_576) return `${(kb / 1_048_576).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} TB`;
-  if (kb >= 1_024) return `${(kb / 1_024).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} GB`;
-  return `${Math.round(kb).toLocaleString("en-US")} MB`;
-}
-
 export function formatTime(iso: string | null | undefined): string {
   if (!iso) return "—";
   const date = new Date(iso.includes("T") ? iso : `${iso.replace(" ", "T")}Z`);

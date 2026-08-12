@@ -16,6 +16,7 @@ import { Card, CardHeader } from "../../components/ui/card";
 import { Input, Label } from "../../components/ui/input";
 import { ConfirmDialog } from "../../components/shared";
 import { Dialog } from "../../components/ui/dialog";
+import { Switch } from "../../components/ui/switch";
 import { HeaderPairsEditor, headersToPairs, pairsToHeaders, type HeaderPair } from "../../components/header-pairs-editor";
 
 interface CustomProviderModel {
@@ -239,7 +240,7 @@ export function CustomProviderDetailPage() {
   });
 
   const routingMutation = useMutation({
-    mutationFn: (strategy: "priority" | "round-robin") => apiPost(`/providers/${id}/routing`, { strategy }),
+    mutationFn: (patch: Record<string, unknown>) => apiPost(`/providers/${id}/routing`, patch),
     onSuccess: () => {
       toast.success("Routing updated");
       void queryClient.invalidateQueries({ queryKey: qk.customProviders.detail(id) });
@@ -438,9 +439,23 @@ export function CustomProviderDetailPage() {
       <Card>
         <CardHeader title="Accounts" icon={Link2} sub={`${data.accounts.length} API key account${data.accounts.length === 1 ? "" : "s"} · keys participate in provider routing`}>
           <div className="flex flex-wrap items-center justify-end gap-1.5">
-            <Button variant="secondary" size="sm" onClick={() => routingMutation.mutate(data.routing.strategy === "round-robin" ? "priority" : "round-robin")} disabled={routingMutation.isPending || data.accounts.length < 2}>
+            <Button variant="secondary" size="sm" onClick={() => routingMutation.mutate({ strategy: data.routing.strategy === "round-robin" ? "priority" : "round-robin" })} disabled={routingMutation.isPending || data.accounts.length < 2}>
               <RefreshCw size={13} /> {data.routing.strategy === "round-robin" ? "Priority" : "Round robin"}
             </Button>
+            <div className="flex items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--inner-border)] bg-[var(--hover)] px-2 py-1" title="Reuse the same account for up to this many consecutive requests before rotating">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-3)]">Sticky</span>
+              <input
+                type="number"
+                min={1}
+                max={100}
+                aria-label="Sticky limit"
+                className="h-6 w-12 rounded-md border border-[var(--inner-border)] bg-[var(--surface-2)] px-1 text-center text-[11px] text-[var(--text-1)] focus:border-[var(--accent)] focus:outline-none disabled:opacity-50"
+                value={data.routing.stickyLimit}
+                onChange={(e) => routingMutation.mutate({ stickyLimit: Math.max(1, Math.min(100, Number(e.target.value) || 1)) })}
+                disabled={routingMutation.isPending || !data.routing.useStickyLimit}
+              />
+              <Switch checked={data.routing.useStickyLimit} disabled={routingMutation.isPending} onChange={(next) => routingMutation.mutate({ useStickyLimit: next })} label="Use sticky limit" />
+            </div>
             <Button size="sm" onClick={() => setAccountOpen(true)}><Plus size={13} /> Add keys</Button>
           </div>
         </CardHeader>

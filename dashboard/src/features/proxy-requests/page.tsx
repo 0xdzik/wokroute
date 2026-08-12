@@ -1,12 +1,11 @@
 /**
- * Proxy & Requests - global routing controls (REQ: consolidate per-provider
- * account rotation strategy in one place, and the outbound proxy pool that
- * routes provider traffic through SOCKS5/HTTP/HTTPS proxies with anti-
- * interrupted failover).
+ * Proxy & Requests - outbound proxy pool management (CRUD, batch import,
+ * testing). Per-provider routing strategy, sticky limits, and proxy
+ * assignment live on each provider's detail page.
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Activity, Clipboard, Download, FlaskConical, Gauge, Loader2, Network, Pencil, Plus, PowerOff, Route, ShieldCheck, Trash2 } from "lucide-react";
+import { Activity, Clipboard, Download, FlaskConical, Gauge, Loader2, Network, Pencil, Plus, PowerOff, ShieldCheck, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "../../lib/toast";
 import { ApiError, apiDelete, apiGet, apiPatch, apiPost } from "../../lib/api";
@@ -20,7 +19,6 @@ import { StatePanel, StatCard } from "../../components/ui/state";
 import { Select } from "../../components/ui/tabs";
 import { Switch } from "../../components/ui/switch";
 import { ConfirmDialog } from "../../components/shared";
-import { ProviderIcon } from "../../components/provider-icon";
 
 function errorMessage(err: unknown): string {
   return err instanceof ApiError ? err.message : "request failed";
@@ -33,26 +31,6 @@ function formatProxyTestTime(value: string | null): string {
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────
-
-interface ProviderRoutingSummary {
-  id: string;
-  name: string;
-  /** Brand icon key — not returned by the API; derived from `id`. */
-  icon?: string;
-  /** Credential kind from the API response. */
-  credentialKind?: string;
-  /** Derived from `credentialKind` for display logic. */
-  authKind?: "none" | "session" | "api-key";
-  routing?: { strategy: "priority" | "round-robin"; stickyLimit: number; useStickyLimit?: boolean };
-}
-
-interface ProxySettings {
-  enabled: boolean;
-  excludedProviders: string[];
-  smartDynamicRouting: boolean;
-  smartDynamicProxyCount: number;
-  targetConcurrent: number;
-}
 
 interface ProxyRecord {
   id: string;
@@ -409,201 +387,6 @@ function ProxyPoolSection() {
   );
 }
 
-// ── Routing strategy + proxy exceptions (bottom - merged per-provider table) ─
-
-function RoutingAndExceptionsSection() {
-  const qc = useQueryClient();
-  const { data: providers, isLoading } = useQuery({
-    queryKey: qk.routing.all,
-    queryFn: () => apiGet<{ items: ProviderRoutingSummary[] }>("/providers"),
-  });
-  const { data: settings } = useQuery({ queryKey: qk.proxySettings.all, queryFn: () => apiGet<ProxySettings>("/proxy-settings") });
-
-  const routingMutation = useMutation({
-    mutationFn: ({ id, config }: { id: string; config: { strategy?: string; stickyLimit?: number; useStickyLimit?: boolean } }) => apiPost<{ ok: boolean }>(`/providers/${id}/routing`, config),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: qk.routing.all }),
-    onError: (err) => toast.error(errorMessage(err)),
-  });
-
-  const [batchApplying, setBatchApplying] = useState<"priority" | "round-robin" | null>(null);
-  const [stickyApplying, setStickyApplying] = useState(false);
-  const applyStrategyToAll = async (strategy: "priority" | "round-robin") => {
-    setBatchApplying(strategy);
-    try {
-      const eligible = (providers?.items ?? []).filter((p) => p.authKind !== "none");
-      await Promise.all(eligible.map((p) => apiPost<{ ok: boolean }>(`/providers/${p.id}/routing`, { strategy })));
-      await qc.invalidateQueries({ queryKey: qk.routing.all });
-      toast.success(`Strategy set to ${strategy === "priority" ? "Priority (failover)" : "Round-robin"} for ${eligible.length} provider${eligible.length === 1 ? "" : "s"}`);
-    } catch (err) {
-      toast.error(errorMessage(err));
-    } finally {
-      setBatchApplying(null);
-    }
-  };
-
-  const toggleStickyLimit = async (enabled: boolean) => {
-    setStickyApplying(true);
-    try {
-      const eligible = (providers?.items ?? []).filter((provider) => provider.authKind !== "none");
-      await Promise.all(eligible.map((provider) => apiPost<{ ok: boolean }>(`/providers/${provider.id}/routing`, { useStickyLimit: enabled })));
-      await qc.invalidateQueries({ queryKey: qk.routing.all });
-      toast.success(`Sticky limit ${enabled ? "enabled" : "disabled"} for ${eligible.length} provider${eligible.length === 1 ? "" : "s"}`);
-    } catch (err) {
-      toast.error(errorMessage(err));
-    } finally {
-      setStickyApplying(false);
-    }
-  };
-
-  const setStickyLimitForAll = async (value: number): Promise<void> => {
-    const stickyLimit = Math.max(1, Math.min(100, Math.round(value) || 1));
-    setStickyApplying(true);
-    try {
-      const eligible = (providers?.items ?? []).filter((provider) => provider.authKind !== "none");
-      await Promise.all(eligible.map((provider) => apiPost<{ ok: boolean }>(`/providers/${provider.id}/routing`, { stickyLimit })));
-      await qc.invalidateQueries({ queryKey: qk.routing.all });
-      toast.success(`Sticky limit set to ${stickyLimit} for ${eligible.length} provider${eligible.length === 1 ? "" : "s"}`);
-    } catch (err) {
-      toast.error(errorMessage(err));
-    } finally {
-      setStickyApplying(false);
-    }
-  };
-
-  const settingsMutation = useMutation({
-    mutationFn: (patch: Partial<ProxySettings>) => apiPost<ProxySettings>("/proxy-settings", patch),
-    onSuccess: (next) => qc.setQueryData(["console", "proxy-settings"], next),
-    onError: (err) => toast.error(errorMessage(err)),
-  });
-
-  const excludedProviders = settings?.excludedProviders ?? [];
-  const toggleExcluded = (id: string, excluded: boolean) => {
-    const next = excluded ? [...excludedProviders, id] : excludedProviders.filter((p) => p !== id);
-    settingsMutation.mutate({ excludedProviders: next });
-  };
-
-  const items = providers?.items ?? [];
-  const eligibleProviders = items.filter((provider) => provider.authKind !== "none");
-  const stickyEnabled = eligibleProviders.length > 0 && eligibleProviders.every((provider) => provider.routing?.useStickyLimit === true);
-  const stickyVisible = eligibleProviders.some((provider) => provider.routing?.useStickyLimit === true);
-  const globalStickyLimit = eligibleProviders.at(0)?.routing?.stickyLimit ?? 1;
-
-  return (
-    <section className="space-y-2">
-      <div className="flex flex-wrap items-center justify-between gap-2.5">
-        <div className="flex items-start gap-2.5">
-          <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[9px]" style={{ backgroundColor: "color-mix(in srgb, var(--accent) 12%, transparent)", color: "var(--accent)" }}>
-            <Route size={15} aria-hidden={true} />
-          </span>
-          <div className="min-w-0">
-            <h2 className="truncate text-sm font-bold">Routing Strategy</h2>
-            <p className="mt-0.5 truncate text-[11.5px] text-[var(--text-2)]">Account rotation strategy, sticky limits, and proxy-pool exceptions per provider</p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center justify-end gap-1.5">
-          <span className="text-[11px] text-[var(--text-3)]">Set all:</span>
-          <Button variant="secondary" size="sm" disabled={batchApplying !== null || stickyApplying} onClick={() => void applyStrategyToAll("priority")}>
-            {batchApplying === "priority" ? <Loader2 size={12} className="animate-spin" /> : null} Priority
-          </Button>
-          <Button variant="secondary" size="sm" disabled={batchApplying !== null || stickyApplying} onClick={() => void applyStrategyToAll("round-robin")}>
-            {batchApplying === "round-robin" ? <Loader2 size={12} className="animate-spin" /> : null} Round-robin
-          </Button>
-        </div>
-      </div>
-      <Card className="space-y-3">
-      <div className="flex flex-col gap-2 px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <div className="text-xs font-semibold">Use sticky limit</div>
-          <div className="mt-0.5 text-[11px] text-[var(--text-3)]">Apply sticky account routing across every provider with configured accounts.</div>
-          <div className="mt-1 text-[10px] text-[var(--text-3)]">Turn it on globally here, then fine-tune each provider&apos;s sticky limit below.</div>
-        </div>
-        <div className="flex w-full shrink-0 flex-wrap items-center justify-between gap-2 sm:w-auto sm:justify-end">
-          <label className="flex items-center gap-1.5 text-[10px] text-[var(--text-3)]" title="Set the sticky account limit for every provider">
-            Sticky limit
-            <Input
-              aria-label="Global sticky limit"
-              type="number"
-              min={1}
-              max={100}
-              value={globalStickyLimit}
-              disabled={isLoading || stickyApplying || batchApplying !== null}
-              onChange={(event) => void setStickyLimitForAll(Number(event.target.value))}
-              className="h-8 w-16 px-2 text-center text-xs"
-            />
-          </label>
-          <Switch checked={stickyEnabled} disabled={isLoading || stickyApplying || batchApplying !== null} onChange={(next) => void toggleStickyLimit(next)} label="Use sticky limit for all providers" />
-        </div>
-      </div>
-      {isLoading ? (
-        <StatePanel kind="loading" title="Loading providers" description="Reading provider routing config…" icon={Route} />
-      ) : items.length === 0 ? (
-        <StatePanel kind="empty" title="No providers registered" description="Add provider accounts to configure routing strategy." icon={Route} />
-      ) : (
-        <div className="scrollbar-fade max-h-[28rem] overflow-y-auto pr-0.5">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {items.map((provider) => {
-              const icon = provider.icon ?? provider.id;
-              const isFreeTier = provider.credentialKind === "none";
-              const authKind = provider.authKind ?? (provider.credentialKind === "oauth" ? "session" : provider.credentialKind === "api_key" ? "api-key" : "none");
-              const hasAccounts = authKind !== "none";
-              const excluded = excludedProviders.includes(provider.id);
-              const routing = provider.routing ?? { strategy: "priority" as const, stickyLimit: 1 };
-              return (
-                <article key={provider.id} className="rounded-[var(--radius-control)] border border-[var(--inner-border)] bg-[var(--surface)] p-3.5 transition-colors hover:border-[var(--accent)]/40 hover:bg-[var(--surface-muted)]">
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <ProviderIcon icon={icon} name={provider.name} size={24} />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-xs font-semibold">{provider.name}</div>
-                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                        <Badge tone={isFreeTier ? "ok" : hasAccounts ? "info" : "default"}>{isFreeTier ? "Free" : hasAccounts ? authKind : "No accounts"}</Badge>
-                        <Badge tone={excluded ? "warn" : "ok"}>{excluded ? "Direct connection" : "Proxy pool eligible"}</Badge>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[var(--inner-border)] pt-3">
-                    <label className="flex items-center gap-1.5 text-[10px] text-[var(--text-3)]">
-                      Strategy
-                      {hasAccounts ? (
-                        <Select
-                          ariaLabel={`${provider.name} strategy`}
-                          className="w-40"
-                          value={routing.strategy}
-                          onChange={(v) => routingMutation.mutate({ id: provider.id, config: { strategy: v } })}
-                          options={[{ value: "priority", label: "Priority (failover)" }, { value: "round-robin", label: "Round-robin" }]}
-                        />
-                      ) : (
-                        <span className="text-[var(--text-3)]">{isFreeTier ? "N/A" : "No accounts"}</span>
-                      )}
-                    </label>
-                    {stickyVisible && <label className="flex items-center gap-1.5 text-[10px] text-[var(--text-3)]">
-                      Sticky
-                      {hasAccounts ? (
-                        <Input
-                          aria-label={`${provider.name} sticky limit`}
-                          type="number"
-                          min={1}
-                          max={100}
-                          value={routing.stickyLimit}
-                          onChange={(event) => routingMutation.mutate({ id: provider.id, config: { stickyLimit: Math.max(1, Math.min(100, Number(event.target.value) || 1)) } })}
-                          className="h-8 w-16 px-2 text-center text-xs"
-                        />
-                      ) : <span>—</span>}
-                    </label>}
-                    <div className="ml-auto flex items-center gap-1.5">
-                      <span className="text-[10px] text-[var(--text-3)]">Always direct</span>
-                      <Switch checked={excluded} onChange={(next) => toggleExcluded(provider.id, next)} label={`${provider.name} always direct`} />
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </div>
-      )}
-      </Card>
-    </section>
-  );
-}
 
 function ProxyModal({ open, existing, onClose, onExited }: { open: boolean; existing: ProxyRecord | null; onClose: () => void; onExited: () => void }) {
   const qc = useQueryClient();
@@ -865,7 +648,6 @@ export function ProxyRequestsPage() {
   return (
     <div className="dashboard-page space-y-4">
       <ProxyPoolSection />
-      <RoutingAndExceptionsSection />
     </div>
   );
 }

@@ -12,9 +12,7 @@
  */
 
 import { cpus, freemem, networkInterfaces, totalmem } from "node:os";
-import { platform } from "node:os";
-import { readFileSync } from "node:fs";
-import { execSync } from "node:child_process";
+import type { TrafficWindow } from "../storage";
 import packageJson from "../../package.json";
 import type { ProviderRegistry } from "../providers/registry";
 import { scheduleGlobalGc, type GcScheduleResult } from "../traffic/memory";
@@ -58,109 +56,11 @@ function sampleCpuPercent(): number {
   return Math.min(100, Math.max(0, Math.round(percent * 10) / 10));
 }
 
-// ── Network bandwidth tracking ──────────────────────────────────────────
-// Samples cumulative bytes received/sent across all network interfaces.
-// Returns null on platforms/contexts where the counters are unavailable
-// (e.g. permission errors), so the UI can gracefully show "—".
-
-interface NetSample { receivedBytes: number; sentBytes: number; }
-interface NetState { last: NetSample | null; lastAt: number | undefined; }
-
-const netState: NetState = { last: null, lastAt: undefined };
-
-// Bandwidth sampling is expensive (execSync powershell on Windows,
-// readFileSync /proc/net/dev on Linux) and runs on every metrics() call.
-// Cache the result for 5s so the console dashboard poll doesn't fork a
-// shell or read a file on every request. The rate computation still uses
-// the previous raw sample, so deltas stay accurate across the TTL window.
-const BANDWIDTH_TTL_MS = 5_000;
-type BandwidthResult = { receivedKb: number; sentKb: number; totalKb: number; rateKbps: number };
-let cachedBandwidth: { value: BandwidthResult | null; at: number } = { value: null, at: 0 };
-
-/** Read cumulative network I/O bytes from the OS. Returns null if unavailable. */
-function readNetBytes(): NetSample | null {
-  try {
-    if (platform() === "linux") {
-      // /proc/net/dev — line format: "interface: rx_bytes rx_packets ... tx_bytes ..."
-      const data = readFileSync("/proc/net/dev", "utf8");
-      let received = 0, sent = 0;
-      for (const line of data.split("\n").slice(2)) {
-        const parts = line.trim().split(/\s+/);
-        if (parts.length < 17) continue;
-        const rx = Number(parts[1]);
-        const tx = Number(parts[9]);
-        if (Number.isFinite(rx)) received += rx;
-        if (Number.isFinite(tx)) sent += tx;
-      }
-      if (received === 0 && sent === 0) return null;
-      return { receivedBytes: received, sentBytes: sent };
-    }
-    if (platform() === "win32") {
-      // Sum ReceivedBytes/SentBytes across all physical adapters.
-      // Use Select-Object with explicit property names to get clean CSV output
-      // that survives shell escaping layers.
-      const out = execSync(
-        'powershell -NoProfile -Command "Get-NetAdapterStatistics | Select-Object ReceivedBytes,SentBytes | ConvertTo-Csv -NoTypeInformation"',
-        { encoding: "utf8", timeout: 5_000 },
-      );
-      let received = 0, sent = 0;
-      for (const line of out.trim().split("\n").slice(1)) {
-        const cols = line.replace(/"/g, "").split(",");
-        if (cols.length < 2) continue;
-        const rx = Number(cols[0]);
-        const tx = Number(cols[1]);
-        if (Number.isFinite(rx)) received += rx;
-        if (Number.isFinite(tx)) sent += tx;
-      }
-      if (received === 0 && sent === 0) return null;
-      return { receivedBytes: received, sentBytes: sent };
-    }
-  } catch {
-    // Silently fall back to null — UI shows "—"
-  }
-  return null;
-}
-
-/** Samples network I/O and computes cumulative + rate stats, cached for 5s. */
-function sampleNetworkBandwidth(): BandwidthResult | null {
-  const now = performance.now();
-  // Return the cached value while it is both present and within the TTL window.
-  // Only recompute (and thus spawn powershell / read /proc/net/dev) when the
-  // cache is null OR expired — never on every poll. The previous condition was
-  // inverted (`!== null` recomputed whenever a value EXISTED), forcing a
-  // synchronous powershell spawn on every /health/metrics request.
-  if (cachedBandwidth.value !== null && now - cachedBandwidth.at < BANDWIDTH_TTL_MS) return cachedBandwidth.value;
-  cachedBandwidth = { value: computeBandwidth(now), at: now };
-  return cachedBandwidth.value;
-}
-
-/** Raw bandwidth computation — uncached, called at most once per TTL window. */
-function computeBandwidth(now: number): BandwidthResult | null {
-  const current = readNetBytes();
-  if (current === null) return null;
-  if (netState.last === null || netState.lastAt === undefined) {
-    netState.last = current;
-    netState.lastAt = now;
-    return { receivedKb: Math.round(current.receivedBytes / 1024), sentKb: Math.round(current.sentBytes / 1024), totalKb: Math.round((current.receivedBytes + current.sentBytes) / 1024), rateKbps: 0 };
-  }
-  const elapsedMs = now - netState.lastAt;
-  const deltaRx = current.receivedBytes - netState.last.receivedBytes;
-  const deltaTx = current.sentBytes - netState.last.sentBytes;
-  // Clamp negative deltas (counter reset / adapter change)
-  const safeDeltaRx = Math.max(0, deltaRx);
-  const safeDeltaTx = Math.max(0, deltaTx);
-  const rateKbps = elapsedMs > 0 ? Math.round(((safeDeltaRx + safeDeltaTx) / 1024) / (elapsedMs / 1000)) : 0;
-  netState.last = current;
-  netState.lastAt = now;
-  return { receivedKb: Math.round(current.receivedBytes / 1024), sentKb: Math.round(current.sentBytes / 1024), totalKb: Math.round((current.receivedBytes + current.sentBytes) / 1024), rateKbps };
-}
-
-function memorySnapshot(): MetricsView {
+function memorySnapshot(): ResourceSnapshot {
   const mem = process.memoryUsage();
   const total = totalmem();
   const free = freemem();
   const toMb = (bytes: number): number => Math.round((bytes / 1024 / 1024) * 10) / 10;
-  const net = sampleNetworkBandwidth();
   return {
     memoryUsedMb: toMb(mem.rss),
     memorySystemUsedMb: toMb(total - free),
@@ -172,10 +72,6 @@ function memorySnapshot(): MetricsView {
     cpuPercent: sampleCpuPercent(),
     coreCount: CPU_INFO.length,
     pid: process.pid,
-    netReceivedKb: net?.receivedKb ?? null,
-    netSentKb: net?.sentKb ?? null,
-    netTotalKb: net?.totalKb ?? null,
-    netRateKbps: net?.rateKbps ?? null,
   };
 }
 
@@ -187,7 +83,7 @@ export interface StatusView {
   readonly timezoneOffsetMinutes: number;
 }
 
-export interface MetricsView {
+interface ResourceSnapshot {
   readonly memoryUsedMb: number;
   readonly memorySystemUsedMb: number;
   readonly memoryTotalMb: number;
@@ -198,11 +94,19 @@ export interface MetricsView {
   readonly cpuPercent: number;
   readonly coreCount: number;
   readonly pid: number;
-  readonly netReceivedKb: number | null;
-  readonly netSentKb: number | null;
-  readonly netTotalKb: number | null;
-  readonly netRateKbps: number | null;
 }
+
+export interface MetricsView extends ResourceSnapshot {
+  readonly trafficWindowMs: number;
+  readonly trafficRequests: number;
+  readonly trafficErrors: number;
+  readonly trafficP95Ms: number;
+  readonly trafficRatePerSec: number;
+}
+
+/** Rolling window behind the Traffic health card; cached to match the 5s poll. */
+const TRAFFIC_WINDOW_MS = 60_000;
+const TRAFFIC_TTL_MS = 5_000;
 
 export interface ResolvePreviewView {
   readonly ok: boolean;
@@ -245,6 +149,7 @@ export class ConsoleDiagnostics {
   private readonly registry: ProviderRegistry;
   private readonly prefixes: ReadonlyMap<string, string>;
   private readonly runtimeCounters: { readonly inFlight: () => number } | null;
+  private cachedTraffic: { value: TrafficWindow | null; at: number } = { value: null, at: 0 };
 
   constructor(options: ConsoleDiagnosticsOptions) {
     this.services = options.services;
@@ -265,15 +170,42 @@ export class ConsoleDiagnostics {
     };
   }
 
-  metrics(): MetricsView {
-    return memorySnapshot();
+  async metrics(): Promise<MetricsView> {
+    return { ...memorySnapshot(), ...ConsoleDiagnostics.trafficFields(await this.trafficSnapshot()) };
   }
 
-  gc(): { before: MetricsView; after: MetricsView; gc: GcScheduleResult } {
-    const before = memorySnapshot();
+  async gc(): Promise<{ before: MetricsView; after: MetricsView; gc: GcScheduleResult }> {
+    const traffic = ConsoleDiagnostics.trafficFields(await this.trafficSnapshot());
+    const before = { ...memorySnapshot(), ...traffic };
     const gc = scheduleGlobalGc();
-    const after = memorySnapshot();
+    const after = { ...memorySnapshot(), ...traffic };
     return { before, after, gc };
+  }
+
+  /** Rolling-window traffic stats, cached so the 5s poll hits SQLite at most once per TTL. */
+  private async trafficSnapshot(): Promise<TrafficWindow | null> {
+    const now = Date.now();
+    if (this.cachedTraffic.value !== null && now - this.cachedTraffic.at < TRAFFIC_TTL_MS) return this.cachedTraffic.value;
+    let value: TrafficWindow | null = null;
+    try {
+      value = await this.repositories.runtimeMetadata.trafficWindow(TRAFFIC_WINDOW_MS);
+    } catch {
+      value = null;
+    }
+    this.cachedTraffic = { value, at: now };
+    return value;
+  }
+
+  private static trafficFields(traffic: TrafficWindow | null): Pick<MetricsView, "trafficWindowMs" | "trafficRequests" | "trafficErrors" | "trafficP95Ms" | "trafficRatePerSec"> {
+    const windowMs = traffic?.windowMs ?? TRAFFIC_WINDOW_MS;
+    const requests = traffic?.requests ?? 0;
+    return {
+      trafficWindowMs: windowMs,
+      trafficRequests: requests,
+      trafficErrors: traffic?.errors ?? 0,
+      trafficP95Ms: traffic?.p95DurationMs ?? 0,
+      trafficRatePerSec: Math.round((requests / (windowMs / 1000)) * 10) / 10,
+    };
   }
 
   localIps(): readonly string[] {

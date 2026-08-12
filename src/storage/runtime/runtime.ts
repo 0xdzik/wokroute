@@ -63,6 +63,14 @@ export interface UsageSummary {
   readonly avgDurationMs: number;
 }
 
+/** Live golden-signal snapshot over a recent rolling window of request history. */
+export interface TrafficWindow {
+  readonly windowMs: number;
+  readonly requests: number;
+  readonly errors: number;
+  readonly p95DurationMs: number;
+}
+
 export interface UsageCacheRow {
   readonly name: string;
   readonly requests: number;
@@ -158,6 +166,7 @@ export interface RuntimeMetadataRepository {
   queryRequests(filters: RuntimeRequestFilters): RuntimeRequestPage;
   getRequestById(id: number): RuntimeRequestRow | null;
   querySummary(period: UsagePeriod): UsageSummary;
+  trafficWindow(windowMs: number): TrafficWindow;
   queryCache(period: UsagePeriod): UsageCacheSummary;
   queryChart(period: UsagePeriod): ChartBucket[];
   queryBy(dimension: UsageDimension, period: UsagePeriod): UsageByRow[];
@@ -849,6 +858,32 @@ export function createRuntimeMetadataRepository(getDb: () => Database, flushBefo
           avgDurationMs: row.avgDurationMs !== null ? Math.round(row.avgDurationMs) : 0,
         };
       });
+    },
+    trafficWindow(windowMs: number): TrafficWindow {
+      // Rolling-window golden signals for the console health panel. Count and
+      // error aggregate scan the started_at index; the p95 sorts a bounded
+      // sample of the most recent rows so heavy instances stay cheap. Error
+      // convention matches querySummary (client cancels + gateway blips are
+      // not counted as request errors).
+      flushBeforeRead();
+      const since = formatUtc(Date.now() - windowMs);
+      const aggregate = getDb()
+        .query(
+          `SELECT
+            COUNT(*) AS requests,
+            COALESCE(SUM(CASE WHEN status >= 400 AND status NOT IN (499, 500, 502) THEN 1 ELSE 0 END), 0) AS errors
+          FROM request_history WHERE started_at >= ?`,
+        )
+        .get(since) as { requests: number; errors: number };
+      const durations = (getDb()
+        .query(
+          `SELECT duration_ms FROM (
+            SELECT duration_ms FROM request_history WHERE started_at >= ? ORDER BY id DESC LIMIT 20000
+          ) ORDER BY duration_ms ASC`,
+        )
+        .all(since) as Array<{ duration_ms: number }>).map((row) => row.duration_ms);
+      const p95DurationMs = durations.length > 0 ? durations[Math.max(0, Math.ceil(durations.length * 0.95) - 1)] ?? 0 : 0;
+      return { windowMs, requests: aggregate.requests, errors: aggregate.errors, p95DurationMs };
     },
     queryCache(period: UsagePeriod): UsageCacheSummary {
       return cache.get(`cache:${period}`, () => {

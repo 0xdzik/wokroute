@@ -1,7 +1,7 @@
 /** Combos page — alias CRUD, combo builder, resolve preview (REQ-13). */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, Pencil, Plus, Route, Search, Trash2 } from "lucide-react";
+import { ArrowRight, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "../../lib/toast";
 import { apiGet, apiPost, apiPatch, apiDelete } from "../../lib/api";
@@ -9,7 +9,7 @@ import { staggerClass } from "../../lib/motion";
 import { qk } from "../../lib/query-keys";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
-import { Card, CardHeader } from "../../components/ui/card";
+import { Card } from "../../components/ui/card";
 import { IconButton } from "../../components/ui/icon";
 import { Dialog } from "../../components/ui/dialog";
 import { Input, Label } from "../../components/ui/input";
@@ -221,26 +221,31 @@ function ResolvePreview() {
   };
 
   return (
-    <Card>
-      <CardHeader title="Resolve Preview" icon={Search} sub="Test how a model name resolves through the chain: prefix → alias → combo → filter." />
-      <div className="flex gap-2">
-        <Input placeholder="e.g. fast, kimchi/kimi-k2.7, my-combo" value={model} onChange={(e) => setModel(e.target.value)} onKeyDown={(e) => e.key === "Enter" && run()} />
-        <Button onClick={run} disabled={busy || !model.trim()}><Search size={14} />{busy ? "Resolving…" : "Resolve"}</Button>
+    <section>
+      <div className="mb-3 min-w-0">
+        <h2 className="truncate text-[15px] font-bold tracking-tight">Resolve Preview</h2>
+        <p className="mt-0.5 truncate text-[11.5px] text-[var(--text-3)]">Test how a model name resolves through the chain: prefix → alias → combo → filter.</p>
       </div>
-      {error && <div className="mt-3 rounded-lg bg-[var(--red-soft)] p-3 text-xs text-[var(--red)]">{error}</div>}
-      {result && (
-        <div className="mt-3 space-y-2">
-          <div className="flex items-center gap-2">
-            <Badge tone={result.ok ? "ok" : "err"}>{result.ok ? "resolved" : "blocked"}</Badge>
-          </div>
-          {result.trace && (
-            <div className="rounded-lg bg-[var(--hover)] p-3 text-[11px] leading-relaxed text-[var(--text-2)]">
-              {result.trace.map((line, i) => <div key={i} className="flex gap-1.5"><ArrowRight size={10} className="mt-0.5 shrink-0 text-[var(--text-3)]" /><span className="break-all">{line}</span></div>)}
-            </div>
-          )}
+      <Card>
+        <div className="flex gap-2">
+          <Input placeholder="e.g. fast, kimchi/kimi-k2.7, my-combo" value={model} onChange={(e) => setModel(e.target.value)} onKeyDown={(e) => e.key === "Enter" && run()} />
+          <Button onClick={run} disabled={busy || !model.trim()}><Search size={14} />{busy ? "Resolving…" : "Resolve"}</Button>
         </div>
-      )}
-    </Card>
+        {error && <div className="mt-3 rounded-lg bg-[var(--red-soft)] p-3 text-xs text-[var(--red)]">{error}</div>}
+        {result && (
+          <div className="mt-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge tone={result.ok ? "ok" : "err"}>{result.ok ? "resolved" : "blocked"}</Badge>
+            </div>
+            {result.trace && (
+              <div className="rounded-lg bg-[var(--hover)] p-3 text-[11px] leading-relaxed text-[var(--text-2)]">
+                {result.trace.map((line, i) => <div key={i} className="flex gap-1.5"><ArrowRight size={10} className="mt-0.5 shrink-0 text-[var(--text-3)]" /><span className="break-all">{line}</span></div>)}
+              </div>
+            )}
+          </div>
+        )}
+      </Card>
+    </section>
   );
 }
 
@@ -256,14 +261,19 @@ export function CombosPage() {
   return (
     <div className="dashboard-page space-y-4">
       <ResolvePreview />
-      <Card>
-        <CardHeader title="Model Routing Rules" icon={Route} sub="Aliases and combos determine how model names resolve to providers." />
-        <Tabs tabs={TABS} value={tab} onChange={setTab} />
-        <div className="mt-4">
+      <section>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h2 className="truncate text-[15px] font-bold tracking-tight">Model Routing Rules</h2>
+            <p className="mt-0.5 truncate text-[11.5px] text-[var(--text-3)]">Aliases and combos determine how model names resolve to providers.</p>
+          </div>
+          <Tabs tabs={TABS} value={tab} onChange={setTab} />
+        </div>
+        <Card>
           {tab === "aliases" && <AliasesTab />}
           {tab === "combos" && <CombosTab />}
-        </div>
-      </Card>
+        </Card>
+      </section>
     </div>
   );
 }
