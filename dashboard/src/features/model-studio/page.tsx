@@ -503,11 +503,11 @@ const MessageRow = memo(function MessageRow({ message: m, index: i, isStreaming:
               <Textarea value={editDraft} onChange={(e) => onEditDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSaveEdit(); } }} rows={3} autoFocus className="min-h-[76px] text-[13px]" />
               <div className="flex items-center justify-end gap-1">
                 <button type="button" onClick={onCancelEdit} className="rounded-md p-1.5 text-[var(--text-3)] hover:bg-[var(--hover)]" aria-label="Cancel"><X size={12} /></button>
-                <button type="button" onClick={onSaveEdit} className="rounded-md bg-[var(--accent)] p-1.5 text-white" aria-label="Save"><Check size={12} /></button>
+                <button type="button" onClick={onSaveEdit} className="rounded-md bg-[var(--accent)] p-1.5 text-[var(--accent-foreground)]" aria-label="Save"><Check size={12} /></button>
               </div>
             </div>
           ) : (
-            <div className={cn("whitespace-pre-wrap break-words rounded-2xl px-3 py-2 sm:px-3.5 sm:py-2.5", isUser ? "bg-[var(--accent)] text-[13px] leading-relaxed text-white" : "glass-2")}>
+            <div className={cn("whitespace-pre-wrap break-words rounded-2xl px-3 py-2 sm:px-3.5 sm:py-2.5", isUser ? "bg-[var(--accent)] text-[13px] leading-relaxed text-[var(--accent-foreground)]" : "glass-2")}>
               {m.images && m.images.length > 0 && <div className="mb-1.5 flex flex-wrap gap-1.5 last:mb-0">{m.images.map((url, idx) => <a key={idx} href={url} target="_blank" rel="noreferrer"><img src={url} alt="" className="h-20 w-20 rounded-lg border border-white/20 object-cover sm:h-24 sm:w-24" /></a>)}</div>}
               {m.role === "assistant" ? m.content ? <AssistantMarkdown content={m.content} /> : <span className="thinking-shimmer">Thinking</span> : m.content}
             </div>
