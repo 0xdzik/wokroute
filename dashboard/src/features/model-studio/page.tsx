@@ -25,8 +25,6 @@ import { Switch } from "../../components/ui/switch";
 import { ConfirmDialog } from "../../components/shared";
 import { ProviderIcon } from "../../components/provider-icon";
 import { useProviders, useModelCatalogState, useCombos, useAliases, useCustomProviders, useCustomProviderCatalog, type ProviderSummary, type FlatModelEntry } from "../../components/model-picker";
-// Bundled character prompt — loaded at build time via Vite ?raw import.
-import jinhsiPromptText from "./jinhsi-prompt.txt?raw";
 import { Popout } from "../../lib/popout";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -377,13 +375,12 @@ function ModelDropdown({ value, onChange, onCapabilityChange }: { value: string;
 
 // ── Prompt popover ─────────────────────────────────────────────────────────
 
-function PromptPopover({ maxTokens, onMaxTokens, reasoningEffort, onReasoningEffort, providerId, systemPromptOverride, onSystemPromptOverride, systemPromptEnabled, onSystemPromptEnabled, bokepEnabled, onBokepEnabled, title, onTitleChange }: { maxTokens: number; onMaxTokens: (v: number) => void; reasoningEffort: string; onReasoningEffort: (v: string) => void; providerId?: string; systemPromptOverride: string; onSystemPromptOverride: (v: string) => void; systemPromptEnabled: boolean; onSystemPromptEnabled: (v: boolean) => void; bokepEnabled: boolean; onBokepEnabled: (v: boolean) => void; title: string; onTitleChange: (v: string) => void }) {
+function PromptPopover({ maxTokens, onMaxTokens, reasoningEffort, onReasoningEffort, providerId, systemPromptOverride, onSystemPromptOverride, systemPromptEnabled, onSystemPromptEnabled, title, onTitleChange }: { maxTokens: number; onMaxTokens: (v: number) => void; reasoningEffort: string; onReasoningEffort: (v: string) => void; providerId?: string; systemPromptOverride: string; onSystemPromptOverride: (v: string) => void; systemPromptEnabled: boolean; onSystemPromptEnabled: (v: boolean) => void; title: string; onTitleChange: (v: string) => void }) {
   const [open, setOpen] = useState(false);
-  const [showBokepPreview, setShowBokepPreview] = useState(false);
   const isAnthropic = providerId === "anthropic";
   const thinkingMaxTokens = maxTokensForThinking(reasoningEffort, isAnthropic);
   const handleReasoningChange = (value: string) => { onReasoningEffort(value); onMaxTokens(maxTokensForThinking(value, isAnthropic)); };
-  const activeInjection = systemPromptEnabled || bokepEnabled;
+  const activeInjection = systemPromptEnabled;
   const panelClass = "popout-enter bg-[var(--popover-bg)] overflow-hidden overflow-y-auto rounded-2xl border border-[var(--inner-border)] shadow-2xl w-[min(360px,calc(100vw-1.5rem))] space-y-3 p-3";
   return (
     <Popout
@@ -417,8 +414,8 @@ function PromptPopover({ maxTokens, onMaxTokens, reasoningEffort, onReasoningEff
           {/* System prompt injection — custom override (user's own text) */}
           <div className="border-t border-[var(--inner-border)] pt-2">
             <div className="flex items-center justify-between gap-2">
-              <label className={cn("text-[11px] font-semibold", bokepEnabled ? "text-[var(--text-3)]" : "text-[var(--text-2)]")}>System Prompt Override</label>
-              <Switch checked={systemPromptEnabled} onChange={onSystemPromptEnabled} disabled={bokepEnabled} label="Override" />
+              <label className="text-[11px] font-semibold text-[var(--text-2)]">System Prompt Override</label>
+              <Switch checked={systemPromptEnabled} onChange={onSystemPromptEnabled} label="Override" />
             </div>
             <p className="mt-0.5 text-[11px] text-[var(--text-3)]">When enabled, this system prompt is prepended to every request.</p>
             {systemPromptEnabled && (
@@ -429,23 +426,6 @@ function PromptPopover({ maxTokens, onMaxTokens, reasoningEffort, onReasoningEff
                 rows={4}
                 className="mt-2 w-full resize-y rounded-lg border border-[var(--inner-border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-[11.5px] leading-relaxed outline-none focus:border-[var(--accent)]"
               />
-            )}
-          </div>
-          {/* System Prompt Bokep — bundled character prompt (Jinhsi) */}
-          <div className="border-t border-[var(--inner-border)] pt-2">
-            <div className="flex items-center justify-between gap-2">
-              <label className={cn("text-[11px] font-semibold", systemPromptEnabled ? "text-[var(--text-3)]" : "text-[var(--text-2)]")}>System Prompt Bokep</label>
-              <Switch checked={bokepEnabled} onChange={onBokepEnabled} disabled={systemPromptEnabled} label="Bokep" />
-            </div>
-            <p className="mt-0.5 text-[11px] text-[var(--text-3)]">Load the bundled character prompt ({jinhsiPromptText.length.toLocaleString()} chars). Disabled while Override is active.</p>
-            {bokepEnabled && (
-              <button type="button" onClick={() => setShowBokepPreview((v) => !v)} className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-[var(--accent)] transition-colors hover:text-[var(--accent)]">
-                <ChevronDown size={10} className={cn("transition-transform", showBokepPreview && "rotate-180")} />
-                {showBokepPreview ? "Hide preview" : "Show preview"}
-              </button>
-            )}
-            {bokepEnabled && showBokepPreview && (
-              <pre className="mt-1.5 max-h-40 overflow-y-auto whitespace-pre-wrap rounded-lg border border-[var(--inner-border)] bg-[var(--surface-1)] px-2.5 py-1.5 text-[11px] leading-relaxed text-[var(--text-3)]">{jinhsiPromptText}</pre>
             )}
           </div>
         </>
@@ -639,8 +619,6 @@ export function ModelStudioPage() {
   // System prompt injection — default off, user toggles in Options popover.
   const [systemPromptOverride, setSystemPromptOverride] = useState("");
   const [systemPromptEnabled, setSystemPromptEnabled] = useState(false);
-  // System Prompt Bokep — bundled character prompt (Jinhsi), default off.
-  const [bokepEnabled, setBokepEnabled] = useState(false);
   const syncedIdRef = useRef<string | null>(null);
   const skipSaveRef = useRef(true);
   const [sending, setSending] = useState(false);
@@ -791,8 +769,8 @@ export function ModelStudioPage() {
       // Clear the assistant message for this attempt.
       patchLast({ content: "", reasoning: undefined, usage: undefined, ttfbMs: undefined, completionMs: undefined });
       // Build payload messages: inject system prompt override if enabled,
-      // otherwise use bokep prompt if enabled, otherwise session system prompt.
-      const effectiveSystemPrompt = systemPromptEnabled && systemPromptOverride.trim() ? systemPromptOverride.trim() : bokepEnabled ? jinhsiPromptText.trim() : systemPrompt.trim();
+      // otherwise use the session system prompt.
+      const effectiveSystemPrompt = systemPromptEnabled && systemPromptOverride.trim() ? systemPromptOverride.trim() : systemPrompt.trim();
       const payloadMessages = [...(effectiveSystemPrompt ? [{ role: "system", content: effectiveSystemPrompt }] : []), ...history.map((msg) => ({ role: msg.role, content: toWireContent(msg) }))];
       const controller = new AbortController();
       abortRef.current = controller;
@@ -851,7 +829,7 @@ export function ModelStudioPage() {
       // If we reached here on the last attempt with no success, break.
       if (attempt === MAX_RETRIES) break;
     }
-  }, [maxTokens, model, patchLast, reasoningEffort, systemPrompt, systemPromptEnabled, systemPromptOverride, bokepEnabled, flushPatch, stopStream]);
+  }, [maxTokens, model, patchLast, reasoningEffort, systemPrompt, systemPromptEnabled, systemPromptOverride, flushPatch, stopStream]);
 
   /** Auto-send after edit — reads from messagesRef since state was just set. */
   const sendWithMessages = useCallback(async (upToIndex: number) => {
@@ -952,7 +930,7 @@ export function ModelStudioPage() {
       <div className="flex items-center gap-2 border-b border-[var(--inner-border)] px-3 py-2 sm:px-4 sm:py-2.5">
         <SessionPicker sessions={sessions} activeId={activeId} onSelect={setActiveId} onCreate={() => createSession.mutate("New chat")} creating={createSession.isPending} />
         <div className="ml-auto flex items-center gap-1.5">
-          <PromptPopover maxTokens={maxTokens} onMaxTokens={setMaxTokens} reasoningEffort={reasoningEffort} onReasoningEffort={setReasoningEffort} providerId={model.split("/")[0] || undefined} systemPromptOverride={systemPromptOverride} onSystemPromptOverride={setSystemPromptOverride} systemPromptEnabled={systemPromptEnabled} onSystemPromptEnabled={setSystemPromptEnabled} bokepEnabled={bokepEnabled} onBokepEnabled={setBokepEnabled} title={title} onTitleChange={setTitle} />
+          <PromptPopover maxTokens={maxTokens} onMaxTokens={setMaxTokens} reasoningEffort={reasoningEffort} onReasoningEffort={setReasoningEffort} providerId={model.split("/")[0] || undefined} systemPromptOverride={systemPromptOverride} onSystemPromptOverride={setSystemPromptOverride} systemPromptEnabled={systemPromptEnabled} onSystemPromptEnabled={setSystemPromptEnabled} title={title} onTitleChange={setTitle} />
           <Button variant="secondary" size="icon" className="h-8 w-8 shrink-0 text-[var(--red)]" onClick={() => activeId && setDeleteTarget(activeId)} disabled={!activeId} aria-label="Delete" title="Delete"><Trash2 size={14} /></Button>
         </div>
       </div>
