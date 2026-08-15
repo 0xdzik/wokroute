@@ -242,6 +242,8 @@ Release history and migration notes are in [`CHANGELOG.md`](./CHANGELOG.md).
 
 ## Credits
 
+Wokroute is a fork of [Cartethyia](https://github.com/risunCode/Cartethyia) by risunCode — the original Bun + Elysia AI proxy and dashboard this codebase is based on. Cartethyia is licensed under the GNU General Public License v3.0; this project carries the same license and preserves that attribution.
+
 Built with:
 
 - [Bun](https://bun.sh) — JavaScript runtime & bundler
