@@ -1,3 +1,11 @@
+## [1.2.1](https://github.com/0xdzik/wokroute/compare/v1.2.0...v1.2.1) (2026-08-15)
+
+
+### Bug Fixes
+
+* **dashboard:** use accent-foreground for text on accent surfaces in night mode ([2fa9fec](https://github.com/0xdzik/wokroute/commit/2fa9fec45dd55a20541c7ba0c2e08a797e3cd5c3)), closes [#EDEDED](https://github.com/0xdzik/wokroute/issues/EDEDED)
+* **qoder:** discover models via COSY-signed model/list endpoint ([4883410](https://github.com/0xdzik/wokroute/commit/4883410020e9d2ddc31baef8b8a6c3741a562bc3))
+
 # [1.2.0](https://github.com/0xdzik/wokroute/compare/v1.1.0...v1.2.0) (2026-08-12)
 
 
