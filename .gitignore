@@ -15,3 +15,6 @@ bin/
 
 # Local agent guides
 AGENTS.md
+
+# Graphify analysis artifacts
+graphify-out/

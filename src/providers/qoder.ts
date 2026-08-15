@@ -49,6 +49,7 @@ const SIG_SECRET = "d2FyLCB3YXIgbmV2ZXIgY2hhbmdlcw==";
 const QODER_JOB_TOKEN_URL = "https://center.qoder.sh/algo/api/v3/user/jobToken?Encode=1";
 export const QODER_USAGE_URL = "https://openapi.qoder.sh/api/v2/quota/usage";
 export const QODER_CHAT_URL = "https://api2.qoder.sh/algo/api/v2/service/pro/sse/agent_chat_generation?FetchKeys=llm_model_result&AgentId=agent_common&Encode=1";
+export const QODER_MODEL_LIST_URL = "https://api2.qoder.sh/algo/api/v2/model/list?Encode=1";
 
 const STANDARD_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 const QODER_ALPHABET = "_doRTgHZBKcGVjlvpC,@aFSx#DPuNJme&i*MzLOEn)sUrthbf%Y^w.(kIQyXqWA!";
@@ -86,44 +87,47 @@ const QODER_MODELS: readonly ProviderModel[] = [
   modelOf("auto", "Qoder Auto", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true, images: true })),
   modelOf("ultimate", "Qoder Ultimate", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true, images: true })),
   modelOf("performance", "Qoder Performance", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true, images: true })),
-  modelOf("efficient", "Qoder Efficient", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true, images: true })),
-  modelOf("lite", "Qoder Lite", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true })),
-  modelOf("qmodel", "Qoder Qwen 3.6 Plus", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true, images: true })),
-  modelOf("qmodel_latest", "Qoder Qwen 3.7 Max", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true, images: true })),
-  modelOf("qmodel_preview", "Qoder Qwen 3.8 Max", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true, images: true })),
+  modelOf("efficient", "Qoder Efficient", capabilitiesOf({ surfaces: QODER_SURFACES, images: true })),
+  modelOf("lite", "Qoder Lite", capabilitiesOf({ surfaces: QODER_SURFACES })),
+  modelOf("qmodel", "Qoder Qwen 3.7 Plus", capabilitiesOf({ surfaces: QODER_SURFACES, images: true })),
+  modelOf("qmodel_latest", "Qoder Qwen 3.7 Max", capabilitiesOf({ surfaces: QODER_SURFACES, images: true })),
+  modelOf("qmodel_preview", "Qoder Qwen 3.8 Max Preview", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true, images: true })),
+  modelOf("cmodel", "Qoder Cantus", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true, images: true })),
   modelOf("dmodel", "Qoder DeepSeek V4 Pro", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true, images: true })),
   modelOf("dfmodel", "Qoder DeepSeek V4 Flash", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true, images: true })),
   modelOf("gm51model", "Qoder GLM 5.2", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true, images: true })),
-  modelOf("kmodel", "Qoder Kimi K2.7", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true, images: true })),
-  modelOf("mmodel", "Qoder MiniMax M2.7", capabilitiesOf({ surfaces: QODER_SURFACES, reasoning: true, images: true })),
+  modelOf("kmodel", "Qoder Kimi K2.7 Code", capabilitiesOf({ surfaces: QODER_SURFACES, images: true })),
+  modelOf("mmodel", "Qoder MiniMax M3", capabilitiesOf({ surfaces: QODER_SURFACES, images: true })),
   // Present in the legacy static config (and accepted by the legacy call
   // path) even though the legacy catalog omitted it — catalog membership is
   // what makes it resolvable in the catalog-driven registry.
-  modelOf("kmodel_latest", "Qoder Kimi K2.7 Latest", capabilitiesOf({ surfaces: QODER_SURFACES, images: true })),
+  modelOf("kmodel_latest", "Qoder Kimi K3", capabilitiesOf({ surfaces: QODER_SURFACES, images: true })),
 ];
 
 export const qoderModelCatalog: readonly ProviderModel[] = QODER_MODELS;
 
 /**
- * Static per-model configuration — mirrors OmniArk's QODER_MODELS. Used
- * instead of fetching Qoder's model catalog API (which has token propagation
- * issues and returns 403 "Login expired" intermittently).
+ * Static per-model configuration — mirrors pi-provider-qoder's static
+ * global catalog (context windows, reasoning flags, display names). Used at
+ * call time instead of fetching Qoder's model catalog API (which has token
+ * propagation issues and returns 403 "Login expired" intermittently).
  */
 export const QODER_MODEL_CONFIGS: Record<string, QoderModelConfig> = {
-  auto:          { id: "auto",          display_name: "Auto",              max_input_tokens: 180000, is_vl: true,  is_reasoning: false },
-  ultimate:      { id: "ultimate",      display_name: "Ultimate",          max_input_tokens: 180000, is_vl: true,  is_reasoning: true },
-  performance:   { id: "performance",   display_name: "Performance",       max_input_tokens: 272000, is_vl: true,  is_reasoning: false },
-  efficient:     { id: "efficient",     display_name: "Efficient",         max_input_tokens: 180000, is_vl: true,  is_reasoning: false },
-  lite:          { id: "lite",          display_name: "Lite",              max_input_tokens: 180000, is_vl: false, is_reasoning: false },
-  qmodel:        { id: "qmodel",        display_name: "Qwen 3.6 Plus",    max_input_tokens: 180000, is_vl: true,  is_reasoning: false },
-  qmodel_latest: { id: "qmodel_latest", display_name: "Qwen 3.7 Max",     max_input_tokens: 1000000, is_vl: true,  is_reasoning: false },
-  qmodel_preview:{ id: "qmodel_preview",display_name: "Qwen 3.8 Max",     max_input_tokens: 1000000, is_vl: true,  is_reasoning: false },
-  dmodel:        { id: "dmodel",        display_name: "DeepSeek V4 Pro",   max_input_tokens: 180000, is_vl: true,  is_reasoning: true },
-  dfmodel:       { id: "dfmodel",       display_name: "DeepSeek V4 Flash", max_input_tokens: 180000, is_vl: true,  is_reasoning: true },
-  gm51model:     { id: "gm51model",     display_name: "GLM 5.1",           max_input_tokens: 180000, is_vl: true,  is_reasoning: true },
-  kmodel:        { id: "kmodel",        display_name: "Kimi K2.6",         max_input_tokens: 256000, is_vl: true,  is_reasoning: false },
-  mmodel:        { id: "mmodel",        display_name: "MiniMax M2.7",      max_input_tokens: 180000, is_vl: true,  is_reasoning: false },
-  kmodel_latest: { id: "kmodel_latest", display_name: "Kimi K2.7 Latest",  max_input_tokens: 256000, is_vl: true,  is_reasoning: false },
+  auto:          { id: "auto",          display_name: "Auto",                 max_input_tokens: 180000,  is_vl: true,  is_reasoning: true },
+  ultimate:      { id: "ultimate",      display_name: "Ultimate",             max_input_tokens: 1000000, is_vl: true,  is_reasoning: true },
+  performance:   { id: "performance",   display_name: "Performance",          max_input_tokens: 1000000, is_vl: true,  is_reasoning: true },
+  efficient:     { id: "efficient",     display_name: "Efficient",            max_input_tokens: 180000,  is_vl: true,  is_reasoning: false },
+  lite:          { id: "lite",          display_name: "Lite",                 max_input_tokens: 180000,  is_vl: false, is_reasoning: false },
+  qmodel:        { id: "qmodel",        display_name: "Qwen 3.7 Plus",        max_input_tokens: 1000000, is_vl: true,  is_reasoning: false },
+  qmodel_latest: { id: "qmodel_latest", display_name: "Qwen 3.7 Max",         max_input_tokens: 1000000, is_vl: true,  is_reasoning: false },
+  qmodel_preview:{ id: "qmodel_preview",display_name: "Qwen 3.8 Max Preview", max_input_tokens: 1000000, is_vl: true,  is_reasoning: true },
+  cmodel:        { id: "cmodel",        display_name: "Cantus",               max_input_tokens: 1000000, is_vl: true,  is_reasoning: true },
+  dmodel:        { id: "dmodel",        display_name: "DeepSeek V4 Pro",      max_input_tokens: 1000000, is_vl: true,  is_reasoning: true },
+  dfmodel:       { id: "dfmodel",       display_name: "DeepSeek V4 Flash",    max_input_tokens: 1000000, is_vl: true,  is_reasoning: true },
+  gm51model:     { id: "gm51model",     display_name: "GLM 5.2",              max_input_tokens: 1000000, is_vl: true,  is_reasoning: true },
+  kmodel:        { id: "kmodel",        display_name: "Kimi K2.7 Code",       max_input_tokens: 256000,  is_vl: true,  is_reasoning: false },
+  mmodel:        { id: "mmodel",        display_name: "MiniMax M3",           max_input_tokens: 1000000, is_vl: true,  is_reasoning: false },
+  kmodel_latest: { id: "kmodel_latest", display_name: "Kimi K3",              max_input_tokens: 1000000, is_vl: true,  is_reasoning: false },
 };
 
 // ---------------------------------------------------------------- request encoding
@@ -296,6 +300,35 @@ export async function fetchQoderUsage(auth: QoderAuth, signal: AbortSignal, fetc
   } catch {
     throw new ProviderAdapterError({ kind: "provider_protocol_error", message: "Qoder usage returned invalid JSON.", routeScope: "provider" });
   }
+}
+
+/**
+ * Fetches the live Qoder model catalog with the same COSY identity the CLI
+ * uses (PAT → jobToken exchange → COSY-signed request). The `Encode=1` query
+ * flag is required: without it upstream returns a truncated list
+ * (reference: pi-provider-qoder). Entries with `enable: false` are dropped.
+ */
+export async function fetchQoderModelList(auth: QoderAuth, signal: AbortSignal, fetcher: QoderFetcher = fetch): Promise<string[]> {
+  const response = await fetcher(QODER_MODEL_LIST_URL, {
+    method: "GET",
+    headers: { ...buildCosyHeaders(new Uint8Array(0), QODER_MODEL_LIST_URL, auth), accept: "application/json" },
+    signal,
+  });
+  if (!response.ok) throw qoderHttpError(response.status, "model list");
+  let payload: unknown;
+  try {
+    payload = await response.json();
+  } catch {
+    throw new ProviderAdapterError({ kind: "provider_protocol_error", message: "Qoder model list returned invalid JSON.", routeScope: "provider" });
+  }
+  const entries = Array.isArray(payload) ? payload : isRecord(payload) && Array.isArray(payload.chat) ? payload.chat : [];
+  const keys: string[] = [];
+  for (const entry of entries) {
+    if (!isRecord(entry) || typeof entry.key !== "string" || entry.key.length === 0) continue;
+    if (entry.enable === false) continue;
+    keys.push(entry.key);
+  }
+  return keys;
 }
 
 /** Maps Qoder inner/HTTP status codes onto typed adapter errors (legacy semantics, current kinds). */

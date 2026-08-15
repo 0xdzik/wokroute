@@ -86,7 +86,7 @@ export function SqlConsole({ db }: SqlConsoleProps) {
             type="button"
             onClick={() => void run()}
             disabled={loading}
-            className="flex items-center gap-1 rounded-md bg-[var(--accent)] px-2.5 py-1 text-[11px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="flex items-center gap-1 rounded-md bg-[var(--accent)] px-2.5 py-1 text-[11px] font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             <Play size={11} />
             {loading ? "…" : "Run"}

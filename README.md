@@ -4,7 +4,7 @@ A self-hosted Bun + Elysia AI proxy with an authenticated web console. Accepts O
 
 ![Wokroute dashboard overview](docs/overview.png)
 
-**Current release:** `1.0.2`
+**Current release:** `1.2.0`
 
 ## Table of contents
 
@@ -241,6 +241,8 @@ dashboard/src/            React authenticated console
 Release history and migration notes are in [`CHANGELOG.md`](./CHANGELOG.md).
 
 ## Credits
+
+Wokroute is a fork of [Cartethyia](https://github.com/risunCode/Cartethyia) by risunCode — the original Bun + Elysia AI proxy and dashboard this codebase is based on. Cartethyia is licensed under the GNU General Public License v3.0; this project carries the same license and preserves that attribution.
 
 Built with:
 
