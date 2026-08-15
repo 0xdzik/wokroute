@@ -55,6 +55,8 @@ import { createDriverAwareOAuthRefresher } from "../auth";
 import { OAuthLoginSessionManager, OAuthSessionError, type OAuthLoginSessionView } from "../auth";
 import { registerOAuthCallback, unregisterOAuthCallback } from "../auth/oauth-callback-server";
 import { assertPublicUrlAtDispatch } from "../security/ssrf-guard";
+import { exchangeQoderPat, fetchQoderModelList } from "../providers/qoder";
+import { ProviderAdapterError } from "../providers/shared";
 
 // Re-import symbols used by service classes from the extracted modules.
 import type {
@@ -150,6 +152,7 @@ const MODEL_ENDPOINTS: Record<string, string> = {
   "gemini": "https://generativelanguage.googleapis.com/v1beta",
   "agentrouter": "https://agentrouter.org/v1",
   "commandcode": "https://api.commandcode.ai",
+  // Gate only: live discovery is COSY-authenticated via fetchQoderModelList.
   "qoder": "https://api2.qoder.sh",
   "kiro": "https://kiro.dev",
   "google-antigravity": "https://daily-cloudcode-pa.googleapis.com",
@@ -206,6 +209,23 @@ async function discoverProviderModels(providerId: string, credential: string | n
   const endpoint = MODEL_ENDPOINTS[providerId];
   if (!endpoint) return [];
   if (!credential) return [];
+  if (providerId === "qoder") {
+    // Qoder has no plain-Bearer /models endpoint: the catalog lives behind
+    // the COSY-signed model/list gateway (PAT → jobToken exchange first).
+    const signal = AbortSignal.timeout(30_000);
+    try {
+      const auth = await exchangeQoderPat(credential, signal);
+      const keys = await fetchQoderModelList(auth, signal);
+      return keys.map((id) => stripProviderPrefix(id, providerId));
+    } catch (error) {
+      // Surface HTTP statuses in the shape discoverBuiltinModels' retry loop
+      // understands so the next active account gets tried.
+      if (error instanceof ProviderAdapterError && error.statusCode !== null) {
+        throw new Error(`Model discovery returned HTTP ${error.statusCode}`);
+      }
+      throw error;
+    }
+  }
   const token = extractAccessToken(credential);
   const headers: Record<string, string> = {
     "accept": "application/json",

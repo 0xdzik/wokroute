@@ -161,9 +161,9 @@ describe("QoderAdapter", () => {
   test("metadata, catalog, and static configs match the legacy identity", () => {
     expect(adapter.metadata).toMatchObject({ id: "qoder", displayName: "Qoder", protocol: "openai", credentialKind: "api_key" });
     const ids = adapter.models.list.map((m) => m.id);
-    expect(ids).toEqual(["auto", "ultimate", "performance", "efficient", "lite", "qmodel", "qmodel_latest", "qmodel_preview", "dmodel", "dfmodel", "gm51model", "kmodel", "mmodel", "kmodel_latest"]);
-    expect(qoderModelCatalog).toHaveLength(14);
-    expect(Object.keys(QODER_MODEL_CONFIGS)).toHaveLength(14);
+    expect(ids).toEqual(["auto", "ultimate", "performance", "efficient", "lite", "qmodel", "qmodel_latest", "qmodel_preview", "cmodel", "dmodel", "dfmodel", "gm51model", "kmodel", "mmodel", "kmodel_latest"]);
+    expect(qoderModelCatalog).toHaveLength(15);
+    expect(Object.keys(QODER_MODEL_CONFIGS)).toHaveLength(15);
     expect(QODER_MODEL_CONFIGS["qmodel_latest"]?.max_input_tokens).toBe(1000000);
     expect(QODER_MODEL_CONFIGS["kmodel_latest"]?.is_reasoning).toBe(false);
     expect(adapter.capabilities.surfaces).toEqual(["openai-chat"]);
